@@ -6,6 +6,7 @@ import { parseArgs } from 'jsr:@std/cli@1.0.24/parse-args';
 import { appendKHRCharacterSkeleton } from './appendKHRCharacterSkeleton.ts';
 import { logVerbose } from './logVerbose.ts';
 import { appendKHRMeshAnnotation } from './appendKHRMeshAnnotationRenderview.ts';
+import { appendKHRVirtualTransforms } from './appendKHRVirtualTransforms.ts';
 
 // == options ======================================================================================
 const options = parseArgs(Deno.args, {
@@ -45,6 +46,7 @@ appendKHRCharacter(gltf);
 appendKHRCharacterSkeleton(gltf);
 appendKHRCharacterExpression(gltf, binChunkBox);
 appendKHRMeshAnnotation(gltf);
+appendKHRVirtualTransforms(gltf);
 
 // == reconstruct GLB ==============================================================================
 logVerbose('Constructing new GLB');
