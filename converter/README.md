@@ -6,6 +6,15 @@ Sanity checks are not enough and it may be specific to certain models, don't exp
 
 ## Usage
 
+You will need [Deno](https://deno.land/) to run the script.
+
 ```bash
 deno run --allow-read --allow-write main.ts -i <input_vrm1_glb> -o <output_khr_character_glb>
 ```
+
+### Options
+
+- `--input`, `-i` to specify input VRM 1.0 glb file (required).
+- `--output`, `-o` to specify output glb file (required).
+- `--spit-json` to output JSON separately for inspection.
+- `--verbose` to output detailed logs.
