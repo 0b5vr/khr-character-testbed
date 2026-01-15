@@ -8,6 +8,7 @@ import { logVerbose } from './logVerbose.ts';
 import { appendKHRMeshAnnotation } from './appendKHRMeshAnnotationRenderview.ts';
 import { appendKHRVirtualTransforms } from './appendKHRVirtualTransforms.ts';
 import { collectNodeBoneMap } from './collectNodeBoneMap.ts';
+import { appendKHRXmpJsonLd } from './appendKHRXmpJsonLd.ts';
 
 // == options ======================================================================================
 const options = parseArgs(Deno.args, {
@@ -46,6 +47,7 @@ const nodeBoneMap = collectNodeBoneMap(gltf);
 // == append KHR extensions ========================================================================
 logVerbose('Appending KHR extensions');
 
+appendKHRXmpJsonLd(gltf);
 appendKHRCharacter(gltf);
 appendKHRCharacterSkeleton(gltf);
 appendKHRCharacterExpression(gltf, binChunkBox, nodeBoneMap);
