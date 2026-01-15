@@ -65,7 +65,11 @@ await Deno.writeFile(outpath, newGLB);
 if (spitJson) {
   logVerbose('Writing JSON part:', outpath + '.json');
   const path = outpath + '.json';
-  await Deno.writeTextFile(path, JSON.stringify(gltf, null, 2));
+  const gltfToSpit = {
+    '$schema': 'https://raw.githubusercontent.com/KhronosGroup/glTF/refs/heads/main/specification/2.0/schema/glTF.schema.json',
+    ...gltf,
+  }
+  await Deno.writeTextFile(path, JSON.stringify(gltfToSpit, null, 2));
 }
 
 logVerbose('Done');
