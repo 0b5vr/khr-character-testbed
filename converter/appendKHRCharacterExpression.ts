@@ -309,11 +309,14 @@ function appendBoneRotationAccessors(
     .premultiply(_quatB)
     .premultiply(bone.rotation);
 
-  const input = new Float32Array([0, Math.max(rangeMap.inputMaxValue / 90.0, 1E-6), 1]);
+  const t = Math.max(rangeMap.inputMaxValue / 90.0, 1E-6);
+  const input = t === 1
+    ? new Float32Array([0, 1])
+    : new Float32Array([0, t, 1]);
   const output = new Float32Array([
     bone.rotation.x, bone.rotation.y, bone.rotation.z, bone.rotation.w,
     _quatA.x, _quatA.y, _quatA.z, _quatA.w,
-    _quatA.x, _quatA.y, _quatA.z, _quatA.w,
+    ...t === 1 ? [] : [_quatA.x, _quatA.y, _quatA.z, _quatA.w],
   ]);
 
   return appendAnimationAccessors(
