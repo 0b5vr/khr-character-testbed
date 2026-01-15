@@ -204,6 +204,11 @@ function appendTextureAnimation(
     for (const extPath of extPaths) {
       const channelIndex = outAnimation.channels.length;
 
+      gltf.extensionsUsed ||= [];
+      if (!gltf.extensionsUsed.includes('KHR_animation_pointer')) {
+        gltf.extensionsUsed.push('KHR_animation_pointer');
+      }
+
       const pointer = `${extPath}/${propName}`;
       outAnimation.channels.push({
         sampler: samplerIndex,
