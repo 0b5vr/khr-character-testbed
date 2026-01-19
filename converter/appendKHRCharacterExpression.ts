@@ -8,6 +8,7 @@ import type { KHRCharacterExpression, KHRCharacterExpressionExpression } from '.
 import type { KHRCharacterExpressionMorphtarget } from '../schematypes/KHRCharacterExpressionMorphtarget.ts';
 import type { KHRCharacterExpressionMapping, KHRCharacterExpressionMappingExpressionSetMapping } from '../schematypes/KHRCharacterExpressionMapping.ts';
 import type { Bone } from './Bone.ts';
+import { options } from './options.ts';
 
 /** Identity quaternion Do not mutate */
 const QUAT_IDENTITY = new Quaternion(0, 0, 0, 1);
@@ -72,35 +73,76 @@ function appendMorphtargetAnimation(
   }
 
   const targetIndex = vrmBind.index;
-  const targetsLength = mesh.primitives?.[0]?.targets?.length ?? 0;
+  const weight = vrmBind.weight;
 
-  const [inputIndex, outputIndex] = appendAnimationAccessors(
-    new Float32Array(isBinary ? [0, 0.5, 1] : [0, 1]),
-    transformToBinary(createOutputWeights(targetsLength, targetIndex, vrmBind.weight), isBinary),
-    'SCALAR',
-    gltf,
-    binChunkBox,
-  );
-  logVerbose(`KHR_character_expression_morphtarget: New accessors (#${inputIndex}, #${outputIndex})`);
+  if (options.useAnimationPointerForMorphTarget) {
+    const [inputIndex, outputIndex] = appendAnimationAccessors(
+      new Float32Array(isBinary ? [0, 0.5, 1] : [0, 1]),
+      new Float32Array(isBinary ? [0, weight, weight] : [0, weight]),
+      'SCALAR',
+      gltf,
+      binChunkBox,
+    );
+    logVerbose(`KHR_character_expression_morphtarget: New accessors (#${inputIndex}, #${outputIndex})`);
 
-  const samplerIndex = outAnimation.samplers.length;
-  outAnimation.samplers.push({
-    input: inputIndex,
-    interpolation: isBinary ? 'STEP' : 'LINEAR',
-    output: outputIndex,
-  });
+    const samplerIndex = outAnimation.samplers.length;
+    outAnimation.samplers.push({
+      input: inputIndex,
+      interpolation: isBinary ? 'STEP' : 'LINEAR',
+      output: outputIndex,
+    });
 
-  const channelIndex = outAnimation.channels.length;
-  outAnimation.channels.push({
-    sampler: samplerIndex,
-    target: {
-      node: nodeIndex,
-      path: 'weights',
-    },
-  });
-  logVerbose(`KHR_character_expression_morphtarget: New animation channel, weights for node #${nodeIndex}`);
+    gltf.extensionsUsed ||= [];
+    if (!gltf.extensionsUsed.includes('KHR_animation_pointer')) {
+      gltf.extensionsUsed.push('KHR_animation_pointer');
+    }
 
-  return [samplerIndex, channelIndex];
+    const channelIndex = outAnimation.channels.length;
+    const pointer = `/nodes/${nodeIndex}/weights/${targetIndex}`;
+    outAnimation.channels.push({
+      sampler: samplerIndex,
+      target: {
+        path: 'pointer' as any,
+        extensions: {
+          'KHR_animation_pointer': {
+            pointer,
+          }
+        }
+      },
+    });
+    logVerbose(`KHR_character_expression_texture: New animation channel, pointer for "${pointer}"`);
+
+    return [samplerIndex, channelIndex];
+  } else {
+    const targetsLength = mesh.primitives?.[0]?.targets?.length ?? 0;
+    const [inputIndex, outputIndex] = appendAnimationAccessors(
+      new Float32Array(isBinary ? [0, 0.5, 1] : [0, 1]),
+      transformToBinary(createOutputWeights(targetsLength, targetIndex, weight), isBinary),
+      'SCALAR',
+      gltf,
+      binChunkBox,
+    );
+    logVerbose(`KHR_character_expression_morphtarget: New accessors (#${inputIndex}, #${outputIndex})`);
+
+    const samplerIndex = outAnimation.samplers.length;
+    outAnimation.samplers.push({
+      input: inputIndex,
+      interpolation: isBinary ? 'STEP' : 'LINEAR',
+      output: outputIndex,
+    });
+
+    const channelIndex = outAnimation.channels.length;
+    outAnimation.channels.push({
+      sampler: samplerIndex,
+      target: {
+        node: nodeIndex,
+        path: 'weights',
+      },
+    });
+    logVerbose(`KHR_character_expression_morphtarget: New animation channel, weights for node #${nodeIndex}`);
+
+    return [samplerIndex, channelIndex];
+  }
 }
 
 function dig(obj: any, path: string): any {
