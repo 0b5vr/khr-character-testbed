@@ -9,6 +9,7 @@ import { appendKHRMeshAnnotation } from './appendKHRMeshAnnotationRenderview.ts'
 import { appendKHRVirtualTransforms } from './appendKHRVirtualTransforms.ts';
 import { collectNodeBoneMap } from './collectNodeBoneMap.ts';
 import { appendKHRXmpJsonLd } from './appendKHRXmpJsonLd.ts';
+import { ensureSingleRoot } from './ensureSingleRoot.ts';
 
 // == options ======================================================================================
 const options = parseArgs(Deno.args, {
@@ -40,6 +41,9 @@ logVerbose('Extracting GLB');
 
 const [gltf, binChunk] = extractGLB(file);
 const binChunkBox: [Uint8Array] = [binChunk];
+
+// == make it a single-root model ==================================================================
+ensureSingleRoot(gltf);
 
 // == collect vrm bone map =========================================================================
 const nodeBoneMap = collectNodeBoneMap(gltf);
