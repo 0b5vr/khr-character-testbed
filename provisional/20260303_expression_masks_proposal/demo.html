@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>KHR Character Expression Mask Demo</title>
+</head>
+<body>
+  <h1>KHR_character_expression_mask demo</h1>
+  <div>
+    <label>aa <input id="inputAa" type="range" min="0" max="1" step="0.01" value="0"></label>
+    <span id="spanAaRaw"></span> -> <span id="spanAaOut"></span>
+  </div>
+  <div>
+    <label>happy <input id="inputHappy" type="range" min="0" max="1" step="0.01" value="0"></label>
+    <span id="spanHappyRaw"></span> -> <span id="spanHappyOut"></span>
+  </div>
+  <div>
+    <label>sad <input id="inputSad" type="range" min="0" max="1" step="0.01" value="0"></label>
+    <span id="spanSadRaw"></span> -> <span id="spanSadOut"></span>
+  </div>
+  <pre id="preLog"></pre>
+  <script>
+    const inputAa = document.getElementById("inputAa");
+    const inputHappy = document.getElementById("inputHappy");
+    const inputSad = document.getElementById("inputSad");
+    const spanAaRaw = document.getElementById("spanAaRaw");
+    const spanHappyRaw = document.getElementById("spanHappyRaw");
+    const spanSadRaw = document.getElementById("spanSadRaw");
+    const spanAaOut = document.getElementById("spanAaOut");
+    const spanHappyOut = document.getElementById("spanHappyOut");
+    const spanSadOut = document.getElementById("spanSadOut");
+    const preLog = document.getElementById("preLog");
+
+    const masksMap = {
+      happy: [{ target: "aa", type: "blend", amount: 0.5 }],
+      sad: [{ target: "aa", type: "block", threshold: 0.2 }],
+    };
+    preLog.textContent = JSON.stringify({ masksMap }, null, 2);
+
+    const saturate = (v) => Math.max(0, Math.min(1, v));
+
+    function update() {
+      const inputValue = {
+        aa: +inputAa.value,
+        happy: +inputHappy.value,
+        sad: +inputSad.value,
+      };
+      const outputValue = { ...inputValue };
+
+      for (const [sourceName, masks] of Object.entries(masksMap)) {
+        for (const mask of masks) {
+          const targetName = mask.target;
+          const type = mask.type;
+          const amount = mask.amount ?? 1.0;
+
+          if (type === "block") {
+            const threshold = mask.threshold ?? 0.0;
+            if (inputValue[sourceName] > threshold) { // greater than
+              outputValue[targetName] *= 1 - amount;
+            }
+          } else if (type === "blend") {
+            outputValue[targetName] *= 1 - saturate(inputValue[sourceName] * amount);
+          }
+        }
+      }
+
+      spanAaRaw.textContent = inputValue.aa.toFixed(3);
+      spanHappyRaw.textContent = inputValue.happy.toFixed(3);
+      spanSadRaw.textContent = inputValue.sad.toFixed(3);
+      spanAaOut.textContent = outputValue.aa.toFixed(3);
+      spanHappyOut.textContent = outputValue.happy.toFixed(3);
+      spanSadOut.textContent = outputValue.sad.toFixed(3);
+    }
+
+    for (const el of [inputAa, inputHappy, inputSad]) {
+      el.addEventListener("input", update);
+    }
+    update();
+  </script>
+</body>
+</html>
