@@ -9,6 +9,16 @@ import type { KHRCharacterExpression, KHRCharacterExpressionExpression } from '.
 import type { KHRCharacterExpressionMorphtarget } from '../../schematypes/KHRCharacterExpressionMorphtarget.ts';
 import type { KHRCharacterExpressionMapping, KHRCharacterExpressionMappingExpressionSetMapping } from '../../schematypes/KHRCharacterExpressionMapping.ts';
 import type { Bone } from '../Bone.ts';
+
+/**
+ * Appends one glTF animation for a single VRM expression.
+ *
+ * @param name The source VRM expression name
+ * @param vrmExpression The source VRM expression object
+ * @param gltf The glTF object to modify
+ * @param binChunkBox The reference box to the binary chunk
+ * @returns `[animationIndex, morphtargetChannelIndices, textureChannelIndices]`
+ */
 function appendAnimation(
   name: string,
   vrmExpression: VRMExpression,
@@ -57,6 +67,16 @@ function appendAnimation(
   return [animationIndex, morphtargetChannelIndices, textureChannelIndices];
 }
 
+/**
+ * Appends one KHR_character_expression expression entry from a VRM expression.
+ *
+ * @param name The source VRM expression name
+ * @param vrmExpression The source VRM expression object
+ * @param gltf The glTF object to modify
+ * @param binChunkBox The reference box to the binary chunk
+ * @param outExpressions Output expression list to append to
+ * @returns Appended expression index, or `null` if no animation was created
+ */
 function appendExpression(
   name: string,
   vrmExpression: VRMExpression,
@@ -95,6 +115,14 @@ function appendExpression(
   return outExpressions.length - 1;
 }
 
+/**
+ * Appends KHR_character_expression and KHR_character_expression_mapping to glTF,
+ * converting VRM expression definitions into extension-compatible expressions.
+ *
+ * @param gltf The glTF object to modify
+ * @param binChunkBox The reference box to the binary chunk
+ * @param nodeBoneMap Node index to bone map (used when lookAt type is `bone`)
+ */
 export function appendKHRCharacterExpression(
   gltf: GLTF.IGLTF,
   binChunkBox: [Uint8Array],
