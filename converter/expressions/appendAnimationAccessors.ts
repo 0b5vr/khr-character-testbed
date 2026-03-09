@@ -1,5 +1,13 @@
 import type { GLTF } from 'npm:@gltf-transform/core@4.2.1';
 
+/**
+ * Appends raw bytes to the given BIN chunk and creates a matching bufferView.
+ *
+ * @param data Uint8Array representing the raw bytes to append to the BIN chunk
+ * @param gltf The glTF JSON object to modify
+ * @param binChunkBox The reference box to the binary chunk
+ * @returns The newly created bufferView index
+ */
 function appendBufferView(
   data: Uint8Array,
   gltf: GLTF.IGLTF,
@@ -23,6 +31,16 @@ function appendBufferView(
   return gltf.bufferViews!.length - 1;
 }
 
+/**
+ * Creates a time accessor for animation input values.
+ *
+ * The accessor min/max are derived from the first/last element in `data`.
+ *
+ * @param data Animation input buffer
+ * @param gltf The glTF JSON object to modify
+ * @param binChunkBox The reference box to the binary chunk
+ * @returns The newly created input accessor index
+ */
 function appendInputAccessor(
   data: Float32Array,
   gltf: GLTF.IGLTF,
@@ -45,6 +63,15 @@ function appendInputAccessor(
   return gltf.accessors!.length - 1;
 }
 
+/**
+ * Creates an accessor for animation output values.
+ *
+ * @param data Animation output buffer
+ * @param type Accessor type of `output`
+ * @param gltf The glTF JSON object to modify
+ * @param binChunkBox The reference box to the binary chunk
+ * @returns The newly created output accessor index
+ */
 function appendOutputAccessor(
   data: Float32Array,
   type: 'SCALAR' | 'VEC2' | 'VEC3' | 'VEC4',
@@ -73,6 +100,16 @@ function appendOutputAccessor(
   return gltf.accessors!.length - 1;
 }
 
+/**
+ * Appends both input/output accessors for one animation sampler payload.
+ *
+ * @param input Animation input buffer
+ * @param output Animation output buffer
+ * @param outputType Accessor type of `output`
+ * @param gltf The glTF JSON object to modify
+ * @param binChunkBox The reference box to the binary chunk
+ * @returns Tuple of `[inputAccessorIndex, outputAccessorIndex]`
+ */
 export function appendAnimationAccessors(
   input: Float32Array,
   output: Float32Array,

@@ -1,14 +1,15 @@
-import { appendAnimationAccessors } from '../appendAnimationAccessors.ts';
+import { appendAnimationAccessors } from './appendAnimationAccessors.ts';
 import { logVerbose } from '../logVerbose.ts';
+import { transformToBinary } from './transformToBinary.ts';
+import { appendMorphtargetAnimation } from './appendMorphtargetAnimation.ts';
 // @ts-types="npm:@types/three@0.181.0"
 import { Quaternion } from 'npm:three@0.181.2';
 import type { GLTF } from 'npm:@gltf-transform/core@4.2.1';
-import type { ExpressionMorphTargetBind, ExpressionTextureTransformBind, LookAtRangeMap, VRMCVRM, Expression as VRMExpression, Humanoid as VRMHumanoid, LookAt as VRMLookAt } from 'npm:@pixiv/types-vrmc-vrm-1.0@3.4.4';
+import type { ExpressionTextureTransformBind, LookAtRangeMap, VRMCVRM, Expression as VRMExpression, Humanoid as VRMHumanoid, LookAt as VRMLookAt } from 'npm:@pixiv/types-vrmc-vrm-1.0@3.4.4';
 import type { KHRCharacterExpression, KHRCharacterExpressionExpression } from '../../schematypes/KHRCharacterExpression.ts';
 import type { KHRCharacterExpressionMorphtarget } from '../../schematypes/KHRCharacterExpressionMorphtarget.ts';
 import type { KHRCharacterExpressionMapping, KHRCharacterExpressionMappingExpressionSetMapping } from '../../schematypes/KHRCharacterExpressionMapping.ts';
 import type { Bone } from '../Bone.ts';
-import { options } from '../options.ts';
 
 /** Identity quaternion Do not mutate */
 const QUAT_IDENTITY = new Quaternion(0, 0, 0, 1);
@@ -28,122 +29,6 @@ export type VRMLookExpressionName =
   (typeof VRMLookExpressionName)[keyof typeof VRMLookExpressionName];
 
 const vrmLookExpressionNames: Set<VRMLookExpressionName> = new Set(Object.values(VRMLookExpressionName));
-
-function transformToBinary(data: Float32Array, isBinary: boolean): Float32Array {
-  if (!isBinary) {
-    return data;
-  }
-
-  const binaryData = new Float32Array(data.length / 2 * 3);
-  binaryData.set(data, 0);
-  binaryData.set(data.subarray(data.length / 2), data.length);
-  return binaryData;
-}
-
-function createOutputWeights(
-  targetsLength: number,
-  targetIndex: number,
-  weight: number,
-): Float32Array {
-  const weights = new Float32Array(targetsLength * 2);
-  weights[targetsLength + targetIndex] = weight;
-  return weights;
-}
-
-function appendMorphtargetAnimation(
-  vrmBind: ExpressionMorphTargetBind,
-  isBinary: boolean,
-  gltf: GLTF.IGLTF,
-  binChunkBox: [Uint8Array],
-  outAnimation: GLTF.IAnimation,
-): [samplerIndex: number | null, channelIndex: number | null] {
-  if (vrmBind.weight === 0) {
-    return [null, null];
-  }
-
-  const nodeIndex = vrmBind.node;
-  const meshIndex = gltf.nodes?.[nodeIndex]?.mesh;
-  if (meshIndex == null) {
-    return [null, null];
-  }
-
-  const mesh = gltf.meshes?.[meshIndex];
-  if (mesh == null) {
-    return [null, null];
-  }
-
-  const targetIndex = vrmBind.index;
-  const weight = vrmBind.weight;
-
-  if (options.useAnimationPointerForMorphTarget) {
-    const [inputIndex, outputIndex] = appendAnimationAccessors(
-      new Float32Array(isBinary ? [0, 0.5, 1] : [0, 1]),
-      new Float32Array(isBinary ? [0, weight, weight] : [0, weight]),
-      'SCALAR',
-      gltf,
-      binChunkBox,
-    );
-    logVerbose(`KHR_character_expression_morphtarget: New accessors (#${inputIndex}, #${outputIndex})`);
-
-    const samplerIndex = outAnimation.samplers.length;
-    outAnimation.samplers.push({
-      input: inputIndex,
-      interpolation: isBinary ? 'STEP' : 'LINEAR',
-      output: outputIndex,
-    });
-
-    gltf.extensionsUsed ||= [];
-    if (!gltf.extensionsUsed.includes('KHR_animation_pointer')) {
-      gltf.extensionsUsed.push('KHR_animation_pointer');
-    }
-
-    const channelIndex = outAnimation.channels.length;
-    const pointer = `/nodes/${nodeIndex}/weights/${targetIndex}`;
-    outAnimation.channels.push({
-      sampler: samplerIndex,
-      target: {
-        path: 'pointer' as any,
-        extensions: {
-          'KHR_animation_pointer': {
-            pointer,
-          }
-        }
-      },
-    });
-    logVerbose(`KHR_character_expression_texture: New animation channel, pointer for "${pointer}"`);
-
-    return [samplerIndex, channelIndex];
-  } else {
-    const targetsLength = mesh.primitives?.[0]?.targets?.length ?? 0;
-    const [inputIndex, outputIndex] = appendAnimationAccessors(
-      new Float32Array(isBinary ? [0, 0.5, 1] : [0, 1]),
-      transformToBinary(createOutputWeights(targetsLength, targetIndex, weight), isBinary),
-      'SCALAR',
-      gltf,
-      binChunkBox,
-    );
-    logVerbose(`KHR_character_expression_morphtarget: New accessors (#${inputIndex}, #${outputIndex})`);
-
-    const samplerIndex = outAnimation.samplers.length;
-    outAnimation.samplers.push({
-      input: inputIndex,
-      interpolation: isBinary ? 'STEP' : 'LINEAR',
-      output: outputIndex,
-    });
-
-    const channelIndex = outAnimation.channels.length;
-    outAnimation.channels.push({
-      sampler: samplerIndex,
-      target: {
-        node: nodeIndex,
-        path: 'weights',
-      },
-    });
-    logVerbose(`KHR_character_expression_morphtarget: New animation channel, weights for node #${nodeIndex}`);
-
-    return [samplerIndex, channelIndex];
-  }
-}
 
 function dig(obj: any, path: string): any {
   const parts = path.split('/');
