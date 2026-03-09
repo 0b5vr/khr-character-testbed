@@ -27,7 +27,7 @@ function createOutputWeights(
 /**
  * Appends one VRM morph target bind as animation sampler/channel entries.
  *
- * @param vrmBind The VRM morph target bind to append
+ * @param vrmBind The source VRM morph target bind to append
  * @param isBinary Whether the `isBinary` is true in the VRM expression
  * @param gltf The glTF object to modify
  * @param binChunkBox The reference box to the binary chunk

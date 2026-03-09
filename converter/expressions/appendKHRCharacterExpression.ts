@@ -1,11 +1,11 @@
 import { appendAnimationAccessors } from './appendAnimationAccessors.ts';
 import { logVerbose } from '../logVerbose.ts';
-import { transformToBinary } from './transformToBinary.ts';
 import { appendMorphtargetAnimation } from './appendMorphtargetAnimation.ts';
+import { appendTextureAnimation } from './appendTextureAnimation.ts';
 // @ts-types="npm:@types/three@0.181.0"
 import { Quaternion } from 'npm:three@0.181.2';
 import type { GLTF } from 'npm:@gltf-transform/core@4.2.1';
-import type { ExpressionTextureTransformBind, LookAtRangeMap, VRMCVRM, Expression as VRMExpression, Humanoid as VRMHumanoid, LookAt as VRMLookAt } from 'npm:@pixiv/types-vrmc-vrm-1.0@3.4.4';
+import type { LookAtRangeMap, VRMCVRM, Expression as VRMExpression, Humanoid as VRMHumanoid, LookAt as VRMLookAt } from 'npm:@pixiv/types-vrmc-vrm-1.0@3.4.4';
 import type { KHRCharacterExpression, KHRCharacterExpressionExpression } from '../../schematypes/KHRCharacterExpression.ts';
 import type { KHRCharacterExpressionMorphtarget } from '../../schematypes/KHRCharacterExpressionMorphtarget.ts';
 import type { KHRCharacterExpressionMapping, KHRCharacterExpressionMappingExpressionSetMapping } from '../../schematypes/KHRCharacterExpressionMapping.ts';
@@ -29,134 +29,6 @@ export type VRMLookExpressionName =
   (typeof VRMLookExpressionName)[keyof typeof VRMLookExpressionName];
 
 const vrmLookExpressionNames: Set<VRMLookExpressionName> = new Set(Object.values(VRMLookExpressionName));
-
-function dig(obj: any, path: string): any {
-  const parts = path.split('/');
-  let current = obj;
-  for (const part of parts) {
-    if (current == null) {
-      return undefined;
-    }
-    current = current[part];
-  }
-  return current;
-}
-
-function compileTextureTransformExtPaths(
-  materialIndex: number,
-  gltf: GLTF.IGLTF,
-): string[] {
-  const material = gltf.materials?.[materialIndex];
-  if (material == null) {
-    return [];
-  }
-
-  const texturePaths = [
-    'normalTexture',
-    'occlusionTexture',
-    'emissiveTexture',
-    'pbrMetallicRoughness/baseColorTexture',
-    'pbrMetallicRoughness/metallicRoughnessTexture',
-    'extensions/KHR_materials_anisotropy/anisotropyTexture',
-    'extensions/KHR_materials_clearcoat/clearcoatTexture',
-    'extensions/KHR_materials_clearcoat/clearcoatRoughnessTexture',
-    'extensions/KHR_materials_clearcoat/clearcoatNormalTexture',
-    'extensions/KHR_materials_iridescence/iridescenceTexture',
-    'extensions/KHR_materials_iridescence/iridescenceThicknessTexture',
-    'extensions/KHR_materials_sheen/sheenColorTexture',
-    'extensions/KHR_materials_sheen/sheenRoughnessTexture',
-    'extensions/KHR_materials_specular/specularTexture',
-    'extensions/KHR_materials_specular/specularColorTexture',
-    'extensions/KHR_materials_transmission/transmissionTexture',
-    'extensions/KHR_materials_volume/thicknessTexture',
-    'extensions/ADOBE_materials_clearcoat_specular/clearcoatSpecularTexture',
-    'extensions/ADOBE_materials_clearcoat_tint/clearcoatTintTexture',
-    'extensions/VRMC_materials_mtoon/shadeMultiplyTexture',
-    'extensions/VRMC_materials_mtoon/shadingShiftTexture',
-    // 'extensions/VRMC_materials_mtoon/matcapTexture', // ignored in VRM spec
-    'extensions/VRMC_materials_mtoon/rimMultiplyTexture',
-    'extensions/VRMC_materials_mtoon/outlineWidthMultiplyTexture',
-    'extensions/VRMC_materials_mtoon/uvAnimationMaskTexture',
-  ];
-
-  return texturePaths
-    .filter((path) => dig(material, path) != null)
-    .map((path) => `/materials/${materialIndex}/${path}/extensions/KHR_texture_transform`);
-}
-
-function appendTextureAnimation(
-  vrmBind: ExpressionTextureTransformBind,
-  isBinary: boolean,
-  gltf: GLTF.IGLTF,
-  binChunkBox: [Uint8Array],
-  outAnimation: GLTF.IAnimation,
-): [samplerIndices: number[], channelIndices: number[]] {
-  const samplerIndices: number[] = [];
-  const channelIndices: number[] = [];
-
-  if (vrmBind.offset == null && vrmBind.scale == null) {
-    return [samplerIndices, channelIndices];
-  }
-
-  const materialIndex = vrmBind.material;
-  const extPaths = compileTextureTransformExtPaths(materialIndex, gltf);
-
-  for (const propName of ['offset', 'scale'] as const) {
-    const prop = vrmBind[propName];
-    if (prop == null) {
-      continue;
-    }
-
-    // TODO: We assume default offset and scale, and it's not always true
-    const [x0, y0] = propName === 'offset' ? [0, 0] : [1, 1];
-    const [x1, y1] = prop;
-
-    const [inputIndex, outputIndex] = appendAnimationAccessors(
-      new Float32Array(isBinary ? [0, 0.5, 1] : [0, 1]),
-      transformToBinary(new Float32Array([x0, y0, x1, y1]), isBinary),
-      'VEC2',
-      gltf,
-      binChunkBox,
-    );
-    logVerbose(`KHR_character_expression_texture: New accessors (#${inputIndex}, #${outputIndex})`);
-
-    const samplerIndex = outAnimation.samplers.length;
-    outAnimation.samplers.push({
-      input: inputIndex,
-      interpolation: isBinary ? 'STEP' : 'LINEAR',
-      output: outputIndex,
-    });
-    samplerIndices.push(samplerIndex);
-
-    for (const extPath of extPaths) {
-      const channelIndex = outAnimation.channels.length;
-
-      gltf.extensionsUsed ||= [];
-      if (!gltf.extensionsUsed.includes('KHR_animation_pointer')) {
-        gltf.extensionsUsed.push('KHR_animation_pointer');
-      }
-
-      const pointer = `${extPath}/${propName}`;
-      outAnimation.channels.push({
-        sampler: samplerIndex,
-        target: {
-          path: 'pointer' as any,
-          extensions: {
-            'KHR_animation_pointer': {
-              pointer,
-            }
-          }
-        },
-      });
-      channelIndices.push(channelIndex);
-      logVerbose(`KHR_character_expression_texture: New animation channel, pointer for "${pointer}"`);
-    }
-  }
-
-  return [samplerIndices, channelIndices];
-}
-
-
 function appendAnimation(
   name: string,
   vrmExpression: VRMExpression,
