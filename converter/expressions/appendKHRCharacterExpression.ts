@@ -9,6 +9,7 @@ import type { KHRCharacterExpression, KHRCharacterExpressionExpression } from '.
 import type { KHRCharacterExpressionMorphtarget } from '../../schematypes/KHRCharacterExpressionMorphtarget.ts';
 import type { KHRCharacterExpressionMapping, KHRCharacterExpressionMappingExpressionSetMapping } from '../../schematypes/KHRCharacterExpressionMapping.ts';
 import type { Bone } from '../Bone.ts';
+import { appendExpressionMasksFromOverride } from './appendExpressionMasksFromOverride.ts';
 
 /**
  * Appends one glTF animation for a single VRM expression.
@@ -104,6 +105,8 @@ function appendExpression(
       channels: textureChannelIndices,
     };
   }
+
+  appendExpressionMasksFromOverride(vrmExpression, extensions);
 
   const expression: KHRCharacterExpressionExpression = {
     expression: name,
