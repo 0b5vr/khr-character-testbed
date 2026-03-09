@@ -14,6 +14,8 @@ export function appendExpressionMasksFromOverride(
 ): void {
   const masks: KHRCharacterExpressionMasksMask[] = [];
 
+  const isBinary = vrmExpression.isBinary ?? false;
+
   const overrideCategories = [
     {
       name: 'blink',
@@ -36,11 +38,20 @@ export function appendExpressionMasksFromOverride(
     const value = vrmExpression[propertyName];
     if (value != null && value !== 'none') {
       logVerbose(`KHR_character_expression_masks: The expression has ${propertyName} == "${value}", masking all ${name} morph targets`);
+
       for (const target of targets) {
-        masks.push({
-          target,
-          type: value,
-        });
+        if (isBinary) {
+          masks.push({
+            target,
+            type: 'block',
+            threshold: 0.5,
+          });
+        } else {
+          masks.push({
+            target,
+            type: value,
+          });
+        }
       }
     }
   }
