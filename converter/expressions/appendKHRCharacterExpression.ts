@@ -1,14 +1,14 @@
-import { appendAnimationAccessors } from './appendAnimationAccessors.ts';
-import { logVerbose } from './logVerbose.ts';
+import { appendAnimationAccessors } from '../appendAnimationAccessors.ts';
+import { logVerbose } from '../logVerbose.ts';
 // @ts-types="npm:@types/three@0.181.0"
 import { Quaternion } from 'npm:three@0.181.2';
 import type { GLTF } from 'npm:@gltf-transform/core@4.2.1';
 import type { ExpressionMorphTargetBind, ExpressionTextureTransformBind, LookAtRangeMap, VRMCVRM, Expression as VRMExpression, Humanoid as VRMHumanoid, LookAt as VRMLookAt } from 'npm:@pixiv/types-vrmc-vrm-1.0@3.4.4';
-import type { KHRCharacterExpression, KHRCharacterExpressionExpression } from '../schematypes/KHRCharacterExpression.ts';
-import type { KHRCharacterExpressionMorphtarget } from '../schematypes/KHRCharacterExpressionMorphtarget.ts';
-import type { KHRCharacterExpressionMapping, KHRCharacterExpressionMappingExpressionSetMapping } from '../schematypes/KHRCharacterExpressionMapping.ts';
-import type { Bone } from './Bone.ts';
-import { options } from './options.ts';
+import type { KHRCharacterExpression, KHRCharacterExpressionExpression } from '../../schematypes/KHRCharacterExpression.ts';
+import type { KHRCharacterExpressionMorphtarget } from '../../schematypes/KHRCharacterExpressionMorphtarget.ts';
+import type { KHRCharacterExpressionMapping, KHRCharacterExpressionMappingExpressionSetMapping } from '../../schematypes/KHRCharacterExpressionMapping.ts';
+import type { Bone } from '../Bone.ts';
+import { options } from '../options.ts';
 
 /** Identity quaternion Do not mutate */
 const QUAT_IDENTITY = new Quaternion(0, 0, 0, 1);

@@ -1,7 +1,7 @@
 import { appendKHRCharacter } from './appendKHRCharacter.ts';
 import { constructGLB } from './constructGLB.ts';
 import { extractGLB } from './extractGLB.ts';
-import { appendKHRCharacterExpression } from './appendKHRCharacterExpression.ts';
+import { appendKHRCharacterExpression } from './expressions/appendKHRCharacterExpression.ts';
 import { parseArgs } from 'jsr:@std/cli@1.0.24/parse-args';
 import { appendKHRCharacterSkeleton } from './appendKHRCharacterSkeleton.ts';
 import { logVerbose } from './logVerbose.ts';
