@@ -147,6 +147,7 @@ export function appendKHRCharacterExpression(
   const mappingName = 'vrmExpressionPresets';
   const mapping: KHRCharacterExpressionMappingExpressionSetMapping = {};
 
+  // preset expressions (except look expressions, which are handled later)
   for (const [name, vrmExpression] of Object.entries(vrm.expressions.preset ?? {})) {
     if (vrmLookExpressionNameSet.has(name)) {
       // look expressions are handled later
@@ -159,6 +160,7 @@ export function appendKHRCharacterExpression(
     logVerbose(`KHR_character_expression_mapping: "${mappingName}" mapping, "${name}": [{ source: "${name}", weight: 1 }]`);
   }
 
+  // look expressions from lookAt
   if (vrm.lookAt?.type === 'expression') {
     for (const lookName of VRMLookExpressionName) {
       const vrmExpression = vrm.expressions.preset?.[lookName];
@@ -183,6 +185,7 @@ export function appendKHRCharacterExpression(
     }
   }
 
+  // custom expressions
   for (const [name, vrmExpression] of Object.entries(vrm.expressions?.custom ?? {})) {
     logVerbose(`KHR_character_expression: Appending expression "${name}"`);
     appendExpression(name, vrmExpression, gltf, binChunkBox, expressions);
