@@ -36,7 +36,7 @@ clock.start();
 let frameCount = 0;
 
 renderer.setAnimationLoop(() => {
-  if (frameCount % 1 === 0) {
+  if (frameCount % guiParams.frameSkip === 0) {
     const deltaTime = clock.getDelta();
     const time = clock.elapsedTime;
 
