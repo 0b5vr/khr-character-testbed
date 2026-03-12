@@ -40,6 +40,7 @@ renderer.setAnimationLoop(() => {
     const deltaTime = clock.getDelta();
     const time = clock.elapsedTime;
 
+    springBoneGroup.setParams(guiParams.springJointParams);
     if (guiParams.movementMode === 'sin') {
       springBoneGroup.position.x = 2.0 * Math.sin(Math.PI * time);
     } else if (guiParams.movementMode === 'step') {

@@ -64,6 +64,18 @@ export class SpringBoneGroup extends THREE.Group {
       });
       applySpringJoint(joint, mesh);
     }
+  }
 
+  /**
+   * Sets the given parameters to all spring joints in the group.
+   *
+   * @param {object} params The parameters to set.
+   */
+  setParams(params) {
+    for (const joint of this.joints) {
+      joint.params.restoration = params.restoration;
+      joint.params.inertia = params.inertia;
+      joint.params.stiffness = params.stiffness;
+    }
   }
 }

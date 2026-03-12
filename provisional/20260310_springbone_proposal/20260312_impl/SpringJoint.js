@@ -23,7 +23,7 @@ export class SpringJoint {
    */
   params = {
     restoration: 0.1,
-    inertia: 0.8,
+    inertia: 0.5,
     stiffness: 0.0,
   };
 
