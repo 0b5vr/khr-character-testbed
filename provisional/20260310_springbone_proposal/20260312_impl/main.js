@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import { SpringBoneGroup } from './SpringBoneGroup.js';
+import { guiParams } from './gui.js';
+import { mouse } from './mouse.js';
 
 // canvas
 const canvas = document.getElementById('canvas');
@@ -38,8 +40,14 @@ renderer.setAnimationLoop(() => {
     const deltaTime = clock.getDelta();
     const time = clock.elapsedTime;
 
-    // springBoneGroup.position.x = (time % 2.0) < 1.0 ? 0.0 : 2.0;
-    springBoneGroup.position.x = 2.0 * Math.sin(Math.PI * time);
+    if (guiParams.movementMode === 'sin') {
+      springBoneGroup.position.x = 2.0 * Math.sin(Math.PI * time);
+    } else if (guiParams.movementMode === 'step') {
+      springBoneGroup.position.x = (time % 2.0) < 1.0 ? -1.0 : 1.0;
+    } else if (guiParams.movementMode === 'mouse') {
+      const mouseX = (mouse.x / window.innerWidth) * 2.0 - 1.0;
+      springBoneGroup.position.x = mouseX * 2.0;
+    }
     springBoneGroup.update(deltaTime);
 
     renderer.render(scene, camera);
