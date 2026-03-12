@@ -1,0 +1,58 @@
+import * as THREE from 'three';
+import { SpringBoneGroup } from './SpringBoneGroup.js';
+
+// canvas
+const canvas = document.getElementById('canvas');
+const { width, height } = canvas.getBoundingClientRect();
+
+// renderer
+const renderer = new THREE.WebGLRenderer({ canvas });
+renderer.setSize(width, height, false);
+renderer.setPixelRatio(window.devicePixelRatio);
+
+// camera
+const camera = new THREE.PerspectiveCamera(45.0, width / height, 0.01, 100.0);
+camera.position.set(0.0, 0.0, 8.0);
+
+// scene
+const scene = new THREE.Scene();
+
+// light
+const directionalLight = new THREE.DirectionalLight(0xffffff);
+directionalLight.intensity = Math.PI;
+directionalLight.position.set(3.0, 4.0, 5.0);
+scene.add(directionalLight);
+
+// spring bone group
+const springBoneGroup = new SpringBoneGroup();
+scene.add(springBoneGroup);
+
+// loop
+const clock = new THREE.Clock();
+clock.start();
+
+let frameCount = 0;
+
+renderer.setAnimationLoop(() => {
+  if (frameCount % 1 === 0) {
+    const deltaTime = clock.getDelta();
+    const time = clock.elapsedTime;
+
+    // springBoneGroup.position.x = (time % 2.0) < 1.0 ? 0.0 : 2.0;
+    springBoneGroup.position.x = 2.0 * Math.sin(Math.PI * time);
+    springBoneGroup.update(deltaTime);
+
+    renderer.render(scene, camera);
+  }
+
+  frameCount ++;
+});
+
+// resize handler
+window.addEventListener('resize', () => {
+  const { width, height } = canvas.getBoundingClientRect();
+  renderer.setSize(width, height, false);
+
+  camera.aspect = width / height;
+  camera.updateProjectionMatrix();
+});
