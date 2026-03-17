@@ -10,6 +10,7 @@ import { appendKHRNodeCameraHint } from './appendKHRNodeCameraHint.ts';
 import { collectNodeBoneMap } from './collectNodeBoneMap.ts';
 import { appendKHRXmpJsonLd } from './appendKHRXmpJsonLd.ts';
 import { ensureSingleRoot } from './ensureSingleRoot.ts';
+import { appendKHRVirtualTransforms } from "./appendKHRVirtualTransforms.ts";
 
 // == options ======================================================================================
 const options = parseArgs(Deno.args, {
@@ -57,6 +58,7 @@ appendKHRCharacterSkeleton(gltf);
 appendKHRCharacterExpression(gltf, binChunkBox, nodeBoneMap);
 appendKHRMeshAnnotation(gltf);
 appendKHRVirtualTransforms(gltf);
+appendKHRNodeCameraHint(gltf);
 
 // == reconstruct GLB ==============================================================================
 logVerbose('Constructing new GLB');
