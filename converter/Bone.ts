@@ -1,5 +1,4 @@
-// @ts-types="npm:@types/three@0.181.0"
-import type { Quaternion, Vector3 } from 'npm:three@0.181.2';
+import type { Quaternion, Vector3 } from 'three';
 
 export interface Bone {
   gltfIndex: number;

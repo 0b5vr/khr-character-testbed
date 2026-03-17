@@ -1,7 +1,6 @@
-// @ts-types="npm:@types/three@0.181.0"
-import { Matrix4, Quaternion, Vector3 } from 'npm:three@0.181.2';
+import { Matrix4, Quaternion, Vector3 } from 'three';
 import type { Bone } from './Bone.ts';
-import type { GLTF } from 'npm:@gltf-transform/core@4.2.1';
+import type { GLTF } from '@gltf-transform/core';
 import { logVerbose } from './logVerbose.ts';
 
 function extractTRSFromNode(node: GLTF.INode): [

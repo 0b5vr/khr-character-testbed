@@ -1,5 +1,5 @@
 import { logVerbose } from './logVerbose.ts';
-import type { GLTF } from 'npm:@gltf-transform/core@4.2.1';
+import type { GLTF } from '@gltf-transform/core';
 import type { KHRMeshAnnotation } from '../schematypes/KHRMeshAnnotation.ts';
 import type { KHRMeshAnnotationRenderview } from '../schematypes/KHRMeshAnnotationRenderview.ts';
 import type { KHRMeshAnnotationRenderviewRenderVisibility } from '../schematypes/KHRMeshAnnotationRenderviewRenderVisibility.ts';

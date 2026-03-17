@@ -1,4 +1,4 @@
-import type { Expression as VRMExpression } from 'npm:@pixiv/types-vrmc-vrm-1.0@3.4.4';
+import type { Expression as VRMExpression } from '@pixiv/types-vrmc-vrm-1.0';
 import type { KHRCharacterExpressionMasksMask } from '../../schematypes/KHRCharacterExpressionMasks.ts';
 import { logVerbose } from '../logVerbose.ts';
 

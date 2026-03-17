@@ -1,7 +1,7 @@
 import { logVerbose } from './logVerbose.ts';
-import type { GLTF } from 'npm:@gltf-transform/core@4.2.1';
+import type { GLTF } from '@gltf-transform/core';
 import type { KHRCharacterSkeletonMapping, KHRCharacterSkeletonMappingSkeletalRigMapping } from '../schematypes/KHRCharacterSkeletonMapping.ts';
-import type { VRMCVRM } from 'npm:@pixiv/types-vrmc-vrm-1.0@3.4.4';
+import type { VRMCVRM } from '@pixiv/types-vrmc-vrm-1.0';
 
 export function appendKHRCharacterSkeleton(gltf: GLTF.IGLTF): void {
   const vrm = gltf.extensions?.['VRMC_vrm'] as VRMCVRM | undefined;

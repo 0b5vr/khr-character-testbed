@@ -1,9 +1,8 @@
 import { appendAnimationAccessors } from './appendAnimationAccessors.ts';
 import { logVerbose } from '../logVerbose.ts';
-// @ts-types="npm:@types/three@0.181.0"
-import { Quaternion } from 'npm:three@0.181.2';
-import type { GLTF } from 'npm:@gltf-transform/core@4.2.1';
-import type { LookAtRangeMap, Humanoid as VRMHumanoid, LookAt as VRMLookAt } from 'npm:@pixiv/types-vrmc-vrm-1.0@3.4.4';
+import { Quaternion } from 'three';
+import type { GLTF } from '@gltf-transform/core';
+import type { LookAtRangeMap, Humanoid as VRMHumanoid, LookAt as VRMLookAt } from '@pixiv/types-vrmc-vrm-1.0';
 import type { KHRCharacterExpressionExpression } from '../../schematypes/KHRCharacterExpression.ts';
 import type { Bone } from '../Bone.ts';
 import type { VRMLookExpressionName } from './VRMLookExpressionName.ts';

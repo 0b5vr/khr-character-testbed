@@ -1,4 +1,4 @@
-import type { GLTF } from 'npm:@gltf-transform/core@4.2.1';
+import type { GLTF } from '@gltf-transform/core';
 import type { KHRCharacter } from '../schematypes/KHRCharacter.ts';
 
 /**

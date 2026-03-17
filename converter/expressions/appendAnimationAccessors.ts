@@ -1,4 +1,4 @@
-import type { GLTF } from 'npm:@gltf-transform/core@4.2.1';
+import type { GLTF } from '@gltf-transform/core';
 
 /**
  * Appends raw bytes to the given BIN chunk and creates a matching bufferView.

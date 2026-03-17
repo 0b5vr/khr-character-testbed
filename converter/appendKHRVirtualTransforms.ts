@@ -1,6 +1,6 @@
 import { logVerbose } from './logVerbose.ts';
-import type { GLTF } from 'npm:@gltf-transform/core@4.2.1';
-import type { VRMCVRM } from 'npm:@pixiv/types-vrmc-vrm-1.0@3.4.4';
+import type { GLTF } from '@gltf-transform/core';
+import type { VRMCVRM } from '@pixiv/types-vrmc-vrm-1.0';
 import type { KHRVirtualTransforms } from '../schematypes/KHRVirtualTransforms.ts';
 
 export function appendKHRVirtualTransforms(gltf: GLTF.IGLTF): void {

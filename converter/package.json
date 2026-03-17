@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "@gltf-transform/core": "^4.3.0",
+    "@pixiv/types-vrmc-vrm-1.0": "3.5.0",
+    "@types/three": "^0.183.1",
+    "three": "^0.183.2"
+  }
+}

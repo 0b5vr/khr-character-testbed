@@ -1,7 +1,7 @@
 import { appendAnimationAccessors } from './appendAnimationAccessors.ts';
 import { logVerbose } from '../logVerbose.ts';
-import type { GLTF } from 'npm:@gltf-transform/core@4.2.1';
-import type { ExpressionMorphTargetBind } from 'npm:@pixiv/types-vrmc-vrm-1.0@3.4.4';
+import type { GLTF } from '@gltf-transform/core';
+import type { ExpressionMorphTargetBind } from '@pixiv/types-vrmc-vrm-1.0';
 import { options } from '../options.ts';
 import { transformToBinary } from './transformToBinary.ts';
 

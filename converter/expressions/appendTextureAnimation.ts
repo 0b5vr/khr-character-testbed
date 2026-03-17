@@ -2,8 +2,8 @@ import { appendAnimationAccessors } from './appendAnimationAccessors.ts';
 import { dig } from './dig.ts';
 import { logVerbose } from '../logVerbose.ts';
 import { transformToBinary } from './transformToBinary.ts';
-import type { GLTF } from 'npm:@gltf-transform/core@4.2.1';
-import type { ExpressionTextureTransformBind } from 'npm:@pixiv/types-vrmc-vrm-1.0@3.4.4';
+import type { GLTF } from '@gltf-transform/core';
+import type { ExpressionTextureTransformBind } from '@pixiv/types-vrmc-vrm-1.0';
 
 /**
  * Collects all KHR_texture_transform extension pointer base paths available on a material.
