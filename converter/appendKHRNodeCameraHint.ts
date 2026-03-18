@@ -1,10 +1,14 @@
 import { logVerbose } from './logVerbose.ts';
+import { Quaternion } from 'three';
 import type { GLTF } from '@gltf-transform/core';
 import type { VRMCVRM } from '@pixiv/types-vrmc-vrm-1.0';
+import { Bone } from "./Bone.ts";
+
+const QUAT_YP_180DEG = new Quaternion(0, 1, 0, 0);
 
 const EXTENSION_NAME = 'KHR_node_camera_hint';
 
-export function appendKHRNodeCameraHint(gltf: GLTF.IGLTF): void {
+export function appendKHRNodeCameraHint(gltf: GLTF.IGLTF, nodeBoneMap: Record<number, Bone>): void {
   const vrm = gltf.extensions?.['VRMC_vrm'] as VRMCVRM | undefined;
   if (vrm == null) {
     return;
@@ -17,8 +21,7 @@ export function appendKHRNodeCameraHint(gltf: GLTF.IGLTF): void {
   }
 
   const vrmHumanoid = vrm.humanoid;
-  const headBone = vrmHumanoid?.humanBones.head;
-  const headNodeIndex = headBone?.node;
+  const headNodeIndex = vrmHumanoid?.humanBones.head?.node;
   if (headNodeIndex == null) {
     console.error(`${EXTENSION_NAME}: The model is invalid; it does not have a head bone.`);
     return;
@@ -36,6 +39,11 @@ export function appendKHRNodeCameraHint(gltf: GLTF.IGLTF): void {
     return;
   }
 
+  const headBone = nodeBoneMap[headNodeIndex];
+  if (headBone == null) {
+    throw new Error(`${EXTENSION_NAME}: Unreachable. Missing bone for the node #${headNodeIndex}.`);
+  }
+
   logVerbose(`${EXTENSION_NAME}: VRM lookAt offsetFromHeadBone found, adding ${EXTENSION_NAME}`);
   logVerbose(`${EXTENSION_NAME}: Head node is #${headNodeIndex} ("${headNode.name}")`);
   logVerbose(`${EXTENSION_NAME}: Offset from head bone: [${offsetFromHeadBone.join(', ')}]`);
@@ -51,6 +59,7 @@ export function appendKHRNodeCameraHint(gltf: GLTF.IGLTF): void {
   const cameraNode: GLTF.INode = {
     name: cameraNodeName,
     translation: offsetFromHeadBone,
+    rotation: headBone.worldRotation.clone().invert().multiply(QUAT_YP_180DEG).toArray(),
     extensions: {
       [EXTENSION_NAME]: {
         role: 'first_person',

@@ -58,7 +58,7 @@ appendKHRCharacterSkeleton(gltf);
 appendKHRCharacterExpression(gltf, binChunkBox, nodeBoneMap);
 appendKHRMeshAnnotation(gltf);
 appendKHRVirtualTransforms(gltf);
-appendKHRNodeCameraHint(gltf);
+appendKHRNodeCameraHint(gltf, nodeBoneMap);
 
 // == reconstruct GLB ==============================================================================
 logVerbose('Constructing new GLB');
