@@ -52,6 +52,7 @@ export class SpringBoneGroup extends THREE.Group {
    */
   update(deltaTime) {
     this.updateWorldMatrix(false, false);
+    this.meshes[0].updateWorldMatrix(false, false);
 
     for (let i = 0; i < 3; i++) {
       const parent = this.meshes[i];
