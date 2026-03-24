@@ -219,8 +219,9 @@ If present, it MUST match an `expression` name defined in `KHR_character_express
 - Unlike `VRMC_vrm.lookAt`, this proposal does not include range map parameters such as horizontal inner/outer or vertical up/down. Non-linear response should be authored in the referenced expressions. If it brings significant confusion to artists and implementers, we should consider adding them.
 - Compared to `VRMC_vrm.lookAt`, this proposal aligns the look-at space with the glTF camera convention, where -Z is forward. I believe this is a good idea.
 - Should `expressions` be allowed to be empty or omitted?
-  - Allowing it would permit a no-op extension object containing only `referenceNode`
+  - Allowing it would permit a no-op extension object containing only `referenceNode`, which effectively becomes a no-op extension.
   - Requiring at least one mapped expression would help catch authoring mistakes such as accidentally exporting an empty `VRMC_character_expression_lookat`.
+  - However, such design decisions are not common in glTF and its extensions, and it may be better to follow the general convention unless there is a strong reason to do otherwise.
 - Should additional properties be allowed?
   - Disallowing them would help catch authoring mistakes such as typos in property names
   - The decision should preferably be aligned with the schema design of `KHR_character_expression` and with glTF conventions
