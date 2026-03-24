@@ -38,24 +38,29 @@ The look-at direction is calculated in the local coordinate system of a specifie
 The local axes of `referenceNode` define the look-at space: `-Z` is the forward direction that "lens" looks towards, `+X` is the right direction, and `+Y` is the up direction.
 This definition matches the glTF camera definition.
 
-By providing a target point `T` from the application, the implementation calculates the direction from `referenceNode` to `T` in the local space of `referenceNode`, and then converts that direction into the four expression values.
+By providing a target point from the application, the implementation calculates the direction from `referenceNode` to the target point in the local space of `referenceNode`, and then converts that direction into the four expression values.
+The implementation then calculates the yaw and pitch angles from the look-at direction. The yaw angle is the angle between the -Z axis and the look-at direction projected onto the XZ plane where the sign is positive when the look-at direction is on the +X side. The pitch angle is the angle between the XZ plane and the look-at direction where the sign is positive when the look-at direction is on the +Y side.
 
-The implementation then calculates the yaw and pitch angles from the look-at direction using the following formulas:
+The following formula describes the calculation of the look-at direction and the conversion to yaw and pitch angles, where `target` is the target position in the world space.
 
-```c
-yaw = atan2(x, -z)
-pitch = atan2(y, sqrt(x * x + z * z))
+```js
+// convert the target position to the local space of referenceNode
+let (x, y, z) = referenceNode.worldMatrix.inverse * target
+
+// calculate yaw and pitch from the look-at direction
+let yaw = atan2(x, -z)
+let pitch = atan2(y, sqrt(x * x + z * z))
 ```
 
 If the target position is equal to the origin of `referenceNode`, the direction SHOULD be treated as `(0, 0, -1)` (i.e. looking forward).
 
 The implementation converts these angles to four non-negative expression inputs as follows:
 
-```c
-lookRightValue = saturate( yaw / (pi / 2))
-lookLeftValue  = saturate(-yaw / (pi / 2))
-lookUpValue    = saturate( pitch / (pi / 2))
-lookDownValue  = saturate(-pitch / (pi / 2))
+```js
+let lookRightValue = saturate( yaw / (pi / 2))
+let lookLeftValue  = saturate(-yaw / (pi / 2))
+let lookUpValue    = saturate( pitch / (pi / 2))
+let lookDownValue  = saturate(-pitch / (pi / 2))
 ```
 
 Where `saturate(v)` limits `v` into the range `[0, 1]`.
