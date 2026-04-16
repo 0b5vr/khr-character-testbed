@@ -1,13 +1,17 @@
 import * as THREE from 'three';
+import { WebGPURenderer } from 'three/webgpu';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { Inspector } from 'three/addons/inspector/Inspector.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import './style.css';
 import sampleGltf from './assets/twist-sample-with-khr.glb?url';
 
 const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 
-const renderer = new THREE.WebGLRenderer({ canvas });
+const renderer = new WebGPURenderer({ canvas, antialias: true });
+renderer.setClearColor(0x000000, 1);
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.inspector = new Inspector();
 
 const camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 0.1, 20);
 camera.position.set(0, 1, 3);
