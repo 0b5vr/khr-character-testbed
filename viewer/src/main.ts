@@ -12,7 +12,9 @@ const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 const renderer = new WebGPURenderer({ canvas, antialias: true });
 renderer.setClearColor(0x000000, 1);
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.inspector = new Inspector();
+
+const inspector = new Inspector();
+renderer.inspector = inspector;
 
 const camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 0.1, 20);
 camera.position.set(0, 1, 3);
@@ -32,6 +34,27 @@ loader.register((parser) => new GLTFAnimationPointerExtension(parser));
 const gltf = await loader.loadAsync(sampleGltf);
 scene.add(gltf.scene);
 
+// temp: test animation
+const mixer = new THREE.AnimationMixer(gltf.scene);
+const action = mixer.clipAction(gltf.animations[0]);
+action.timeScale = 0;
+action.play();
+
+const timer = new THREE.Timer();
+
+const params = {
+  'time': 0.0,
+}
+const gui = inspector.createParameters('Parameters');
+
+gui.add(params, 'time', 0, 1).onChange((value) => {
+  action.time = value;
+});
+
 renderer.setAnimationLoop(() => {
+  timer.update();
+  const delta = timer.getDelta();
+
+  mixer.update(delta);
   renderer.render(scene, camera);
 });
