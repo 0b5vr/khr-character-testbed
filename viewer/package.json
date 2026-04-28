@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "devDependencies": {
+    "@gltf-transform/core": "^4.3.0",
     "@types/three": "^0.183.1",
     "three": "^0.183.2",
     "typescript": "~6.0.2",
