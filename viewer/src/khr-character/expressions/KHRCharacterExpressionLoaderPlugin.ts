@@ -1,0 +1,59 @@
+import * as THREE from 'three';
+import type { GLTF, GLTFLoaderPlugin, GLTFParser } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { type GLTF as GLTFSchema } from '@gltf-transform/core';
+import { KHRCharacterExpressionManager } from './KHRCharacterExpressionManager';
+import { type KHRCharacterExpression as KHRCharacterExpressionSchema } from '../../../../schematypes/KHRCharacterExpression.ts';
+import { KHRCharacterExpression } from './KHRCharacterExpression';
+
+export class KHRCharacterExpressionLoaderPlugin implements GLTFLoaderPlugin {
+  public readonly parser: GLTFParser;
+
+  public get name(): string {
+    return 'KHRCharacterExpressionLoaderPlugin';
+  }
+
+  public constructor(parser: GLTFParser) {
+    this.parser = parser;
+  }
+
+  public async afterRoot(gltf: GLTF): Promise<void> {
+    gltf.userData.khrCharacterExpressionManager = await this._import(gltf);
+  }
+
+  public async _import(gltf: GLTF): Promise<KHRCharacterExpressionManager | null> {
+    const json = gltf.parser.json as GLTFSchema.IGLTF;
+
+    const isExtensionUsed = json.extensionsUsed?.includes('KHR_character_expression');
+    if (!isExtensionUsed) {
+      return null;
+    }
+
+    const extension = json.extensions?.['KHR_character_expression'] as KHRCharacterExpressionSchema | undefined;
+    if (!extension) {
+      console.warn('KHR_character_expression extension is listed in extensionsUsed but not found in extensions.');
+      return null;
+    }
+
+    const expressionManager = new KHRCharacterExpressionManager(gltf);
+
+    for (const expressionDef of extension.expressions) {
+      const clip = gltf.animations[expressionDef.animation];
+      if (!clip) {
+        console.warn(`Animation with index ${expressionDef.animation} not found for expression "${expressionDef.expression}". Skipping this expression.`);
+        continue;
+      }
+
+      THREE.AnimationUtils.makeClipAdditive(clip);
+
+      const expression = new KHRCharacterExpression(expressionDef.expression);
+      expressionManager.registerExpression(expression);
+
+      expression.action = expressionManager.animationMixer.clipAction(clip);
+      expression.action.timeScale = 0;
+      expression.action.blendMode = THREE.AdditiveAnimationBlendMode;
+      expression.action.play();
+    }
+
+    return expressionManager;
+  }
+}

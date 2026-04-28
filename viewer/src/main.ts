@@ -6,7 +6,10 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import './style.css';
 import sampleGltf from './assets/twist-sample-with-khr.glb?url';
 import { GLTFAnimationPointerExtension } from '@needle-tools/three-animation-pointer';
+import { KHRCharacterExpressionLoaderPlugin } from './khr-character/expressions/KHRCharacterExpressionLoaderPlugin';
+import type { KHRCharacterExpressionManager } from './khr-character/expressions/KHRCharacterExpressionManager';
 
+// == basic Three.js stuff =========================================================================
 const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 
 const renderer = new WebGPURenderer({ canvas, antialias: true });
@@ -29,32 +32,32 @@ const light = new THREE.DirectionalLight(0xffffff, Math.PI);
 light.position.set(1, 2, 3);
 scene.add(light);
 
+// == gltf =========================================================================================
 const loader = new GLTFLoader();
 loader.register((parser) => new GLTFAnimationPointerExtension(parser));
+loader.register((parser) => new KHRCharacterExpressionLoaderPlugin(parser));
+
 const gltf = await loader.loadAsync(sampleGltf);
+const expressionManager = gltf.userData.khrCharacterExpressionManager as KHRCharacterExpressionManager | undefined;
 scene.add(gltf.scene);
 
-// temp: test animation
-const mixer = new THREE.AnimationMixer(gltf.scene);
-const action = mixer.clipAction(gltf.animations[0]);
-action.timeScale = 0;
-action.play();
+// == gui for expressions ==========================================================================
+const gui = inspector.createParameters('Expressions');
+const params: Record<string, number> = {};
 
-const timer = new THREE.Timer();
-
-const params = {
-  'time': 0.0,
+for (const expression of expressionManager?.expressions ?? []) {
+  params[expression.expressionName] = expression.weight;
+  gui.add(params, expression.expressionName, 0, 1).onChange((value) => {
+    expressionManager?.setValue(expression.expressionName, value);
+  });
 }
-const gui = inspector.createParameters('Parameters');
 
-gui.add(params, 'time', 0, 1).onChange((value) => {
-  action.time = value;
-});
-
+// == animation loop ===============================================================================
+const timer = new THREE.Timer();
 renderer.setAnimationLoop(() => {
   timer.update();
   const delta = timer.getDelta();
 
-  mixer.update(delta);
+  expressionManager?.update(delta);
   renderer.render(scene, camera);
 });

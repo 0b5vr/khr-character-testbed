@@ -1,0 +1,42 @@
+import * as THREE from 'three';
+import { type KHRCharacterExpressionManager } from './KHRCharacterExpressionManager.ts';
+
+export class KHRCharacterExpression extends THREE.Object3D {
+  /**
+   * The name of this expression.
+   * It is distinguished with {@link name} property of {@link THREE.Object3D}.
+   */
+  public readonly expressionName: string;
+
+  /**
+   * The current weight of this expression.
+   * You usually want to set the weight via {@link KHRCharacterExpressionManager.getValue}.
+   *
+   * It might also be controlled by the Three.js animation system.
+   */
+  public weight: number;
+
+  /**
+   * The animation action for this expression.
+   * It is controlled by {@link KHRCharacterExpressionManager}.
+   */
+  public action?: THREE.AnimationAction;
+
+  /**
+   * Indicates that this is a KHRCharacterExpression.
+   */
+  public readonly isKHRCharacterExpression = true;
+
+  constructor(expressionName: string) {
+    super();
+
+    this.name = `KHRCharacterExpression_${expressionName}`;
+    this.expressionName = expressionName;
+
+    this.weight = 0.0;
+
+    // This is not intended to be visible, we set visible to false for the sake of performance.
+    // It omits the calculation of the matrix every frame.
+    this.visible = false;
+  }
+}
