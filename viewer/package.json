@@ -11,8 +11,8 @@
   "devDependencies": {
     "@gltf-transform/core": "^4.3.0",
     "@needle-tools/three-animation-pointer": "github:0b5vr/three-animation-pointer#individual-weights",
-    "@types/three": "^0.183.1",
-    "three": "^0.183.2",
+    "@types/three": "^0.184.0",
+    "three": "^0.184.0",
     "typescript": "~6.0.2",
     "vite": "^8.0.4"
   }
