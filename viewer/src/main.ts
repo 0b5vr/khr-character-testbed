@@ -5,6 +5,7 @@ import { Inspector } from 'three/addons/inspector/Inspector.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import './style.css';
 import sampleGltf from './assets/twist-sample-with-khr.glb?url';
+import { GLTFAnimationPointerExtension } from '@needle-tools/three-animation-pointer';
 
 const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 
@@ -27,6 +28,7 @@ light.position.set(1, 2, 3);
 scene.add(light);
 
 const loader = new GLTFLoader();
+loader.register((parser) => new GLTFAnimationPointerExtension(parser));
 const gltf = await loader.loadAsync(sampleGltf);
 scene.add(gltf.scene);
 
