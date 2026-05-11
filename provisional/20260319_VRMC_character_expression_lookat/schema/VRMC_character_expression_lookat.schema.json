@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "title": "VRMC_character_expression_lookat",
+  "type": "object",
+  "description": "glTF extension defining how KHR_character_expression expressions are used for eye gaze look-at control.",
+  "allOf": [ { "$ref": "glTFProperty.schema.json" } ],
+  "properties": {
+    "referenceNode": {
+      "type": "integer",
+      "description": "The index of the node used as the reference for look-at direction calculation.",
+      "minimum": 0
+    },
+    "expressions": {
+      "$ref": "VRMC_character_expression_lookat.expressions.schema.json"
+    },
+    "extensions": { },
+    "extras": { }
+  },
+  "required": [
+    "referenceNode"
+  ]
+}

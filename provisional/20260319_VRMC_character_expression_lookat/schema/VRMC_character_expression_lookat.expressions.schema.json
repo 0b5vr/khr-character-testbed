@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "title": "VRMC_character_expression_lookat.expressions",
+  "type": "object",
+  "description": "The mapping of look-at expressions to the expressions defined in KHR_character_expression. Each mapped value MUST match an expression name defined in KHR_character_expression.expressions. The values of lookUp, lookDown, lookLeft, and lookRight MUST be distinct from each other.",
+  "allOf": [ { "$ref": "glTFProperty.schema.json" } ],
+  "properties": {
+    "lookUp": {
+      "type": "string",
+      "description": "The name of the expression used for looking up."
+    },
+    "lookDown": {
+      "type": "string",
+      "description": "The name of the expression used for looking down."
+    },
+    "lookLeft": {
+      "type": "string",
+      "description": "The name of the expression used for looking left."
+    },
+    "lookRight": {
+      "type": "string",
+      "description": "The name of the expression used for looking right."
+    },
+    "extensions": { },
+    "extras": { }
+  }
+}
