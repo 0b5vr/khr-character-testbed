@@ -1,5 +1,10 @@
 {
   "imports": {
     "@std/cli": "jsr:@std/cli@^1.0.28"
+  },
+  "fmt": {
+    "options": {
+      "singleQuote": true
+    }
   }
 }
