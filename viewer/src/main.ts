@@ -8,6 +8,8 @@ import sampleGltf from './assets/twist-sample-with-khr.glb?url';
 import { GLTFAnimationPointerExtension } from '@needle-tools/three-animation-pointer';
 import { KHRCharacterExpressionLoaderPlugin } from './khr-character/expressions/KHRCharacterExpressionLoaderPlugin';
 import type { KHRCharacterExpressionManager } from './khr-character/expressions/KHRCharacterExpressionManager';
+import { VRMCCharacterExpressionLookatLoaderPlugin } from './khr-character/lookat/VRMCCharacterExpressionLookatLoaderPlugin';
+import type { VRMCCharacterExpressionLookat } from './khr-character/lookat/VRMCCharacterExpressionLookat';
 
 // == basic Three.js stuff =========================================================================
 const canvas = document.getElementById('canvas') as HTMLCanvasElement;
@@ -36,27 +38,55 @@ scene.add(light);
 const loader = new GLTFLoader();
 loader.register((parser) => new GLTFAnimationPointerExtension(parser));
 loader.register((parser) => new KHRCharacterExpressionLoaderPlugin(parser));
+loader.register((parser) => new VRMCCharacterExpressionLookatLoaderPlugin(parser));
 
 const gltf = await loader.loadAsync(sampleGltf);
 const expressionManager = gltf.userData.khrCharacterExpressionManager as KHRCharacterExpressionManager | undefined;
+const lookat = gltf.userData.vrmcCharacterExpressionLookat as VRMCCharacterExpressionLookat | undefined;
 scene.add(gltf.scene);
 
 // == gui for expressions ==========================================================================
-const gui = inspector.createParameters('Expressions');
-const params: Record<string, number> = {};
+const paramsExpressions: Record<string, number> = {};
+const guiExpressions = inspector.createParameters('Expressions');
 
 for (const expression of expressionManager?.expressions ?? []) {
-  params[expression.expressionName] = expression.weight;
-  gui.add(params, expression.expressionName, 0, 1).onChange((value) => {
+  paramsExpressions[expression.expressionName] = expression.weight;
+  guiExpressions.add(paramsExpressions, expression.expressionName, 0, 1).onChange((value) => {
     expressionManager?.setValue(expression.expressionName, value);
   });
 }
 
+const paramsLookat = {
+  lookAtMode: 'none' as 'none' | 'camera',
+};
+const guiLookat = inspector.createParameters('Look-at');
+
+guiLookat.add(paramsLookat, 'lookAtMode', [ 'none', 'camera' ]).onChange((value) => {
+  if (value !== 'none' && lookat == null) {
+    console.warn('VRMC_character_expression_lookat extension is not available in this model.');
+  }
+
+  if (value === 'none' && lookat != null && expressionManager != null) {
+    // reset
+    lookat.target = null;
+    lookat.applyFromYawPitchToExpressionManager(expressionManager, 0.0, 0.0);
+  }
+});
+
 // == animation loop ===============================================================================
 const timer = new THREE.Timer();
+const lookatTarget = new THREE.Vector3();
 renderer.setAnimationLoop(() => {
   timer.update();
   const delta = timer.getDelta();
+
+  if (lookat != null && expressionManager != null) {
+    if (paramsLookat.lookAtMode === 'camera') {
+      camera.getWorldPosition(lookatTarget);
+      lookat.target = lookatTarget;
+      lookat.applyFromTargetToExpressionManager(expressionManager);
+    }
+  }
 
   expressionManager?.update(delta);
   renderer.render(scene, camera);
