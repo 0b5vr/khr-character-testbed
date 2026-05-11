@@ -11,6 +11,7 @@ import { collectNodeBoneMap } from './collectNodeBoneMap.ts';
 import { appendKHRXmpJsonLd } from './appendKHRXmpJsonLd.ts';
 import { ensureSingleRoot } from './ensureSingleRoot.ts';
 import { appendKHRVirtualTransforms } from "./appendKHRVirtualTransforms.ts";
+import { appendVRMCCharacterExpressionLookat } from './appendVRMCCharacterExpressionLookat.ts';
 
 // == options ======================================================================================
 const options = parseArgs(Deno.args, {
@@ -56,6 +57,7 @@ appendKHRXmpJsonLd(gltf);
 appendKHRCharacter(gltf);
 appendKHRCharacterSkeleton(gltf);
 appendKHRCharacterExpression(gltf, binChunkBox, nodeBoneMap);
+appendVRMCCharacterExpressionLookat(gltf, nodeBoneMap);
 appendKHRMeshAnnotation(gltf);
 appendKHRVirtualTransforms(gltf);
 appendKHRNodeCameraHint(gltf, nodeBoneMap);
