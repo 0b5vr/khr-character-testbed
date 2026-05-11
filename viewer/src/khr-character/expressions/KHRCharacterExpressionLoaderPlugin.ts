@@ -5,6 +5,12 @@ import { KHRCharacterExpressionManager } from './KHRCharacterExpressionManager';
 import { type KHRCharacterExpression as KHRCharacterExpressionSchema } from '../../../../schematypes/KHRCharacterExpression.ts';
 import { KHRCharacterExpression } from './KHRCharacterExpression';
 
+/**
+ * A GLTFLoader plugin for loading `KHR_character_expression` extension.
+ *
+ * It reads the content of `KHR_character_expression` extension and creates a {@link KHRCharacterExpressionManager}.
+ * The created {@link KHRCharacterExpressionManager} is stored in `gltf.userData.khrCharacterExpressionManager` property.
+ */
 export class KHRCharacterExpressionLoaderPlugin implements GLTFLoaderPlugin {
   public readonly parser: GLTFParser;
 

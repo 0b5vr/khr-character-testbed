@@ -3,6 +3,9 @@ import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { saturate } from '../../utils/saturate.ts';
 import { type KHRCharacterExpression } from './KHRCharacterExpression.ts';
 
+/**
+ * Manages character expressions for a GLTF model.
+ */
 export class KHRCharacterExpressionManager {
   /**
    * The animation mixer for the character.

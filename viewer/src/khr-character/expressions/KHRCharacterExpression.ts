@@ -1,6 +1,12 @@
 import * as THREE from 'three';
 import { type KHRCharacterExpressionManager } from './KHRCharacterExpressionManager.ts';
 
+/**
+ * Represents a character expression.
+ *
+ * It is intended to be managed and controlled via {@link KHRCharacterExpressionManager}.
+ * It extends `Object3D` so that its {@link weight} can be animated via Three.js animation system.
+ */
 export class KHRCharacterExpression extends THREE.Object3D {
   /**
    * The name of this expression.
