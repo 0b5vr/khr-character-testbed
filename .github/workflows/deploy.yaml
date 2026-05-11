@@ -1,0 +1,45 @@
+name: Inspect
+
+on: push
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build-viewer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          cache: 'npm'
+          cache-dependency-path: viewer/package-lock.json
+      - name: Fetch deps
+        working-directory: ./viewer
+        run: npm ci
+      - name: Build
+        working-directory: ./viewer
+        run: npm run build
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v5
+        id: gh-pages-viewer
+        with:
+          path: ./viewer/dist
+
+  deploy-viewer:
+    needs: build-viewer
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to gh-pages
+        id: gh-pages-viewer
+        uses: actions/deploy-pages@v5
