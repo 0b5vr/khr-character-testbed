@@ -39,7 +39,7 @@ This discussion proceeds with that priority in mind.
 
 ## Previous cases
 
-Among the cases below, both `VRMC_springBone` and `VRCPhysBone` can be organized as position-based approaches, where updates focus on positions rather than pure impulse-based simulation.
+Among the cases below, `VRMC_springBone`, `VRCPhysBone`, and `Kawaii Physics` can be organized as position-based approaches, where updates focus on positions rather than pure impulse-based simulation.
 This commonality is an important clue when considering a KHR extension.
 
 ### VRMC_springBone
@@ -56,10 +56,10 @@ As of 2026, the spec is being operated while compensating for missing elements v
 
 List of parameters related to forces:
 
-- Stiffness
-- Gravity Power
-- Gravity Dir
-- Drag Force
+- Stiffness: rest pose restoration
+- Gravity Power: external force
+- Gravity Dir: external force
+- Drag Force: inertia
 
 ### VRCPhysBone
 
@@ -78,13 +78,31 @@ Research results (ja) compiled independently by 0b5vr about VRCPhysBone behavior
 
 List of parameters related to forces:
 
-- Pull
-- Momentum
-- Stiffness
-- Gravity
-- Gravity Falloff
-- Immobile Type
-- Immobile
+- Pull: rest pose restoration
+- Momentum: inertia
+- Stiffness: makes it harder, slower to move
+- Gravity: external force
+- Gravity Falloff: controls the influence of gravity when the model is at rest pose
+- Immobile Type: to suppress excessive motion when moving in VR space
+- Immobile: to suppress excessive motion when moving in VR space
+
+### Kawaii Physics
+
+https://github.com/pafuhana1213/KawaiiPhysics
+
+`Kawaii Physics` is a secondary-animation library for Unreal Engine.
+It seems it is widely used in many productions, especially in Japanese and Chinese games.
+
+Like VRCPhysBone, its parameters are normalized and it is designed to be easy for artists to tune.
+
+List of parameters related to forces (partial):
+
+- Damping: inertia
+- Stiffness: rest pose restoration
+- World Damping Location: to suppress excessive motion when moving in VR space
+- World Damping Rotation: to suppress excessive motion when moving in VR space
+- Limit Angle: to suppress excessive motion, especially for skirts
+  - VRCPhysBone also has angle limits but they are a separated from force-related parameters, which allows more granular control.
 
 ### Magica Cloth 2
 
