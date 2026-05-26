@@ -7,6 +7,26 @@
   </head>
   <body>
     <canvas id="canvas" class="fullscreen"></canvas>
+    <div id="info">
+      <h1>
+        khr-character-testbed: viewer
+      </h1>
+      <p>
+        This is a tentative viewer for <a href="https://github.com/KhronosGroup/glTF/pull/2512" target="_blank" rel="noopener noreferrer">KHR_character</a>, a proposed extension for glTF.
+        The purpose of this viewer is to test the extension and provide feedback to the proposal, so it may not be a fully featured viewer for KHR_character.
+      </p>
+      <p>
+        Currently supported features:
+      </p>
+      <ul>
+        <li>Basic glTF rendering using Three.js GLTFLoader</li>
+        <li>KHR_character_expression: Control character expressions using sliders</li>
+        <li>KHR_character_expression_joint: Support joint-based expressions</li>
+        <li>KHR_character_expression_morphtarget: Support morph-based expressions</li>
+        <li>KHR_character_expression_texture: Support texture UV-based expressions. Thanks to </li>
+        <li>VRMC_character_expression_lookat: When "Look-at" is set to "camera", the character's expression is automatically controlled to follow the camera</li>
+      </ul>
+    </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
