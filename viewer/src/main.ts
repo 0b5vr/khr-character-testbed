@@ -5,11 +5,17 @@ import { Inspector } from 'three/addons/inspector/Inspector.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import './style.css';
 import sampleGltf from './assets/twist-sample-with-khr.glb?url';
+import smartphoneVrma from './assets/smartphone.vrma?url';
 import { GLTFAnimationPointerExtension } from '@needle-tools/three-animation-pointer';
 import { KHRCharacterExpressionLoaderPlugin } from './khr-character/expressions/KHRCharacterExpressionLoaderPlugin';
 import type { KHRCharacterExpressionManager } from './khr-character/expressions/KHRCharacterExpressionManager';
 import { VRMCCharacterExpressionLookatLoaderPlugin } from './khr-character/lookat/VRMCCharacterExpressionLookatLoaderPlugin';
 import type { VRMCCharacterExpressionLookat } from './khr-character/lookat/VRMCCharacterExpressionLookat';
+import { KHRCharacterSkeletonLoaderPlugin } from './khr-character/skeleton/KHRCharacterSkeletonLoaderPlugin';
+import { loadVRMAnimation } from './loadVRMAnimation';
+import { vrmSkeletonMappingToVRMHumanoid } from './vrmSkeletonMappingToVRMHumanoid';
+import { createVRMAnimationClip } from '@pixiv/three-vrm-animation';
+import { VRMCore } from '@pixiv/three-vrm-core';
 
 // == basic Three.js stuff =========================================================================
 const canvas = document.getElementById('canvas') as HTMLCanvasElement;
@@ -37,13 +43,47 @@ scene.add(light);
 // == gltf =========================================================================================
 const loader = new GLTFLoader();
 loader.register((parser) => new GLTFAnimationPointerExtension(parser));
+loader.register((parser) => new KHRCharacterSkeletonLoaderPlugin(parser));
 loader.register((parser) => new KHRCharacterExpressionLoaderPlugin(parser));
 loader.register((parser) => new VRMCCharacterExpressionLookatLoaderPlugin(parser));
 
 const gltf = await loader.loadAsync(sampleGltf);
-const expressionManager = gltf.userData.khrCharacterExpressionManager as KHRCharacterExpressionManager | undefined;
-const lookat = gltf.userData.vrmcCharacterExpressionLookat as VRMCCharacterExpressionLookat | undefined;
 scene.add(gltf.scene);
+
+// KHR_character_expression
+const expressionManager = gltf.userData.khrCharacterExpressionManager as KHRCharacterExpressionManager | undefined;
+
+// VRMC_character_expression_lookat
+const lookat = gltf.userData.vrmcCharacterExpressionLookat as VRMCCharacterExpressionLookat | undefined;
+
+// KHR_character_skeleton_mapping -> VRMHumanoid
+const khrCharacterSkeletonMapping = gltf.userData.khrCharacterSkeletonMapping;
+const vrmHumanoid = vrmSkeletonMappingToVRMHumanoid(khrCharacterSkeletonMapping);
+
+let vrmForAnimation: VRMCore | null = null;
+if (vrmHumanoid != null) {
+  gltf.scene.add(vrmHumanoid.normalizedHumanBonesRoot);
+  vrmForAnimation = new VRMCore({
+    scene: gltf.scene,
+    humanoid: vrmHumanoid ?? undefined,
+    meta: { // temporary meta, since VRMCore requires it
+      metaVersion: '1',
+      name: '-',
+      authors: ['-'],
+      licenseUrl: 'https://vrm.dev/licenses/1.0/',
+    },
+  });
+}
+
+// == vrma =========================================================================================
+let animationMixer: THREE.AnimationMixer | null = null;
+if (vrmForAnimation != null) {
+  const vrmAnimation = await loadVRMAnimation(smartphoneVrma);
+
+  const animationClip = createVRMAnimationClip(vrmAnimation, vrmForAnimation);
+  animationMixer = new THREE.AnimationMixer(vrmForAnimation.scene);
+  animationMixer.clipAction(animationClip).play();
+}
 
 // == gui for expressions ==========================================================================
 const paramsExpressions: Record<string, number> = {};
@@ -88,6 +128,8 @@ renderer.setAnimationLoop(() => {
     }
   }
 
+  animationMixer?.update(delta);
+  vrmForAnimation?.update(delta);
   expressionManager?.update(delta);
   renderer.render(scene, camera);
 });
