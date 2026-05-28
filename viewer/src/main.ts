@@ -4,11 +4,11 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { Inspector } from 'three/addons/inspector/Inspector.js';
 import './style.css';
 import sampleGltf from './assets/khr-character-example.glb?url';
-import { createVRMAnimationClip, VRMAnimation } from '@pixiv/three-vrm-animation';
+import { createVRMAnimationHumanoidTracks, VRMAnimation } from '@pixiv/three-vrm-animation';
 import { loadGLTF } from './loadGLTF';
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import type { KHRCharacterExpressionManager } from './khr-character/expressions/KHRCharacterExpressionManager';
-import type { VRMCore } from '@pixiv/three-vrm-core';
+import type { VRMHumanoid } from '@pixiv/three-vrm-core';
 import { VRMUtils } from '@pixiv/three-vrm';
 import type { VRMCCharacterExpressionLookat } from './khr-character/lookat/VRMCCharacterExpressionLookat';
 import smartphoneVrma from './assets/smartphone.vrma?url';
@@ -77,19 +77,26 @@ function setupExpressionsGUI() {
 let currentGLTF: GLTF | null = null;
 let currentExpressionManager: KHRCharacterExpressionManager | null = null;
 let currentLookat: VRMCCharacterExpressionLookat | null = null;
-let currentVRM: VRMCore | null = null;
+let currentVRMHumanoid: VRMHumanoid | null = null;
 let currentVRMAnimation: VRMAnimation | null = null;
 let currentAnimationMixer: THREE.AnimationMixer | null = null;
 
 function playVRMAnimation() {
-  if (currentVRM != null && currentAnimationMixer != null && currentVRMAnimation != null) {
-    const animationClip = createVRMAnimationClip(currentVRMAnimation, currentVRM);
-    currentAnimationMixer.clipAction(animationClip).play();
+  // stop existing animation
+  if (currentAnimationMixer != null) {
+    currentAnimationMixer.stopAllAction();
+  }
+
+  // play new animation, if both character and animation are available
+  if (currentVRMHumanoid != null && currentAnimationMixer != null && currentVRMAnimation != null) {
+    const humanoidTracks = createVRMAnimationHumanoidTracks(currentVRMAnimation, currentVRMHumanoid, '1');
+    const clip = new THREE.AnimationClip('Clip', currentVRMAnimation.duration, [...humanoidTracks.translation.values(), ...humanoidTracks.rotation.values()]);
+    currentAnimationMixer.clipAction(clip).play();
   }
 }
 
 async function handleLoadGLTF(url: string) {
-  const { gltf, expressionManager, lookat, vrm, vrmAnimations } = await loadGLTF(url);
+  const { gltf, expressionManager, lookat, vrmHumanoid, vrmAnimations } = await loadGLTF(url);
 
   // when loaded GLTF is animation, skip setting character stuff
   if (vrmAnimations != null) {
@@ -107,9 +114,9 @@ async function handleLoadGLTF(url: string) {
     currentGLTF = gltf;
     currentExpressionManager = expressionManager ?? null;
     currentLookat = lookat ?? null;
-    currentVRM = vrm ?? null;
-    if (currentVRM != null) {
-      currentAnimationMixer = new THREE.AnimationMixer(currentVRM.scene);
+    currentVRMHumanoid = vrmHumanoid ?? null;
+    if (currentVRMHumanoid != null) {
+      currentAnimationMixer = new THREE.AnimationMixer(gltf.scene);
     }
 
     // setup GUI
@@ -141,7 +148,7 @@ renderer.setAnimationLoop(() => {
   }
 
   currentAnimationMixer?.update(delta);
-  currentVRM?.update(delta);
+  currentVRMHumanoid?.update();
   currentExpressionManager?.update(delta);
   renderer.render(scene, camera);
 });
