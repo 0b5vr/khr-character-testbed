@@ -102,7 +102,12 @@ function playVRMAnimation() {
   }
 
   // play new animation, if both character and animation are available
-  if (currentVRMHumanoid != null && currentAnimationMixer != null && currentVRMAnimation != null) {
+  if (currentVRMAnimation != null) {
+    if (currentVRMHumanoid == null || currentAnimationMixer == null) {
+      console.warn('Unable to play VRM animation. Skeletal rig mapping "vrmHumanoid" is not available in this model.');
+      return;
+    }
+
     const humanoidTracks = createVRMAnimationHumanoidTracks(currentVRMAnimation, currentVRMHumanoid, '1');
     const clip = new THREE.AnimationClip('Clip', currentVRMAnimation.duration, [...humanoidTracks.translation.values(), ...humanoidTracks.rotation.values()]);
     currentAnimationMixer.clipAction(clip).play();
