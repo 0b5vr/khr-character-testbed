@@ -56,9 +56,10 @@ export class KHRCharacterSkeletonLoaderPlugin implements GLTFLoaderPlugin {
       const nodeToMappingNameMap: Map<THREE.Object3D, string> = new Map();
 
       for (const [boneName, mappingName] of Object.entries(mapping)) {
-        const node = boneNameToNodeMap.get(boneName);
+        const sanitizedBoneName = THREE.PropertyBinding.sanitizeNodeName(boneName);
+        const node = boneNameToNodeMap.get(sanitizedBoneName);
         if (!node) {
-          console.warn(`Bone with name "${boneName}" not found for mapping "${mappingName}".`);
+          console.warn(`Bone with name "${sanitizedBoneName}" not found for mapping "${mappingName}".`);
           continue;
         }
 
