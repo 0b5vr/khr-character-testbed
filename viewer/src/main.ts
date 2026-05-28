@@ -37,6 +37,20 @@ const light = new THREE.DirectionalLight(0xffffff, Math.PI);
 light.position.set(1, 2, 3);
 scene.add(light);
 
+// == gui for skeletons ============================================================================
+const skeletonExpressions: Record<string, string> = {
+  'vrmAnimation': 'none',
+};
+const guiSkeletons = inspector.createParameters('Skeleton');
+guiSkeletons.add(skeletonExpressions, 'vrmAnimation', [ 'none', 'smartphone' ]).onChange((value) => {
+  if (value === 'none') {
+    currentVRMAnimation = null;
+    playVRMAnimation();
+  } else if (value === 'smartphone') {
+    handleLoadGLTF(smartphoneVrma);
+  }
+});;
+
 // == gui for expressions ==========================================================================
 const paramsExpressions: Record<string, number> = {};
 const guiExpressions = inspector.createParameters('Expressions');
@@ -129,8 +143,8 @@ async function handleLoadGLTF(url: string) {
   playVRMAnimation();
 }
 
+// load sample GLTF at the beginning
 await handleLoadGLTF(sampleGltf);
-await handleLoadGLTF(smartphoneVrma);
 
 // == animation loop ===============================================================================
 const timer = new THREE.Timer();
