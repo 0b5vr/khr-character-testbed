@@ -4,7 +4,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { Inspector } from 'three/addons/inspector/Inspector.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import './style.css';
-import sampleGltf from './assets/twist-sample-with-khr.glb?url';
+import sampleGltf from './assets/khr-character-example.glb?url';
 import smartphoneVrma from './assets/smartphone.vrma?url';
 import { GLTFAnimationPointerExtension } from '@needle-tools/three-animation-pointer';
 import { KHRCharacterExpressionLoaderPlugin } from './khr-character/expressions/KHRCharacterExpressionLoaderPlugin';
