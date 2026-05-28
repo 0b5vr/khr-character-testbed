@@ -16,15 +16,19 @@
         The purpose of this viewer is to test the extension and provide feedback to the proposal. It may not be a fully featured viewer for KHR_character.
       </p>
       <p>
+        Drag and drop a glTF file with KHR_character extensions to the canvas to load it. You can also drag and drop a VRM animation file to play it on the character, if the skeletal rig mapping <code>"vrmHumanoid"</code> is available in the model.
+      </p>
+      <p>
         Currently supported features:
       </p>
       <ul>
         <li>Basic glTF rendering using Three.js GLTFLoader</li>
-        <li>KHR_character_expression: Control character expressions using sliders</li>
-        <li>KHR_character_expression_joint: Support joint-based expressions</li>
-        <li>KHR_character_expression_morphtarget: Support morph-based expressions</li>
-        <li>KHR_character_expression_texture: Support texture UV-based expressions. Thanks to </li>
-        <li>VRMC_character_expression_lookat: When "Look-at" is set to "camera", the character's expression is automatically controlled to follow the camera</li>
+        <li><code>KHR_character_skeleton_mapping</code>: When skeletal rig mapping <code>"vrmHumanoid"</code> is available, it can play VRM animations</li>
+        <li><code>KHR_character_expression</code>: Control character expressions using sliders</li>
+        <li><code>KHR_character_expression_joint</code>: Support joint-based expressions</li>
+        <li><code>KHR_character_expression_morphtarget</code>: Support morph-based expressions</li>
+        <li><code>KHR_character_expression_texture</code>: Support texture UV-based expressions</li>
+        <li><code>VRMC_character_expression_lookat</code>: When "Look-at" is set to "camera", the character's expression is automatically controlled to follow the camera</li>
       </ul>
       <p>
         You can see the source code of this viewer on GitHub:<br />
