@@ -2,7 +2,8 @@ import * as THREE from 'three';
 import type { GLTF, GLTFLoaderPlugin, GLTFParser } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { type GLTF as GLTFSchema } from '@gltf-transform/core';
 import { KHRCharacterExpressionManager } from './KHRCharacterExpressionManager';
-import { type KHRCharacterExpression as KHRCharacterExpressionSchema } from '../../../../schematypes/KHRCharacterExpression.ts';
+import { type KHRCharacterExpressionExpression, type KHRCharacterExpression as KHRCharacterExpressionSchema } from '../../../../schematypes/KHRCharacterExpression.ts';
+import { type KHRCharacterExpressionMasks, type KHRCharacterExpressionMasksMask } from '../../../../schematypes/KHRCharacterExpressionMasks.ts';
 import { KHRCharacterExpression } from './KHRCharacterExpression';
 
 /**
@@ -52,6 +53,7 @@ export class KHRCharacterExpressionLoaderPlugin implements GLTFLoaderPlugin {
       THREE.AnimationUtils.makeClipAdditive(clip);
 
       const expression = new KHRCharacterExpression(expressionDef.expression);
+      expression.masks = this._importMasks(expressionDef);
       expressionManager.registerExpression(expression);
 
       expression.action = expressionManager.animationMixer.clipAction(clip);
@@ -60,6 +62,27 @@ export class KHRCharacterExpressionLoaderPlugin implements GLTFLoaderPlugin {
       expression.action.play();
     }
 
+    // Validate expression masks
+    for (const expression of expressionManager.expressions) {
+      for (const mask of expression.masks) {
+        if (expressionManager.getValue(mask.target) == null) {
+          console.warn(`Expression mask on "${expression.expressionName}" targets unknown expression "${mask.target}". Skipping this mask.`);
+        }
+      }
+    }
+
     return expressionManager;
+  }
+
+  /**
+   * Import expression masks from the extension.
+   *
+   * @param expressionDef - The expression definition from the GLTF schema.
+   * @returns The imported masks.
+   */
+  private _importMasks(expressionDef: KHRCharacterExpressionExpression): KHRCharacterExpressionMasksMask[] {
+    const extension = expressionDef.extensions?.['KHR_character_expression_masks'] as KHRCharacterExpressionMasks | undefined;
+
+    return extension?.masks ?? [];
   }
 }

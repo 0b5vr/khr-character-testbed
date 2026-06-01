@@ -1,7 +1,28 @@
 import * as THREE from 'three';
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { saturate } from '../../utils/saturate.ts';
-import { type KHRCharacterExpression } from './KHRCharacterExpression.ts';
+import { type KHRCharacterExpression, type KHRCharacterExpressionMask } from './KHRCharacterExpression.ts';
+
+/**
+ * Calculate how much a mask attenuates its target expression.
+ *
+ * A `blend` mask linearly reduces the target as the source expression grows.
+ * A `block` mask reduces the target by a fixed amount once the source expression exceeds the threshold.
+ *
+ * @param mask - The mask definition authored on the source expression.
+ * @param sourceWeight - The current input weight of the source expression.
+ * @returns A multiplier applied to the target expression weight.
+ */
+function getMaskMultiplier(mask: KHRCharacterExpressionMask, sourceWeight: number): number {
+  const amount = saturate(mask.amount ?? 1.0);
+
+  if (mask.type === 'block') {
+    const threshold = saturate(mask.threshold ?? 0.0);
+    return sourceWeight > threshold ? 1.0 - amount : 1.0;
+  }
+
+  return 1.0 - saturate(sourceWeight * amount);
+}
 
 /**
  * Manages character expressions for a GLTF model.
@@ -119,6 +140,28 @@ export class KHRCharacterExpressionManager {
    * @param delta - The delta time. Usually taken from `THREE.Timer`.
    */
   public update(delta: number): void {
+    // Gather input weights
+    const inputWeights = new Map<string, number>();
+    for (const expression of this._expressions) {
+      inputWeights.set(expression.expressionName, saturate(expression.weight));
+    }
+
+    // Calculate output weights by applying masks
+    const outputWeights = new Map(inputWeights);
+    for (const sourceExpression of this._expressions) {
+      const sourceWeight = inputWeights.get(sourceExpression.expressionName) ?? 0.0;
+
+      for (const mask of sourceExpression.masks) {
+        const targetWeight = outputWeights.get(mask.target);
+        if (targetWeight == null) {
+          continue;
+        }
+
+        outputWeights.set(mask.target, targetWeight * getMaskMultiplier(mask, sourceWeight));
+      }
+    }
+
+    // Apply output weights to animation actions
     for (const expression of this._expressions) {
       if (!expression.action) {
         console.warn(
@@ -127,9 +170,10 @@ export class KHRCharacterExpressionManager {
         continue;
       }
 
-      expression.action.time = expression.weight;
+      expression.action.time = outputWeights.get(expression.expressionName) ?? 0.0;
     }
 
+    // Finally, update the animation mixer to apply the changes
     this.animationMixer.update(delta);
   }
 }

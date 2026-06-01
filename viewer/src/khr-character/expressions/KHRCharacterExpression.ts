@@ -1,5 +1,8 @@
 import * as THREE from 'three';
 import { type KHRCharacterExpressionManager } from './KHRCharacterExpressionManager.ts';
+import type { KHRCharacterExpressionMasksMask } from '../../../../schematypes/KHRCharacterExpressionMasks.ts';
+
+export type KHRCharacterExpressionMask = KHRCharacterExpressionMasksMask;
 
 /**
  * Represents a character expression.
@@ -23,6 +26,11 @@ export class KHRCharacterExpression extends THREE.Object3D {
   public weight: number;
 
   /**
+   * Masks authored on this expression that reduce target expression influence.
+   */
+  public masks: KHRCharacterExpressionMask[];
+
+  /**
    * The animation action for this expression.
    * It is controlled by {@link KHRCharacterExpressionManager}.
    */
@@ -40,6 +48,7 @@ export class KHRCharacterExpression extends THREE.Object3D {
     this.expressionName = expressionName;
 
     this.weight = 0.0;
+    this.masks = [];
 
     // This is not intended to be visible, we set visible to false for the sake of performance.
     // It omits the calculation of the matrix every frame.
