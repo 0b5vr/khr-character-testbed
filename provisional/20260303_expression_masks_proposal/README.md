@@ -68,7 +68,7 @@ Not exhaustive, just to show the structure of the extension.
                 0
               ]
             },
-            "KHR_character_expression_mask": {
+            "KHR_character_expression_masks": {
               "masks": [
                 {
                   "target": "aa",
@@ -88,7 +88,7 @@ Not exhaustive, just to show the structure of the extension.
                 0
               ]
             },
-            "KHR_character_expression_mask": {
+            "KHR_character_expression_masks": {
               "masks": [
                 {
                   "target": "aa",
@@ -107,14 +107,14 @@ Not exhaustive, just to show the structure of the extension.
 ```
 
 ## glTF Schema
-### KHR_character_expression_mask
+### KHR_character_expression_masks
 The root object of the extension, which contains an array of masks.
 
 | | Type | Description | Required |
 |-|-|-|-|
 | `masks` | `array` | An array of a mask object. | ✅ Yes |
 
-#### KHR_character_expression_mask.masks ✅
+#### KHR_character_expression_masks.masks ✅
 An array of mask objects.
 
 - Type: `array`
