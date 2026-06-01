@@ -4,6 +4,16 @@ import { VRMHumanoid, type VRMHumanBones, VRMRequiredHumanBoneName, VRMHumanBone
 const vrmHumanBoneNameSet = new Set<string>(Object.values(VRMHumanBoneName));
 
 /**
+ * In KHR_character, eye rotations are took place in the expression system, so setting eye bones in
+ * the skeletal rig mapping may conflict with the expression system and cause issues.
+ * To avoid this, we skip reading eye bones in the `vrmHumanoid` mapping and ignore them.
+ */
+const vrmBonesToSkip: Set<VRMHumanBoneName> = new Set([
+  'leftEye',
+  'rightEye',
+]);
+
+/**
  * Convert a `vrmHumanoid` mapping in {@link KHRCharacterSkeletonMapping} to a {@link VRMHumanoid}.
  * It returns null if the mapping is invalid, e.g. missing required bones or incorrect hierarchy.
  *
@@ -21,6 +31,11 @@ export function vrmSkeletonMappingToVRMHumanoid(skeletonMapping: KHRCharacterSke
   for (const [node, vrmBoneName] of source) {
     if (!vrmHumanBoneNameSet.has(vrmBoneName)) {
       console.warn(`Bone "${vrmBoneName}" is not a valid VRM human bone name. Skipping this bone.`);
+      continue;
+    }
+
+    if (vrmBonesToSkip.has(vrmBoneName as VRMHumanBoneName)) {
+      console.warn(`Bone "${vrmBoneName}" must not be included in the "vrmHumanoid" mapping to avoid conflicts with the expression system. Skipping this bone.`);
       continue;
     }
 
