@@ -4,13 +4,15 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { Inspector } from 'three/addons/inspector/Inspector.js';
 import './style.css';
 import sampleGltf from './assets/khr-character-example.glb?url';
-import { createVRMAnimationHumanoidTracks, VRMAnimation } from '@pixiv/three-vrm-animation';
+import { VRMAnimation } from '@pixiv/three-vrm-animation';
 import { loadGLTF } from './loadGLTF';
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import type { KHRCharacterExpressionManager } from './khr-character/expressions/KHRCharacterExpressionManager';
-import type { VRMHumanoid } from '@pixiv/three-vrm-core';
 import { VRMUtils } from '@pixiv/three-vrm';
 import type { VRMCCharacterExpressionLookat } from './khr-character/lookat/VRMCCharacterExpressionLookat';
+import { createKHRCharacterHumanoidAnimationTracks } from './createKHRCharacterHumanoidAnimationTracks';
+import { createKHRCharacterVRMHumanoidRestPose } from './createKHRCharacterVRMHumanoidRestPose';
+import type { KHRCharacterVRMHumanoidRestPose } from './KHRCharacterVRMHumanoidRestPose';
 import smartphoneVrma from './assets/smartphone.vrma?url';
 import { handleDragAndDrop } from './utils/handleDragAndDrop';
 
@@ -91,7 +93,7 @@ function setupExpressionsGUI() {
 let currentGLTF: GLTF | null = null;
 let currentExpressionManager: KHRCharacterExpressionManager | null = null;
 let currentLookat: VRMCCharacterExpressionLookat | null = null;
-let currentVRMHumanoid: VRMHumanoid | null = null;
+let currentVRMHumanoidRestPose: KHRCharacterVRMHumanoidRestPose | null = null;
 let currentVRMAnimation: VRMAnimation | null = null;
 let currentAnimationMixer: THREE.AnimationMixer | null = null;
 
@@ -103,19 +105,19 @@ function playVRMAnimation() {
 
   // play new animation, if both character and animation are available
   if (currentVRMAnimation != null) {
-    if (currentVRMHumanoid == null || currentAnimationMixer == null) {
+    if (currentVRMHumanoidRestPose == null || currentAnimationMixer == null) {
       console.warn('Unable to play VRM animation. Skeletal rig mapping "vrmHumanoid" is not available in this model.');
       return;
     }
 
-    const humanoidTracks = createVRMAnimationHumanoidTracks(currentVRMAnimation, currentVRMHumanoid, '1');
+    const humanoidTracks = createKHRCharacterHumanoidAnimationTracks(currentVRMAnimation, currentVRMHumanoidRestPose);
     const clip = new THREE.AnimationClip('Clip', currentVRMAnimation.duration, [...humanoidTracks.translation.values(), ...humanoidTracks.rotation.values()]);
     currentAnimationMixer.clipAction(clip).play();
   }
 }
 
 async function handleLoadGLTF(url: string) {
-  const { gltf, expressionManager, lookat, vrmHumanoid, vrmAnimations } = await loadGLTF(url);
+  const { gltf, skeletonMapping, expressionManager, lookat, vrmAnimations } = await loadGLTF(url);
 
   // when loaded GLTF is animation, skip setting character stuff
   if (vrmAnimations != null) {
@@ -133,10 +135,12 @@ async function handleLoadGLTF(url: string) {
     currentGLTF = gltf;
     currentExpressionManager = expressionManager ?? null;
     currentLookat = lookat ?? null;
-    currentVRMHumanoid = vrmHumanoid ?? null;
-    if (currentVRMHumanoid != null) {
-      currentAnimationMixer = new THREE.AnimationMixer(gltf.scene);
-    }
+    currentVRMHumanoidRestPose = skeletonMapping != null
+      ? createKHRCharacterVRMHumanoidRestPose(skeletonMapping)
+      : null;
+    currentAnimationMixer = currentVRMHumanoidRestPose != null
+      ? new THREE.AnimationMixer(gltf.scene)
+      : null;
 
     // setup GUI
     setupExpressionsGUI();
@@ -167,7 +171,6 @@ renderer.setAnimationLoop(() => {
   }
 
   currentAnimationMixer?.update(delta);
-  currentVRMHumanoid?.update();
   currentExpressionManager?.update(delta);
   renderer.render(scene, camera);
 });

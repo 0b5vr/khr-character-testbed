@@ -7,8 +7,6 @@ import { KHRCharacterSkeletonLoaderPlugin } from './khr-character/skeleton/KHRCh
 import type { KHRCharacterExpressionManager } from './khr-character/expressions/KHRCharacterExpressionManager';
 import type { VRMCCharacterExpressionLookat } from './khr-character/lookat/VRMCCharacterExpressionLookat';
 import type { KHRCharacterSkeletonMapping } from './khr-character/skeleton/KHRCharacterSkeletonMapping';
-import type { VRMHumanoid } from '@pixiv/three-vrm-core';
-import { vrmSkeletonMappingToVRMHumanoid } from './vrmSkeletonMappingToVRMHumanoid';
 
 /**
  * Create a GLTFLoader with bunch of KHR_character related plugins registered.
@@ -37,7 +35,6 @@ export async function loadGLTF(url: string): Promise<{
   skeletonMapping: KHRCharacterSkeletonMapping | undefined;
   expressionManager: KHRCharacterExpressionManager | undefined;
   lookat: VRMCCharacterExpressionLookat | undefined;
-  vrmHumanoid: VRMHumanoid | null;
   vrmAnimations: VRMAnimation[] | undefined;
 }> {
   const loader = createLoader();
@@ -48,14 +45,7 @@ export async function loadGLTF(url: string): Promise<{
   const expressionManager = gltf.userData.khrCharacterExpressionManager as KHRCharacterExpressionManager | undefined;
   const lookat = gltf.userData.vrmcCharacterExpressionLookat as VRMCCharacterExpressionLookat | undefined;
 
-  const vrmHumanoid = skeletonMapping != null
-    ? vrmSkeletonMappingToVRMHumanoid(skeletonMapping)
-    : null;
-  if (vrmHumanoid != null) {
-    gltf.scene.add(vrmHumanoid.normalizedHumanBonesRoot);
-  }
-
   const vrmAnimations = gltf.userData.vrmAnimations as VRMAnimation[] | undefined;
 
-  return { gltf, skeletonMapping, expressionManager, lookat, vrmHumanoid, vrmAnimations };
+  return { gltf, skeletonMapping, expressionManager, lookat, vrmAnimations };
 }
