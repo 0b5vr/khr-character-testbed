@@ -9,14 +9,18 @@ const tempScale = new THREE.Vector3();
 const vrmHumanBoneNameSet = new Set<string>(Object.values(VRMHumanBoneName));
 
 /**
- * In KHR_character, eye rotations are took place in the expression system, so setting eye bones in
- * the skeletal rig mapping may conflict with the expression system and cause issues.
- * To avoid this, we skip reading eye bones in the `vrmHumanoid` mapping and ignore them.
+ * In KHR_character, eye rotations and jaw movements are took place in the expression system,
+ * so setting eye bones and the jaw bone in the skeletal rig mapping may conflict with
+ * the expression system and cause issues.
+ * To avoid this, we skip reading eye bones and the jaw bone in the `vrmHumanoid` mapping
+ * and ignore them.
  */
-const eyeBones = new Set<VRMHumanBoneName>([
+const vrmBonesToSkip: Set<VRMHumanBoneName> = new Set([
   'leftEye',
   'rightEye',
+  'jaw',
 ]);
+
 
 /**
  * Checks whether the given bone name is a known VRM humanoid bone name.
@@ -52,8 +56,8 @@ function createValidatedVRMHumanoidBoneNodeMap(
       return null;
     }
 
-    // eye bones
-    if (eyeBones.has(vrmBoneName)) {
+    // eye bones and jaw bone
+    if (vrmBonesToSkip.has(vrmBoneName as VRMHumanBoneName)) {
       console.warn(`Bone "${vrmBoneName}" must not be included in the "vrmHumanoid" mapping to avoid conflicts with the expression system. Skipping this bone.`);
       continue;
     }

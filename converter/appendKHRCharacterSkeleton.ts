@@ -4,13 +4,15 @@ import type { KHRCharacterSkeletonMapping, KHRCharacterSkeletonMappingSkeletalRi
 import type { HumanoidHumanBoneName, VRMCVRM } from '@pixiv/types-vrmc-vrm-1.0';
 
 /**
- * In KHR_character, eye rotations are took place in the expression system, so setting eye bones in
- * the skeletal rig mapping may conflict with the expression system and cause issues.
- * To avoid this, we skip setting eye bones in the `vrmHumanoid` mapping.
+ * In KHR_character, eye rotations and jaw movements are took place in the expression system,
+ * so setting eye bones and the jaw bone in the skeletal rig mapping may conflict with
+ * the expression system and cause issues.
+ * To avoid this, we skip setting eye bones and the jaw bone in the `vrmHumanoid` mapping.
  */
 const vrmBonesToSkip: Set<HumanoidHumanBoneName> = new Set([
   'leftEye',
   'rightEye',
+  'jaw',
 ]);
 
 export function appendKHRCharacterSkeleton(gltf: GLTF.IGLTF): void {
