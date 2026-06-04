@@ -41,31 +41,31 @@ export class KHRCharacterSkeletonLoaderPlugin implements GLTFLoaderPlugin {
 
     const skeletonMapping = new KHRCharacterSkeletonMapping();
 
-    // Build a map, bone name -> node
-    const boneNameToNodeMap: Map<string, THREE.Object3D> = new Map();
+    // Build a map, native name -> node
+    const nativeNameToNodeMap: Map<string, THREE.Object3D> = new Map();
     for (const node of await gltf.parser.getDependencies('node')) {
       if (node.name) {
-        boneNameToNodeMap.set(node.name, node);
+        nativeNameToNodeMap.set(node.name, node);
       }
     }
 
-    // build a map, rig mapping name -> (node -> mapping name)
-    const skeletalRigMappings: Map<string, Map<THREE.Object3D, string>> = new Map();
-    for (const [mappingName, mapping] of Object.entries(extension.skeletalRigMappings)) {
-      // build a map, node -> mapping name
-      const nodeToMappingNameMap: Map<THREE.Object3D, string> = new Map();
+    // build a map, target rig name -> (target joint name -> node)
+    const skeletalRigMappings: Map<string, Map<string, THREE.Object3D>> = new Map();
+    for (const [targetRigName, mapping] of Object.entries(extension.skeletalRigMappings)) {
+      // build a map, target joint name -> node
+      const targetJointNameToNodeMap: Map<string, THREE.Object3D> = new Map();
 
-      for (const [boneName, mappingName] of Object.entries(mapping)) {
-        const sanitizedBoneName = THREE.PropertyBinding.sanitizeNodeName(boneName);
-        const node = boneNameToNodeMap.get(sanitizedBoneName);
+      for (const [targetJointName, nativeName] of Object.entries(mapping)) {
+        const sanitizedNativeName = THREE.PropertyBinding.sanitizeNodeName(nativeName);
+        const node = nativeNameToNodeMap.get(sanitizedNativeName);
         if (!node) {
-          console.warn(`Bone with name "${sanitizedBoneName}" not found for mapping "${mappingName}".`);
+          console.warn(`Bone with native name "${sanitizedNativeName}" not found for mapping "${targetRigName}".`);
           continue;
         }
 
-        nodeToMappingNameMap.set(node, mappingName);
+        targetJointNameToNodeMap.set(targetJointName, node);
       }
-      skeletalRigMappings.set(mappingName, nodeToMappingNameMap);
+      skeletalRigMappings.set(targetRigName, targetJointNameToNodeMap);
     }
 
     skeletonMapping.skeletalRigMappings = skeletalRigMappings;

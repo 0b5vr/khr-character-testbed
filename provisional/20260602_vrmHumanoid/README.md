@@ -204,14 +204,14 @@ The following JSON snippet shows an example of how to define the `vrmHumanoid` s
     "KHR_character_skeleton_mapping": {
       "skeletalRigMappings": {
         "vrmHumanoid": {
-          "J_Bip_C_Hips": "hips",
-          "J_Bip_C_Spine": "spine",
-          "J_Bip_C_Chest": "chest",
-          "J_Bip_C_UpperChest": "upperChest",
-          "J_Bip_C_Neck": "neck",
-          "J_Bip_C_Head": "head",
-          "J_Bip_L_UpperLeg": "leftUpperLeg",
-          "J_Bip_L_LowerLeg": "leftLowerLeg",
+          "hips": "J_Bip_C_Hips",
+          "spine": "J_Bip_C_Spine",
+          "chest": "J_Bip_C_Chest",
+          "upperChest": "J_Bip_C_UpperChest",
+          "neck": "J_Bip_C_Neck",
+          "head": "J_Bip_C_Head",
+          "leftUpperLeg": "J_Bip_L_UpperLeg",
+          "leftLowerLeg": "J_Bip_L_LowerLeg",
           // ...
         }
       }

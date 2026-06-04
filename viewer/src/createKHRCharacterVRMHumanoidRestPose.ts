@@ -25,7 +25,7 @@ const vrmBonesToSkip: Set<VRMHumanBoneName> = new Set([
 /**
  * Checks whether the given bone name is a known VRM humanoid bone name.
  *
- * @param boneName - A skeletal rig mapping value to test.
+ * @param boneName - A skeletal rig mapping key to test.
  * @returns True when the name is a VRM humanoid bone name.
  */
 function isVRMHumanBoneName(boneName: string): boneName is VRMHumanBoneName {
@@ -39,11 +39,11 @@ function isVRMHumanBoneName(boneName: string): boneName is VRMHumanBoneName {
  * @returns A validated bone node map, or null when the mapping is invalid.
  */
 function createValidatedVRMHumanoidBoneNodeMap(
-  vrmHumanoidMapping: Map<THREE.Object3D, string>,
+  vrmHumanoidMapping: Map<string, THREE.Object3D>,
 ): Map<VRMHumanBoneName, THREE.Object3D> | null {
   const boneNodeMap = new Map<VRMHumanBoneName, THREE.Object3D>();
 
-  for (const [node, vrmBoneName] of vrmHumanoidMapping) {
+  for (const [vrmBoneName, node] of vrmHumanoidMapping) {
     // unknown bone name
     if (!isVRMHumanBoneName(vrmBoneName)) {
       console.warn(`Invalid VRM humanoid mapping: Bone "${vrmBoneName}" is not a valid VRM human bone name.`);

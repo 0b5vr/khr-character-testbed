@@ -2,7 +2,7 @@ import { type KHRCharacterSkeletalRigMapping } from './KHRCharacterSkeletalRigMa
 
 export class KHRCharacterSkeletonMapping {
   /**
-   * A map, rig mapping name -> (node -> mapping name).
+   * A map, target rig name -> (target joint name -> node).
    */
   skeletalRigMappings: Map<string, KHRCharacterSkeletalRigMapping> = new Map();
 }

@@ -35,10 +35,10 @@ export function appendKHRCharacterSkeleton(gltf: GLTF.IGLTF): void {
     }
 
     const node = nodes?.[humanBone.node];
-    const nodeName = node?.name;
-    if (node != null && nodeName) {
-      mapping[nodeName] = boneName;
-      logVerbose(`KHR_character_skeleton_mapping: "${mappingName}" mapping, "${nodeName}": "${boneName}"`);
+    const nativeName = node?.name;
+    if (node != null && nativeName) {
+      mapping[boneName] = nativeName;
+      logVerbose(`KHR_character_skeleton_mapping: "${mappingName}" mapping, "${boneName}": "${nativeName}"`);
     }
   }
 
