@@ -10,7 +10,7 @@
   },
   "devDependencies": {
     "@gltf-transform/core": "^4.3.0",
-    "@needle-tools/three-animation-pointer": "github:0b5vr/three-animation-pointer#individual-weights",
+    "@needle-tools/three-animation-pointer": "github:0b5vr/three-animation-pointer#dont-overwrite-pointer",
     "@pixiv/three-vrm": "^3.5.3",
     "@pixiv/three-vrm-animation": "^3.5.3",
     "@pixiv/three-vrm-core": "^3.5.3",
