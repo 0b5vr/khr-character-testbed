@@ -40,18 +40,38 @@ light.position.set(1, 2, 3);
 scene.add(light);
 
 // == gui for skeletons ============================================================================
-const skeletonExpressions: Record<string, string> = {
+const paramsSkeleton: Record<string, any> = {
   'vrmAnimation': 'none',
+  'hideHead': false,
 };
 const guiSkeletons = inspector.createParameters('Skeleton');
-guiSkeletons.add(skeletonExpressions, 'vrmAnimation', [ 'none', 'smartphone' ]).onChange((value) => {
+
+guiSkeletons.add(paramsSkeleton, 'vrmAnimation', [ 'none', 'smartphone' ]).onChange((value) => {
   if (value === 'none') {
     currentVRMAnimation = null;
     playVRMAnimation();
   } else if (value === 'smartphone') {
     handleLoadGLTF(smartphoneVrma);
   }
-});;
+});
+guiSkeletons.add(paramsSkeleton, 'hideHead');
+
+function updateHideHead() {
+  const headBone = currentVRMHumanoidRestPose?.get('head')?.node;
+  if (headBone == null || currentVRMHumanoidRestPose == null) {
+    return;
+  }
+
+  if (paramsSkeleton.hideHead) {
+    headBone.scale.setScalar(0.0);
+  } else {
+    if (currentVRMHumanoidRestPose.get('head')?.localScale == null) {
+      console.error('Unreachable. The head bone should have local scale data in the rest pose.');
+      return;
+    }
+    headBone.scale.copy(currentVRMHumanoidRestPose.get('head')!.localScale);
+  }
+}
 
 // == gui for expressions ==========================================================================
 const paramsExpressions: Record<string, number> = {};
@@ -161,6 +181,8 @@ const lookatTarget = new THREE.Vector3();
 renderer.setAnimationLoop(() => {
   timer.update();
   const delta = timer.getDelta();
+
+  updateHideHead();
 
   if (currentLookat != null && currentExpressionManager != null) {
     if (paramsLookat.lookAtMode === 'camera') {

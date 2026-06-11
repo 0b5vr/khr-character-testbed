@@ -9,6 +9,7 @@ export type KHRCharacterVRMHumanoidBoneRest = {
   parentWorldRotation: THREE.Quaternion;
   parentWorldMatrix: THREE.Matrix4;
   worldPosition: THREE.Vector3;
+  localScale: THREE.Vector3;
 };
 
 /**

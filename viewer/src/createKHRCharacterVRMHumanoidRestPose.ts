@@ -150,6 +150,7 @@ export function createKHRCharacterVRMHumanoidRestPose(
       parentWorldRotation,
       parentWorldMatrix,
       worldPosition: node.getWorldPosition(new THREE.Vector3()),
+      localScale: node.scale.clone(),
     });
   }
 
