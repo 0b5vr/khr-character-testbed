@@ -7,6 +7,8 @@ import { KHRCharacterSkeletonLoaderPlugin } from './khr-character/skeleton/KHRCh
 import type { KHRCharacterExpressionManager } from './khr-character/expressions/KHRCharacterExpressionManager';
 import type { VRMCCharacterExpressionLookat } from './khr-character/lookat/VRMCCharacterExpressionLookat';
 import type { KHRCharacterSkeletonMapping } from './khr-character/skeleton/KHRCharacterSkeletonMapping';
+import { KHRNodeCameraHintLoaderPlugin } from './khr-character/camera-hint/KHRNodeCameraHintLoaderPlugin';
+import type { KHRNodeCameraHint } from './khr-character/camera-hint/KHRNodeCameraHint';
 
 /**
  * Create a GLTFLoader with bunch of KHR_character related plugins registered.
@@ -18,6 +20,7 @@ function createLoader(): GLTFLoader {
   loader.register((parser) => new KHRCharacterSkeletonLoaderPlugin(parser));
   loader.register((parser) => new KHRCharacterExpressionLoaderPlugin(parser));
   loader.register((parser) => new VRMCCharacterExpressionLookatLoaderPlugin(parser));
+  loader.register((parser) => new KHRNodeCameraHintLoaderPlugin(parser));
   loader.register((parser) => new VRMAnimationLoaderPlugin(parser));
 
   return loader;
@@ -35,6 +38,7 @@ export async function loadGLTF(url: string): Promise<{
   skeletonMapping: KHRCharacterSkeletonMapping | undefined;
   expressionManager: KHRCharacterExpressionManager | undefined;
   lookat: VRMCCharacterExpressionLookat | undefined;
+  cameraHints: KHRNodeCameraHint[] | undefined;
   vrmAnimations: VRMAnimation[] | undefined;
 }> {
   const loader = createLoader();
@@ -44,8 +48,9 @@ export async function loadGLTF(url: string): Promise<{
   const skeletonMapping = gltf.userData.khrCharacterSkeletonMapping as KHRCharacterSkeletonMapping | undefined;
   const expressionManager = gltf.userData.khrCharacterExpressionManager as KHRCharacterExpressionManager | undefined;
   const lookat = gltf.userData.vrmcCharacterExpressionLookat as VRMCCharacterExpressionLookat | undefined;
+  const cameraHints = gltf.userData.khrNodeCameraHints as KHRNodeCameraHint[] | undefined;
 
   const vrmAnimations = gltf.userData.vrmAnimations as VRMAnimation[] | undefined;
 
-  return { gltf, skeletonMapping, expressionManager, lookat, vrmAnimations };
+  return { gltf, skeletonMapping, expressionManager, lookat, cameraHints, vrmAnimations };
 }
