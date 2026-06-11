@@ -5,6 +5,7 @@ import { KHRCharacterExpressionManager } from './KHRCharacterExpressionManager';
 import { type KHRCharacterExpressionExpression, type KHRCharacterExpression as KHRCharacterExpressionSchema } from '../../../../schematypes/KHRCharacterExpression.ts';
 import { type KHRCharacterExpressionMasks, type KHRCharacterExpressionMasksMask } from '../../../../schematypes/KHRCharacterExpressionMasks.ts';
 import { KHRCharacterExpression } from './KHRCharacterExpression';
+import { validateKHRCharacterExpressionChannelTargets } from './validateKHRCharacterExpressionChannelTargets.ts';
 
 /**
  * A GLTFLoader plugin for loading `KHR_character_expression` extension.
@@ -54,6 +55,7 @@ export class KHRCharacterExpressionLoaderPlugin implements GLTFLoaderPlugin {
 
       const expression = new KHRCharacterExpression(expressionDef.expression);
       expression.masks = this._importMasks(expressionDef);
+      validateKHRCharacterExpressionChannelTargets(expressionDef, json);
       expressionManager.registerExpression(expression);
 
       expression.action = expressionManager.animationMixer.clipAction(clip);
