@@ -15,6 +15,8 @@ import { createKHRCharacterVRMHumanoidRestPose } from './createKHRCharacterVRMHu
 import type { KHRCharacterVRMHumanoidRestPose } from './KHRCharacterVRMHumanoidRestPose';
 import smartphoneVrma from './assets/smartphone.vrma?url';
 import { handleDragAndDrop } from './utils/handleDragAndDrop';
+import type { KHRNodeCameraHint } from './khr-character/camera-hint/KHRNodeCameraHint';
+import { KHRNodeCameraHintHelper } from './khr-character/camera-hint/KHRNodeCameraHintHelper';
 
 // == basic Three.js stuff =========================================================================
 const canvas = document.getElementById('canvas') as HTMLCanvasElement;
@@ -56,20 +58,33 @@ guiSkeletons.add(paramsSkeleton, 'vrmAnimation', [ 'none', 'smartphone' ]).onCha
 });
 guiSkeletons.add(paramsSkeleton, 'hideHead');
 
-function updateHideHead() {
-  const headBone = currentVRMHumanoidRestPose?.get('head')?.node;
-  if (headBone == null || currentVRMHumanoidRestPose == null) {
+/**
+ * Apply head hiding during given callback, and restore it afterward.
+ * It is only applied when "hideHead" is true.
+ */
+function applyHideHead(callback: () => void) {
+  if (!paramsSkeleton.hideHead) {
+    callback();
     return;
   }
 
-  if (paramsSkeleton.hideHead) {
-    headBone.scale.setScalar(0.0);
-  } else {
-    if (currentVRMHumanoidRestPose.get('head')?.localScale == null) {
-      console.error('Unreachable. The head bone should have local scale data in the rest pose.');
-      return;
-    }
-    headBone.scale.copy(currentVRMHumanoidRestPose.get('head')!.localScale);
+  const headBone = currentVRMHumanoidRestPose?.get('head')?.node;
+  if (headBone == null || currentVRMHumanoidRestPose == null) {
+    callback();
+    return;
+  }
+
+  const localScale = currentVRMHumanoidRestPose.get('head')?.localScale;
+  if (localScale == null) {
+    console.error('Unreachable. The head bone should have local scale data in the rest pose.');
+    return;
+  }
+
+  headBone.scale.setScalar(0.0);
+  try {
+    callback();
+  } finally {
+    headBone.scale.copy(localScale);
   }
 }
 
@@ -109,6 +124,14 @@ function setupExpressionsGUI() {
   }
 }
 
+// == gui for camera hint ==========================================================================
+const paramsCameraHint = {
+  showCameraHint: false,
+};
+const guiCameraHint = inspector.createParameters('Camera Hint');
+
+guiCameraHint.add(paramsCameraHint, 'showCameraHint');
+
 // == gltf =========================================================================================
 let currentGLTF: GLTF | null = null;
 let currentExpressionManager: KHRCharacterExpressionManager | null = null;
@@ -116,6 +139,7 @@ let currentLookat: VRMCCharacterExpressionLookat | null = null;
 let currentVRMHumanoidRestPose: KHRCharacterVRMHumanoidRestPose | null = null;
 let currentVRMAnimation: VRMAnimation | null = null;
 let currentAnimationMixer: THREE.AnimationMixer | null = null;
+let currentCameraHints: KHRNodeCameraHint[] | null = null;
 
 function playVRMAnimation() {
   // stop existing animation
@@ -137,7 +161,7 @@ function playVRMAnimation() {
 }
 
 async function handleLoadGLTF(url: string) {
-  const { gltf, skeletonMapping, expressionManager, lookat, vrmAnimations } = await loadGLTF(url);
+  const { gltf, skeletonMapping, expressionManager, lookat, cameraHints, vrmAnimations } = await loadGLTF(url);
 
   // when loaded GLTF is animation, skip setting character stuff
   if (vrmAnimations != null) {
@@ -161,6 +185,7 @@ async function handleLoadGLTF(url: string) {
     currentAnimationMixer = currentVRMHumanoidRestPose != null
       ? new THREE.AnimationMixer(gltf.scene)
       : null;
+    currentCameraHints = cameraHints ?? null;
 
     // setup GUI
     setupExpressionsGUI();
@@ -175,14 +200,30 @@ async function handleLoadGLTF(url: string) {
 // load sample GLTF at the beginning
 await handleLoadGLTF(sampleGltf);
 
+// == camera hint helper ===========================================================================
+const cameraHintHelper = new KHRNodeCameraHintHelper();
+cameraHintHelper.matrixAutoUpdate = false;
+scene.add(cameraHintHelper);
+
+function updateCameraHintHelper() {
+  const hint = currentCameraHints?.find((h) => h.role === 'first_person');
+
+  if (!paramsCameraHint.showCameraHint || hint == null) {
+    cameraHintHelper.visible = false;
+    return;
+  }
+
+  cameraHintHelper.visible = true;
+
+  hint.node.updateWorldMatrix(true, false);
+  cameraHintHelper.matrix.copy(hint.node.matrixWorld);
+}
 // == animation loop ===============================================================================
 const timer = new THREE.Timer();
 const lookatTarget = new THREE.Vector3();
 renderer.setAnimationLoop(() => {
   timer.update();
   const delta = timer.getDelta();
-
-  updateHideHead();
 
   if (currentLookat != null && currentExpressionManager != null) {
     if (paramsLookat.lookAtMode === 'camera') {
@@ -192,9 +233,13 @@ renderer.setAnimationLoop(() => {
     }
   }
 
+  updateCameraHintHelper();
+
   currentAnimationMixer?.update(delta);
   currentExpressionManager?.update(delta);
-  renderer.render(scene, camera);
+  applyHideHead(() => {
+    renderer.render(scene, camera);
+  });
 });
 
 // == handle dnd ===================================================================================
