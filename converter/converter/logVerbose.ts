@@ -6,5 +6,5 @@ interface LogVerbose {
 export const logVerbose: LogVerbose = function (...message: string[]): void {
   if (!logVerbose.enabled) return;
   console.log(...message);
-}
+};
 logVerbose.enabled = false;

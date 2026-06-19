@@ -1,10 +1,25 @@
 # converter
 
-This directory contains a converter script that appends the KHR_character extension suite to VRM 1.0 models.
+This directory contains a converter script that appends the KHR_character
+extension suite to VRM 1.0 models.
 
-Sanity checks are not enough and it may be specific to certain models, don't expect too much.
+Sanity checks are not enough and it may be specific to certain models, don't
+expect too much.
 
-## Usage
+## Module API
+
+```ts
+import { convertVRMToKHRCharacter } from './converter/index.ts';
+
+const input = await file.arrayBuffer();
+const { glb, gltf } = convertVRMToKHRCharacter(input);
+```
+
+The module API only depends on standard JavaScript binary APIs for input and
+output, so it can be used from browser build tools as well as Deno. It accepts
+`ArrayBuffer` or `Uint8Array` and returns the converted GLB as `Uint8Array`.
+
+## Usage - Deno
 
 You will need [Deno](https://deno.land/) to run the script.
 

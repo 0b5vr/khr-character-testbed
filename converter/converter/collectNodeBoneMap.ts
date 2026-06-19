@@ -18,14 +18,19 @@ function extractTRSFromNode(node: GLTF.INode): [
     return [translation, rotation, scale];
   }
 
-  if (node.translation != null) { translation.fromArray(node.translation); }
-  if (node.rotation != null) { rotation.fromArray(node.rotation); }
-  if (node.scale != null) { scale.fromArray(node.scale); }
+  if (node.translation != null) translation.fromArray(node.translation);
+  if (node.rotation != null) rotation.fromArray(node.rotation);
+  if (node.scale != null) scale.fromArray(node.scale);
 
   return [translation, rotation, scale];
 }
 
-function appendGLTFBone(gltf: GLTF.IGLTF, index: number, parentBone: Bone | null, map: Record<number, Bone>): void {
+function appendGLTFBone(
+  gltf: GLTF.IGLTF,
+  index: number,
+  parentBone: Bone | null,
+  map: Record<number, Bone>,
+): void {
   if (map[index] != null) {
     throw new Error(`Node #${index} is revisited while building skeleton`);
   }
@@ -35,15 +40,18 @@ function appendGLTFBone(gltf: GLTF.IGLTF, index: number, parentBone: Bone | null
     throw new Error(`Node #${index} is missing`);
   }
 
-  const [ position, rotation, scale ] = extractTRSFromNode(node);
+  const [position, rotation, scale] = extractTRSFromNode(node);
   const bone: Bone = {
     gltfIndex: index,
     name: node.name ?? `node_${index}`,
     position,
     rotation,
     scale,
-    worldPosition: parentBone?.worldPosition.clone().add(position.clone().applyQuaternion(parentBone?.rotation)) ?? position.clone(),
-    worldRotation: parentBone?.worldRotation.clone().multiply(rotation) ?? rotation.clone(),
+    worldPosition: parentBone?.worldPosition.clone().add(
+      position.clone().applyQuaternion(parentBone?.rotation),
+    ) ?? position.clone(),
+    worldRotation: parentBone?.worldRotation.clone().multiply(rotation) ??
+      rotation.clone(),
     worldScale: parentBone?.worldScale.clone().multiply(scale) ?? scale.clone(),
   };
   map[index] = bone;

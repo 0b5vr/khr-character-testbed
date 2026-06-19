@@ -1,5 +1,5 @@
 import type { GLTF } from '@gltf-transform/core';
-import type { KHRCharacter } from '../schematypes/KHRCharacter.ts';
+import type { KHRCharacter } from '../../schematypes/KHRCharacter.ts';
 
 /**
  * Gets the index of the root node in the given glTF model.
@@ -22,7 +22,9 @@ function getRootNodeIndex(gltf: GLTF.IGLTF): number | null {
     console.warn('No root node found in the default scene');
     return null;
   } else if (scene.nodes.length > 1) {
-    console.warn('Multiple root nodes found in the default scene; KHR_character requires a single root node');
+    console.warn(
+      'Multiple root nodes found in the default scene; KHR_character requires a single root node',
+    );
     return null;
   }
 
@@ -38,7 +40,9 @@ export function appendKHRCharacter(gltf: GLTF.IGLTF): void {
   // identify the root node
   const rootNodeIndex = getRootNodeIndex(gltf);
   if (rootNodeIndex == null) {
-    console.warn('Skipping KHR_character extension append due to missing root node');
+    console.warn(
+      'Skipping KHR_character extension append due to missing root node',
+    );
     return;
   }
 

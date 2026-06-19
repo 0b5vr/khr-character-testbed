@@ -67,7 +67,9 @@ export function appendMorphtargetAnimation(
       gltf,
       binChunkBox,
     );
-    logVerbose(`KHR_character_expression_morphtarget: New accessors (#${inputIndex}, #${outputIndex})`);
+    logVerbose(
+      `KHR_character_expression_morphtarget: New accessors (#${inputIndex}, #${outputIndex})`,
+    );
 
     const samplerIndex = outAnimation.samplers.length;
     outAnimation.samplers.push({
@@ -90,23 +92,30 @@ export function appendMorphtargetAnimation(
         extensions: {
           'KHR_animation_pointer': {
             pointer,
-          }
-        }
+          },
+        },
       },
     });
-    logVerbose(`KHR_character_expression_texture: New animation channel, pointer for "${pointer}"`);
+    logVerbose(
+      `KHR_character_expression_texture: New animation channel, pointer for "${pointer}"`,
+    );
 
     return [samplerIndex, channelIndex];
   } else {
     const targetsLength = mesh.primitives?.[0]?.targets?.length ?? 0;
     const [inputIndex, outputIndex] = appendAnimationAccessors(
       new Float32Array(isBinary ? [0, 0.5, 1] : [0, 1]),
-      transformToBinary(createOutputWeights(targetsLength, targetIndex, weight), isBinary),
+      transformToBinary(
+        createOutputWeights(targetsLength, targetIndex, weight),
+        isBinary,
+      ),
       'SCALAR',
       gltf,
       binChunkBox,
     );
-    logVerbose(`KHR_character_expression_morphtarget: New accessors (#${inputIndex}, #${outputIndex})`);
+    logVerbose(
+      `KHR_character_expression_morphtarget: New accessors (#${inputIndex}, #${outputIndex})`,
+    );
 
     const samplerIndex = outAnimation.samplers.length;
     outAnimation.samplers.push({
@@ -123,7 +132,9 @@ export function appendMorphtargetAnimation(
         path: 'weights',
       },
     });
-    logVerbose(`KHR_character_expression_morphtarget: New animation channel, weights for node #${nodeIndex}`);
+    logVerbose(
+      `KHR_character_expression_morphtarget: New animation channel, weights for node #${nodeIndex}`,
+    );
 
     return [samplerIndex, channelIndex];
   }

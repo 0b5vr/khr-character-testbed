@@ -118,6 +118,11 @@ export function appendAnimationAccessors(
   binChunkBox: [Uint8Array],
 ): [inputIndex: number, outputIndex: number] {
   const inputIndex = appendInputAccessor(input, gltf, binChunkBox);
-  const outputIndex = appendOutputAccessor(output, outputType, gltf, binChunkBox);
+  const outputIndex = appendOutputAccessor(
+    output,
+    outputType,
+    gltf,
+    binChunkBox,
+  );
   return [inputIndex, outputIndex];
 }

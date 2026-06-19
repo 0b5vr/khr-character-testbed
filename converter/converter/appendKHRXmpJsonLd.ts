@@ -17,7 +17,7 @@ export function appendKHRXmpJsonLd(gltf: GLTF.IGLTF): void {
 
   const packet: Record<string, unknown> = {
     '@context': {
-      'dc': 'http://purl.org/dc/elements/1.1/'
+      'dc': 'http://purl.org/dc/elements/1.1/',
     },
     '@id': '',
     'dc:format': 'model/gltf-binary',
@@ -31,7 +31,7 @@ export function appendKHRXmpJsonLd(gltf: GLTF.IGLTF): void {
   if (vrm.meta.authors != null) {
     logVerbose(`KHR_xmp_json_ld: VRM meta authors found, adding dc:creator`);
     packet['dc:creator'] = {
-      '@list': vrm.meta.authors
+      '@list': vrm.meta.authors,
     };
   }
 

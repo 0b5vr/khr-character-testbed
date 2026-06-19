@@ -3,9 +3,9 @@ import type { GLTF } from '@gltf-transform/core';
 import type { VRMCVRM } from '@pixiv/types-vrmc-vrm-1.0';
 import type { Bone } from './Bone.ts';
 import { logVerbose } from './logVerbose.ts';
-import type { KHRCharacterExpression } from '../schematypes/KHRCharacterExpression.ts';
-import type { VRMCCharacterExpressionLookat } from '../schematypes/VRMCCharacterExpressionLookat.ts';
-import type { VRMCCharacterExpressionLookatExpressions } from '../schematypes/VRMCCharacterExpressionLookatExpressions.ts';
+import type { KHRCharacterExpression } from '../../schematypes/KHRCharacterExpression.ts';
+import type { VRMCCharacterExpressionLookat } from '../../schematypes/VRMCCharacterExpressionLookat.ts';
+import type { VRMCCharacterExpressionLookatExpressions } from '../../schematypes/VRMCCharacterExpressionLookatExpressions.ts';
 
 const QUAT_YP_180DEG = new Quaternion(0, 1, 0, 0);
 
@@ -15,9 +15,15 @@ function appendReferenceNode(
   nodeBoneMap: Record<number, Bone>,
 ): number | null {
   const vrmLookAt = vrm.lookAt;
-  const offsetFromHeadBone = vrmLookAt?.offsetFromHeadBone as [number, number, number] | undefined;
+  const offsetFromHeadBone = vrmLookAt?.offsetFromHeadBone as [
+    number,
+    number,
+    number,
+  ] | undefined;
   if (offsetFromHeadBone == null) {
-    logVerbose('VRMC_character_expression_lookat: VRM lookAt offsetFromHeadBone is not found, skipping VRMC_character_expression_lookat');
+    logVerbose(
+      'VRMC_character_expression_lookat: VRM lookAt offsetFromHeadBone is not found, skipping VRMC_character_expression_lookat',
+    );
     return null;
   }
 
@@ -32,7 +38,9 @@ function appendReferenceNode(
 
   const nodes = gltf.nodes;
   if (nodes == null) {
-    console.error('VRMC_character_expression_lookat: The model is invalid; it does not have any nodes.');
+    console.error(
+      'VRMC_character_expression_lookat: The model is invalid; it does not have any nodes.',
+    );
     return null;
   }
 
@@ -51,19 +59,30 @@ function appendReferenceNode(
     );
   }
 
-  logVerbose('VRMC_character_expression_lookat: VRM lookAt offsetFromHeadBone found, adding VRMC_character_expression_lookat');
-  logVerbose(`VRMC_character_expression_lookat: Head node is #${headNodeIndex} ("${headNode.name}")`);
-  logVerbose(`VRMC_character_expression_lookat: Offset from head bone: [${offsetFromHeadBone.join(', ')}]`);
+  logVerbose(
+    'VRMC_character_expression_lookat: VRM lookAt offsetFromHeadBone found, adding VRMC_character_expression_lookat',
+  );
+  logVerbose(
+    `VRMC_character_expression_lookat: Head node is #${headNodeIndex} ("${headNode.name}")`,
+  );
+  logVerbose(
+    `VRMC_character_expression_lookat: Offset from head bone: [${
+      offsetFromHeadBone.join(', ')
+    }]`,
+  );
 
   const referenceNodeIndex = nodes.length;
   const referenceNodeName = '__LookAtReferenceNode__';
 
-  logVerbose(`VRMC_character_expression_lookat: Adding a node #${referenceNodeIndex} "${referenceNodeName}" under the head bone #${headNodeIndex}`);
+  logVerbose(
+    `VRMC_character_expression_lookat: Adding a node #${referenceNodeIndex} "${referenceNodeName}" under the head bone #${headNodeIndex}`,
+  );
 
   const referenceNode: GLTF.INode = {
     name: referenceNodeName,
     translation: offsetFromHeadBone,
-    rotation: headBone.worldRotation.clone().invert().multiply(QUAT_YP_180DEG).toArray(),
+    rotation: headBone.worldRotation.clone().invert().multiply(QUAT_YP_180DEG)
+      .toArray(),
   };
   nodes.push(referenceNode);
 
@@ -78,7 +97,9 @@ function appendReferenceNode(
 function collectLookExpressions(
   gltf: GLTF.IGLTF,
 ): VRMCCharacterExpressionLookatExpressions | null {
-  const expressionExtension = gltf.extensions?.['KHR_character_expression'] as KHRCharacterExpression | undefined;
+  const expressionExtension = gltf.extensions?.['KHR_character_expression'] as
+    | KHRCharacterExpression
+    | undefined;
   if (expressionExtension == null) {
     logVerbose(
       `VRMC_character_expression_lookat: KHR_character_expression extension is not found. Aborting`,
@@ -96,7 +117,9 @@ function collectLookExpressions(
   const expressions: VRMCCharacterExpressionLookatExpressions = {};
 
   for (const lookatExpressionName of lookatExpressionNames) {
-    const expression = expressionExtension.expressions.find((expression) => expression.expression === lookatExpressionName);
+    const expression = expressionExtension.expressions.find((expression) =>
+      expression.expression === lookatExpressionName
+    );
     if (expression != null) {
       logVerbose(
         `VRMC_character_expression_lookat: Found look-at expression "${lookatExpressionName}". Adding it to VRMC_character_expression_lookat`,

@@ -51,7 +51,9 @@ function compileTextureTransformExtPaths(
 
   return texturePaths
     .filter((path) => dig(material, path) != null)
-    .map((path) => `/materials/${materialIndex}/${path}/extensions/KHR_texture_transform`);
+    .map((path) =>
+      `/materials/${materialIndex}/${path}/extensions/KHR_texture_transform`
+    );
 }
 
 /**
@@ -98,7 +100,9 @@ export function appendTextureAnimation(
       gltf,
       binChunkBox,
     );
-    logVerbose(`KHR_character_expression_texture: New accessors (#${inputIndex}, #${outputIndex})`);
+    logVerbose(
+      `KHR_character_expression_texture: New accessors (#${inputIndex}, #${outputIndex})`,
+    );
 
     const samplerIndex = outAnimation.samplers.length;
     outAnimation.samplers.push({
@@ -124,12 +128,14 @@ export function appendTextureAnimation(
           extensions: {
             'KHR_animation_pointer': {
               pointer,
-            }
-          }
+            },
+          },
         },
       });
       channelIndices.push(channelIndex);
-      logVerbose(`KHR_character_expression_texture: New animation channel, pointer for "${pointer}"`);
+      logVerbose(
+        `KHR_character_expression_texture: New animation channel, pointer for "${pointer}"`,
+      );
     }
   }
 

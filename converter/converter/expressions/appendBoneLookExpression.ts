@@ -2,8 +2,12 @@ import { appendAnimationAccessors } from './appendAnimationAccessors.ts';
 import { logVerbose } from '../logVerbose.ts';
 import { Quaternion } from 'three';
 import type { GLTF } from '@gltf-transform/core';
-import type { LookAtRangeMap, Humanoid as VRMHumanoid, LookAt as VRMLookAt } from '@pixiv/types-vrmc-vrm-1.0';
-import type { KHRCharacterExpressionExpression } from '../../schematypes/KHRCharacterExpression.ts';
+import type {
+  Humanoid as VRMHumanoid,
+  LookAt as VRMLookAt,
+  LookAtRangeMap,
+} from '@pixiv/types-vrmc-vrm-1.0';
+import type { KHRCharacterExpressionExpression } from '../../../schematypes/KHRCharacterExpression.ts';
 import type { Bone } from '../Bone.ts';
 import type { VRMLookExpressionName } from './VRMLookExpressionName.ts';
 
@@ -41,16 +45,23 @@ function appendBoneRotationAccessors(
     rangeMap = vrmLookAt.rangeMapVerticalDown;
     _quatA.set(0.7071, 0, 0, 0.7071); // 90 degrees down
   } else if (name === 'lookLeft') {
-    rangeMap = isLeft ? vrmLookAt.rangeMapHorizontalOuter : vrmLookAt.rangeMapHorizontalInner;
+    rangeMap = isLeft
+      ? vrmLookAt.rangeMapHorizontalOuter
+      : vrmLookAt.rangeMapHorizontalInner;
     _quatA.set(0, 0.7071, 0, 0.7071); // 90 degrees left
   } else if (name === 'lookRight') {
-    rangeMap = isLeft ? vrmLookAt.rangeMapHorizontalInner : vrmLookAt.rangeMapHorizontalOuter;
+    rangeMap = isLeft
+      ? vrmLookAt.rangeMapHorizontalInner
+      : vrmLookAt.rangeMapHorizontalOuter;
     _quatA.set(0, -0.7071, 0, 0.7071); // 90 degrees right
   } else {
     throw new Error(`Unreachable. Unknown look expression name: ${name}`);
   }
 
-  if (rangeMap == null || rangeMap.inputMaxValue == null || rangeMap.outputScale == null || rangeMap.outputScale === 0) {
+  if (
+    rangeMap == null || rangeMap.inputMaxValue == null ||
+    rangeMap.outputScale == null || rangeMap.outputScale === 0
+  ) {
     return null;
   }
 
@@ -65,8 +76,14 @@ function appendBoneRotationAccessors(
     ? new Float32Array([0, 1])
     : new Float32Array([0, t, 1]);
   const output = new Float32Array([
-    bone.rotation.x, bone.rotation.y, bone.rotation.z, bone.rotation.w,
-    _quatA.x, _quatA.y, _quatA.z, _quatA.w,
+    bone.rotation.x,
+    bone.rotation.y,
+    bone.rotation.z,
+    bone.rotation.w,
+    _quatA.x,
+    _quatA.y,
+    _quatA.z,
+    _quatA.w,
     ...t === 1 ? [] : [_quatA.x, _quatA.y, _quatA.z, _quatA.w],
   ]);
 
@@ -127,7 +144,9 @@ function appendBoneLookAnimation(
     }
 
     const [inputIndex, outputIndex] = inputIndexAndOutputIndex;
-    logVerbose(`KHR_character_expression_joint: New accessors (#${inputIndex}, #${outputIndex})`);
+    logVerbose(
+      `KHR_character_expression_joint: New accessors (#${inputIndex}, #${outputIndex})`,
+    );
 
     const samplerIndex = animation.samplers.length;
     animation.samplers.push({
@@ -144,7 +163,9 @@ function appendBoneLookAnimation(
         path: 'rotation',
       },
     });
-    logVerbose(`KHR_character_expression_joint: New animation channel, rotation for node #${nodeIndex}`);
+    logVerbose(
+      `KHR_character_expression_joint: New animation channel, rotation for node #${nodeIndex}`,
+    );
     channelIndices.push(channelIndex);
   }
 
@@ -152,7 +173,9 @@ function appendBoneLookAnimation(
   gltf.animations.push(animation);
 
   const animationIndex = gltf.animations.length - 1;
-  logVerbose(`KHR_character_expression_joint: New animation (#${animationIndex})`);
+  logVerbose(
+    `KHR_character_expression_joint: New animation (#${animationIndex})`,
+  );
 
   return [animationIndex, channelIndices];
 }
@@ -178,7 +201,14 @@ export function appendBoneLookExpression(
   outExpressions: KHRCharacterExpressionExpression[],
   nodeBoneMap: Record<number, Bone>,
 ): number | null {
-  const [animationIndex, channelIndices] = appendBoneLookAnimation(name, vrmHumanoid, vrmLookAt, gltf, binChunkBox, nodeBoneMap);
+  const [animationIndex, channelIndices] = appendBoneLookAnimation(
+    name,
+    vrmHumanoid,
+    vrmLookAt,
+    gltf,
+    binChunkBox,
+    nodeBoneMap,
+  );
   if (animationIndex == null) {
     return null;
   }

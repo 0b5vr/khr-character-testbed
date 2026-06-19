@@ -1,7 +1,7 @@
 import type { GLTF } from '@gltf-transform/core';
 
 export function extractGLB(glb: Uint8Array): [GLTF.IGLTF, Uint8Array] {
-  const view = new DataView(glb.buffer);
+  const view = new DataView(glb.buffer, glb.byteOffset, glb.byteLength);
   let head = 0;
 
   // sanity check

@@ -2,12 +2,24 @@ import { logVerbose } from '../logVerbose.ts';
 import { appendMorphtargetAnimation } from './appendMorphtargetAnimation.ts';
 import { appendTextureAnimation } from './appendTextureAnimation.ts';
 import { appendBoneLookExpression } from './appendBoneLookExpression.ts';
-import { VRMLookExpressionName, vrmLookExpressionNameSet } from './VRMLookExpressionName.ts';
+import {
+  VRMLookExpressionName,
+  vrmLookExpressionNameSet,
+} from './VRMLookExpressionName.ts';
 import type { GLTF } from '@gltf-transform/core';
-import type { VRMCVRM, Expression as VRMExpression } from '@pixiv/types-vrmc-vrm-1.0';
-import type { KHRCharacterExpression, KHRCharacterExpressionExpression } from '../../schematypes/KHRCharacterExpression.ts';
-import type { KHRCharacterExpressionMorphtarget } from '../../schematypes/KHRCharacterExpressionMorphtarget.ts';
-import type { KHRCharacterExpressionMapping, KHRCharacterExpressionMappingExpressionSetMapping } from '../../schematypes/KHRCharacterExpressionMapping.ts';
+import type {
+  Expression as VRMExpression,
+  VRMCVRM,
+} from '@pixiv/types-vrmc-vrm-1.0';
+import type {
+  KHRCharacterExpression,
+  KHRCharacterExpressionExpression,
+} from '../../../schematypes/KHRCharacterExpression.ts';
+import type { KHRCharacterExpressionMorphtarget } from '../../../schematypes/KHRCharacterExpressionMorphtarget.ts';
+import type {
+  KHRCharacterExpressionMapping,
+  KHRCharacterExpressionMappingExpressionSetMapping,
+} from '../../../schematypes/KHRCharacterExpressionMapping.ts';
 import type { Bone } from '../Bone.ts';
 import { appendExpressionMasksFromOverride } from './appendExpressionMasksFromOverride.ts';
 
@@ -25,7 +37,11 @@ function appendAnimation(
   vrmExpression: VRMExpression,
   gltf: GLTF.IGLTF,
   binChunkBox: [Uint8Array],
-): [animationIndex: number | null, morphtargetChannelIndices: number[], textureChannelIndices: number[]] {
+): [
+  animationIndex: number | null,
+  morphtargetChannelIndices: number[],
+  textureChannelIndices: number[],
+] {
   const animation: GLTF.IAnimation = {
     name,
     samplers: [],
@@ -38,21 +54,42 @@ function appendAnimation(
   const isBinary = vrmExpression.isBinary ?? false;
 
   for (const bind of vrmExpression.morphTargetBinds ?? []) {
-    logVerbose('KHR_character_expression_morphtarget: Appending an animation channel for morph target bind');
-    const [_, i] = appendMorphtargetAnimation(bind, isBinary, gltf, binChunkBox, animation);
+    logVerbose(
+      'KHR_character_expression_morphtarget: Appending an animation channel for morph target bind',
+    );
+    const [_, i] = appendMorphtargetAnimation(
+      bind,
+      isBinary,
+      gltf,
+      binChunkBox,
+      animation,
+    );
     if (i != null) {
       morphtargetChannelIndices.push(i);
     }
   }
 
   for (const bind of vrmExpression.textureTransformBinds ?? []) {
-    logVerbose('KHR_character_expression_texture: Appending animation channels for texture transform bind');
-    const [_, i] = appendTextureAnimation(bind, isBinary, gltf, binChunkBox, animation);
+    logVerbose(
+      'KHR_character_expression_texture: Appending animation channels for texture transform bind',
+    );
+    const [_, i] = appendTextureAnimation(
+      bind,
+      isBinary,
+      gltf,
+      binChunkBox,
+      animation,
+    );
     textureChannelIndices.push(...i);
   }
 
-  if (vrmExpression.materialColorBinds != null && vrmExpression.materialColorBinds.length > 0) {
-    console.warn(`The expression ${name} contains materialColorBinds, which is not supported in KHR_character_expression. Ignoring the bind.`);
+  if (
+    vrmExpression.materialColorBinds != null &&
+    vrmExpression.materialColorBinds.length > 0
+  ) {
+    console.warn(
+      `The expression ${name} contains materialColorBinds, which is not supported in KHR_character_expression. Ignoring the bind.`,
+    );
   }
 
   if (animation.channels.length === 0) {
@@ -85,7 +122,8 @@ function appendExpression(
   binChunkBox: [Uint8Array],
   outExpressions: KHRCharacterExpressionExpression[],
 ): number | null {
-  const [animationIndex, morphtargetChannelIndices, textureChannelIndices] = appendAnimation(name, vrmExpression, gltf, binChunkBox);
+  const [animationIndex, morphtargetChannelIndices, textureChannelIndices] =
+    appendAnimation(name, vrmExpression, gltf, binChunkBox);
   if (animationIndex == null) {
     return null;
   }
@@ -93,14 +131,22 @@ function appendExpression(
   const extensions: Record<string, unknown> = {};
 
   if (morphtargetChannelIndices.length > 0) {
-    logVerbose(`KHR_character_expression: Morphtarget channels: [${morphtargetChannelIndices.join(', ')}]`);
+    logVerbose(
+      `KHR_character_expression: Morphtarget channels: [${
+        morphtargetChannelIndices.join(', ')
+      }]`,
+    );
     extensions['KHR_character_expression_morphtarget'] = {
       channels: morphtargetChannelIndices,
     } satisfies KHRCharacterExpressionMorphtarget;
   }
 
   if (textureChannelIndices.length > 0) {
-    logVerbose(`KHR_character_expression: Texture channels: [${textureChannelIndices.join(', ')}]`);
+    logVerbose(
+      `KHR_character_expression: Texture channels: [${
+        textureChannelIndices.join(', ')
+      }]`,
+    );
     extensions['KHR_character_expression_texture'] = {
       channels: textureChannelIndices,
     };
@@ -141,9 +187,13 @@ export function appendKHRCharacterExpression(
   }
 
   if (vrm.lookAt?.type == null) {
-    logVerbose('KHR_character_expression: VRM lookAt type is not defined, skipping look expressions');
+    logVerbose(
+      'KHR_character_expression: VRM lookAt type is not defined, skipping look expressions',
+    );
   } else {
-    logVerbose(`KHR_character_expression: VRM lookAt type is "${vrm.lookAt?.type}"`);
+    logVerbose(
+      `KHR_character_expression: VRM lookAt type is "${vrm.lookAt?.type}"`,
+    );
   }
 
   const expressions: KHRCharacterExpressionExpression[] = [];
@@ -151,7 +201,9 @@ export function appendKHRCharacterExpression(
   const mapping: KHRCharacterExpressionMappingExpressionSetMapping = {};
 
   // preset expressions (except look expressions, which are handled later)
-  for (const [name, vrmExpression] of Object.entries(vrm.expressions.preset ?? {})) {
+  for (
+    const [name, vrmExpression] of Object.entries(vrm.expressions.preset ?? {})
+  ) {
     if (vrmLookExpressionNameSet.has(name)) {
       // look expressions are handled later
       continue;
@@ -160,7 +212,9 @@ export function appendKHRCharacterExpression(
     logVerbose(`KHR_character_expression: Appending expression "${name}"`);
     appendExpression(name, vrmExpression, gltf, binChunkBox, expressions);
     mapping[name] = [{ source: name, weight: 1 }];
-    logVerbose(`KHR_character_expression_mapping: "${mappingName}" mapping, "${name}": [{ source: "${name}", weight: 1 }]`);
+    logVerbose(
+      `KHR_character_expression_mapping: "${mappingName}" mapping, "${name}": [{ source: "${name}", weight: 1 }]`,
+    );
   }
 
   // look expressions from lookAt
@@ -171,25 +225,43 @@ export function appendKHRCharacterExpression(
         continue;
       }
 
-      logVerbose(`KHR_character_expression: Appending look expression "${lookName}"`);
+      logVerbose(
+        `KHR_character_expression: Appending look expression "${lookName}"`,
+      );
       appendExpression(lookName, vrmExpression, gltf, binChunkBox, expressions);
 
       mapping[lookName] = [{ source: lookName, weight: 1 }];
-      logVerbose(`KHR_character_expression_mapping: "${mappingName}" mapping, "${lookName}": [{ source: "${lookName}", weight: 1 }]`);
+      logVerbose(
+        `KHR_character_expression_mapping: "${mappingName}" mapping, "${lookName}": [{ source: "${lookName}", weight: 1 }]`,
+      );
     }
   } else if (vrm.lookAt?.type === 'bone') {
     // create look expressions out of vrm lookAt
     for (const lookName of VRMLookExpressionName) {
-      logVerbose(`KHR_character_expression: Appending look expression "${lookName}"`);
-      appendBoneLookExpression(lookName, vrm.humanoid, vrm.lookAt, gltf, binChunkBox, expressions, nodeBoneMap);
+      logVerbose(
+        `KHR_character_expression: Appending look expression "${lookName}"`,
+      );
+      appendBoneLookExpression(
+        lookName,
+        vrm.humanoid,
+        vrm.lookAt,
+        gltf,
+        binChunkBox,
+        expressions,
+        nodeBoneMap,
+      );
 
       mapping[lookName] = [{ source: lookName, weight: 1 }];
-      logVerbose(`KHR_character_expression_mapping: "${mappingName}" mapping, "${lookName}": [{ source: "${lookName}", weight: 1 }]`);
+      logVerbose(
+        `KHR_character_expression_mapping: "${mappingName}" mapping, "${lookName}": [{ source: "${lookName}", weight: 1 }]`,
+      );
     }
   }
 
   // custom expressions
-  for (const [name, vrmExpression] of Object.entries(vrm.expressions?.custom ?? {})) {
+  for (
+    const [name, vrmExpression] of Object.entries(vrm.expressions?.custom ?? {})
+  ) {
     logVerbose(`KHR_character_expression: Appending expression "${name}"`);
     appendExpression(name, vrmExpression, gltf, binChunkBox, expressions);
   }

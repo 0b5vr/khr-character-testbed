@@ -1,6 +1,9 @@
 import { logVerbose } from './logVerbose.ts';
 import type { GLTF } from '@gltf-transform/core';
-import type { KHRCharacterSkeletonMapping, KHRCharacterSkeletonMappingSkeletalRigMapping } from '../schematypes/KHRCharacterSkeletonMapping.ts';
+import type {
+  KHRCharacterSkeletonMapping,
+  KHRCharacterSkeletonMappingSkeletalRigMapping,
+} from '../../schematypes/KHRCharacterSkeletonMapping.ts';
 import type { HumanoidHumanBoneName, VRMCVRM } from '@pixiv/types-vrmc-vrm-1.0';
 
 /**
@@ -26,11 +29,15 @@ export function appendKHRCharacterSkeleton(gltf: GLTF.IGLTF): void {
   const mappingName = 'vrmHumanoid';
   const mapping: KHRCharacterSkeletonMappingSkeletalRigMapping = {};
 
-  logVerbose(`KHR_character_skeleton_mapping: Mapping VRM humanoid bones to ${mappingName} mapping`);
+  logVerbose(
+    `KHR_character_skeleton_mapping: Mapping VRM humanoid bones to ${mappingName} mapping`,
+  );
 
   for (const [boneName, humanBone] of Object.entries(vrmHumanoid.humanBones)) {
     if (vrmBonesToSkip.has(boneName as HumanoidHumanBoneName)) {
-      logVerbose(`KHR_character_skeleton_mapping: "${mappingName}" mapping, skipping bone "${boneName}"`);
+      logVerbose(
+        `KHR_character_skeleton_mapping: "${mappingName}" mapping, skipping bone "${boneName}"`,
+      );
       continue;
     }
 
@@ -38,7 +45,9 @@ export function appendKHRCharacterSkeleton(gltf: GLTF.IGLTF): void {
     const nativeName = node?.name;
     if (node != null && nativeName) {
       mapping[boneName] = nativeName;
-      logVerbose(`KHR_character_skeleton_mapping: "${mappingName}" mapping, "${boneName}": "${nativeName}"`);
+      logVerbose(
+        `KHR_character_skeleton_mapping: "${mappingName}" mapping, "${boneName}": "${nativeName}"`,
+      );
     }
   }
 

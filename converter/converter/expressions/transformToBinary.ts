@@ -6,7 +6,10 @@
  * @param isBinary A boolean flag indicating whether the output should be in binary format. If false, the input data is returned as-is
  * @returns A new Float32Array containing the transformed keyframe values
  */
-export function transformToBinary(data: Float32Array, isBinary: boolean): Float32Array {
+export function transformToBinary(
+  data: Float32Array,
+  isBinary: boolean,
+): Float32Array {
   if (!isBinary) {
     return data;
   }
