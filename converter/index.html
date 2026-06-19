@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KHR Character Converter</title>
+  </head>
+  <body>
+    <h1>VRM 1.0 to KHR_character converter</h1>
+
+    <label id="label-dnd">
+      <input
+        id="input-file"
+        type="file"
+        accept=".glb,.vrm,model/gltf-binary"
+      />
+      <span>Drop a VRM 1.0 GLB</span>
+      <span id="span-dnd-meta">No file selected</span>
+    </label>
+
+    <div id="div-actions">
+      <button id="button-convert" type="button" disabled>Convert</button>
+      <a id="a-download">Download GLB</a>
+    </div>
+
+    <textarea
+      id="textarea-log"
+      readonly
+      spellcheck="false"
+      aria-label="Conversion log"
+    ></textarea>
+
+    <script type="module" src="/web/main.ts"></script>
+  </body>
+</html>

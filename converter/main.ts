@@ -29,7 +29,7 @@ function logVerbose(...message: string[]): void {
 logVerbose('Reading file:', filepath);
 
 const file = await Deno.readFile(filepath);
-const { glb, gltf } = convertVRMToKHRCharacter(file, { verbose });
+const { glb, gltf } = convertVRMToKHRCharacter(file, { verboseHandler: logVerbose });
 
 logVerbose('Writing file:', outpath);
 

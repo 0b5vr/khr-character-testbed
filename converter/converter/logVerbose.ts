@@ -1,10 +1,8 @@
 interface LogVerbose {
   (...message: string[]): void;
-  enabled: boolean;
+  handler?: (...message: string[]) => void;
 }
 
 export const logVerbose: LogVerbose = function (...message: string[]): void {
-  if (!logVerbose.enabled) return;
-  console.log(...message);
+  logVerbose.handler?.(...message);
 };
-logVerbose.enabled = false;

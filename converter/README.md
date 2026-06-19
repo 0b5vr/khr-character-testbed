@@ -19,6 +19,15 @@ The module API only depends on standard JavaScript binary APIs for input and
 output, so it can be used from browser build tools as well as Deno. It accepts
 `ArrayBuffer` or `Uint8Array` and returns the converted GLB as `Uint8Array`.
 
+## Web UI
+
+```bash
+npm install
+npm run dev
+```
+
+Open the local Vite URL and convert a VRM 1.0 GLB from the browser.
+
 ## Usage - Deno
 
 You will need [Deno](https://deno.land/) to run the script.

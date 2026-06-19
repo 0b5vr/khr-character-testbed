@@ -1,0 +1,66 @@
+body {
+  font-family: sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+#label-dnd {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  width: 480px;
+  height: 240px;
+  background-color: #f0f0f0;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+}
+
+#label-dnd input {
+  display: none;
+}
+
+#div-actions {
+  display: flex;
+  gap: 8px;
+}
+
+#button-convert {
+  background-color: #007bff;
+  color: #ffffff;
+  border: none;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+#button-convert:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+#a-download {
+  background-color: #28a745;
+  color: #ffffff;
+  text-decoration: none;
+  padding: 8px;
+  border-radius: 4px; 
+}
+
+#a-download:not([href]) {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+#textarea-log {
+  width: 480px;
+  height: 160px;
+  padding: 8px;
+  font-size: 10px;
+  background-color: #222222;
+  color: #f0f0f0;
+}

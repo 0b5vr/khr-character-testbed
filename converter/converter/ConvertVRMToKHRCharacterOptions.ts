@@ -5,8 +5,8 @@ import { type convertVRMToKHRCharacter } from './convertVRMToKHRCharacter.ts';
  */
 export interface ConvertVRMToKHRCharacterOptions {
   /**
-   * If true, the converter will log verbose messages to the console.
+   * When set, the converter will call this function with verbose messages.
    * The implementation of verbose logging is pretty rough and vulnerable to parallel calls.
    */
-  verbose?: boolean;
+  verboseHandler?: (...message: string[]) => void;
 }

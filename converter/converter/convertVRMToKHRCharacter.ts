@@ -13,45 +13,45 @@ import { extractGLB } from './extractGLB.ts';
 import { logVerbose } from './logVerbose.ts';
 import { type ConvertVRMToKHRCharacterOptions } from './ConvertVRMToKHRCharacterOptions.ts';
 import { type ConvertVRMToKHRCharacterResult } from './ConvertVRMToKHRCharacterResult.ts';
+import { type GLBInput } from './GLBInput.ts';
+
+function toUint8Array(input: GLBInput): Uint8Array {
+  return input instanceof Uint8Array ? input : new Uint8Array(input);
+}
 
 export function convertVRMToKHRCharacter(
-  input: Uint8Array,
+  input: GLBInput,
   options: ConvertVRMToKHRCharacterOptions = {},
 ): ConvertVRMToKHRCharacterResult {
-  const previousVerbose = logVerbose.enabled;
-  logVerbose.enabled = options.verbose ?? previousVerbose;
+  logVerbose.handler = options.verboseHandler;
 
-  try {
-    logVerbose('Extracting GLB');
+  logVerbose('Extracting GLB');
 
-    const [gltf, binChunk] = extractGLB(input);
-    const binChunkBox: [Uint8Array] = [binChunk];
+  const [gltf, binChunk] = extractGLB(toUint8Array(input));
+  const binChunkBox: [Uint8Array] = [binChunk];
 
-    ensureSingleRoot(gltf);
+  ensureSingleRoot(gltf);
 
-    const nodeBoneMap = collectNodeBoneMap(gltf);
+  const nodeBoneMap = collectNodeBoneMap(gltf);
 
-    logVerbose('Appending KHR extensions');
+  logVerbose('Appending KHR extensions');
 
-    appendKHRXmpJsonLd(gltf);
-    appendKHRCharacter(gltf);
-    appendKHRCharacterSkeleton(gltf);
-    appendKHRCharacterExpression(gltf, binChunkBox, nodeBoneMap);
-    appendVRMCCharacterExpressionLookat(gltf, nodeBoneMap);
-    appendKHRMeshAnnotation(gltf);
-    appendKHRVirtualTransforms(gltf);
-    appendKHRNodeCameraHint(gltf, nodeBoneMap);
+  appendKHRXmpJsonLd(gltf);
+  appendKHRCharacter(gltf);
+  appendKHRCharacterSkeleton(gltf);
+  appendKHRCharacterExpression(gltf, binChunkBox, nodeBoneMap);
+  appendVRMCCharacterExpressionLookat(gltf, nodeBoneMap);
+  appendKHRMeshAnnotation(gltf);
+  appendKHRVirtualTransforms(gltf);
+  appendKHRNodeCameraHint(gltf, nodeBoneMap);
 
-    logVerbose('Constructing new GLB');
+  logVerbose('Constructing new GLB');
 
-    const glb = constructGLB(gltf, binChunkBox[0]);
+  const glb = constructGLB(gltf, binChunkBox[0]);
 
-    return {
-      glb,
-      gltf,
-      binChunk: binChunkBox[0],
-    };
-  } finally {
-    logVerbose.enabled = previousVerbose;
-  }
+  return {
+    glb,
+    gltf,
+    binChunk: binChunkBox[0],
+  };
 }

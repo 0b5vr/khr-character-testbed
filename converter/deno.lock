@@ -87,7 +87,8 @@
         "npm:@gltf-transform/core@^4.3.0",
         "npm:@pixiv/types-vrmc-vrm-1.0@3.5.0",
         "npm:@types/three@~0.183.1",
-        "npm:three@~0.183.2"
+        "npm:three@~0.183.2",
+        "npm:vite@^8.0.16"
       ]
     }
   }
