@@ -30,8 +30,33 @@ jobs:
           name: viewer-dist
           path: ./viewer/dist
 
+  build-converter:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          cache: 'npm'
+          cache-dependency-path: converter/package-lock.json
+      - name: Fetch deps
+        working-directory: ./converter
+        run: npm ci
+      - name: Build
+        working-directory: ./converter
+        run: npm run build
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: converter-dist
+          path: ./converter/dist
+
   gh-pages:
-    needs: build-viewer
+    needs:
+      - build-viewer
+      - build-converter
     runs-on: ubuntu-latest
     permissions:
       pages: write
@@ -45,6 +70,11 @@ jobs:
         with:
           name: viewer-dist
           path: ./_site/viewer/dist
+      - name: Download converter artifact
+        uses: actions/download-artifact@v7
+        with:
+          name: converter-dist
+          path: ./_site/converter/dist
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v5
       - name: Deploy to pages
