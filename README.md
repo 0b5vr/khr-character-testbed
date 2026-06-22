@@ -11,6 +11,11 @@ This repository aims to support the development of the KHR_character extension b
 - [viewer](./viewer): A Three.js-based web viewer for testing KHR_character models.
     - It contains a sample KHR_character model converted from a VRM 1.0 model: [viewer/src/assets/khr-character-example.glb](./viewer/src/assets/khr-character-example.glb).
 
+## Quick links
+
+- [Web converter](https://0b5vr.github.io/khr-character-testbed/converter/dist/)
+- [Web viewer](https://0b5vr.github.io/khr-character-testbed/viewer/dist/)
+
 ## License
 
 [Apache License 2.0](./LICENSE)
