@@ -1,7 +1,6 @@
 import { appendKHRCharacter } from './appendKHRCharacter.ts';
 import { appendKHRCharacterSkeleton } from './appendKHRCharacterSkeleton.ts';
 import { appendKHRNodeCameraHint } from './appendKHRNodeCameraHint.ts';
-import { appendKHRVirtualTransforms } from './appendKHRVirtualTransforms.ts';
 import { appendKHRXmpJsonLd } from './appendKHRXmpJsonLd.ts';
 import { appendVRMCCharacterExpressionLookat } from './appendVRMCCharacterExpressionLookat.ts';
 import { collectNodeBoneMap } from './collectNodeBoneMap.ts';
@@ -40,7 +39,6 @@ export function convertVRMToKHRCharacter(
   appendKHRCharacterSkeleton(gltf);
   appendKHRCharacterExpression(gltf, binChunkBox, nodeBoneMap);
   appendVRMCCharacterExpressionLookat(gltf, nodeBoneMap);
-  appendKHRVirtualTransforms(gltf);
   appendKHRNodeCameraHint(gltf, nodeBoneMap);
 
   logVerbose('Constructing new GLB');
