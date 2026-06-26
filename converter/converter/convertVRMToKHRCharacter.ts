@@ -1,6 +1,5 @@
 import { appendKHRCharacter } from './appendKHRCharacter.ts';
 import { appendKHRCharacterSkeleton } from './appendKHRCharacterSkeleton.ts';
-import { appendKHRMeshAnnotation } from './appendKHRMeshAnnotationRenderview.ts';
 import { appendKHRNodeCameraHint } from './appendKHRNodeCameraHint.ts';
 import { appendKHRVirtualTransforms } from './appendKHRVirtualTransforms.ts';
 import { appendKHRXmpJsonLd } from './appendKHRXmpJsonLd.ts';
@@ -41,7 +40,6 @@ export function convertVRMToKHRCharacter(
   appendKHRCharacterSkeleton(gltf);
   appendKHRCharacterExpression(gltf, binChunkBox, nodeBoneMap);
   appendVRMCCharacterExpressionLookat(gltf, nodeBoneMap);
-  appendKHRMeshAnnotation(gltf);
   appendKHRVirtualTransforms(gltf);
   appendKHRNodeCameraHint(gltf, nodeBoneMap);
 
