@@ -18,6 +18,7 @@ import { handleDragAndDrop } from './utils/handleDragAndDrop';
 import type { KHRNodeCameraHint } from './khr-character/camera-hint/KHRNodeCameraHint';
 import { KHRNodeCameraHintHelper } from './khr-character/camera-hint/KHRNodeCameraHintHelper';
 import type { KHRCharacterNodeVisibility } from './khr-character/node-visibility/KHRCharacterNodeVisibility';
+import type { KHRCharacterMeshVisibility } from './khr-character/mesh-visibility/KHRCharacterMeshVisibility';
 
 // == basic Three.js stuff =========================================================================
 const canvas = document.getElementById('canvas') as HTMLCanvasElement;
@@ -63,7 +64,7 @@ const paramsVisibility = {
 };
 const guiVisibility = inspector.createParameters('Visibility');
 guiVisibility.add(paramsVisibility, 'view', ['firstPerson', 'thirdPerson']).onChange(() => {
-  updateNodeVisibility();
+  updateVisibility();
 });
 
 // == gui for expressions ==========================================================================
@@ -119,6 +120,7 @@ let currentVRMAnimation: VRMAnimation | null = null;
 let currentAnimationMixer: THREE.AnimationMixer | null = null;
 let currentCameraHints: KHRNodeCameraHint[] | null = null;
 let currentNodeVisibility: KHRCharacterNodeVisibility | null = null;
+let currentMeshVisibility: KHRCharacterMeshVisibility | null = null;
 
 function playVRMAnimation() {
   // stop existing animation
@@ -147,6 +149,7 @@ async function handleLoadGLTF(url: string) {
     lookat,
     cameraHints,
     nodeVisibility,
+    meshVisibility,
     vrmAnimations,
   } = await loadGLTF(url);
 
@@ -174,10 +177,11 @@ async function handleLoadGLTF(url: string) {
       : null;
     currentCameraHints = cameraHints ?? null;
     currentNodeVisibility = nodeVisibility ?? null;
+    currentMeshVisibility = meshVisibility ?? null;
 
     // setup GUI
     setupExpressionsGUI();
-    updateNodeVisibility();
+    updateVisibility();
 
     // add the gltf root to the scene
     scene.add(gltf.scene);
@@ -208,8 +212,9 @@ function updateCameraHintHelper() {
   cameraHintHelper.matrix.copy(hint.node.matrixWorld);
 }
 
-function updateNodeVisibility() {
+function updateVisibility() {
   currentNodeVisibility?.setView(paramsVisibility.view);
+  currentMeshVisibility?.setView(paramsVisibility.view);
 }
 
 // == animation loop ===============================================================================
