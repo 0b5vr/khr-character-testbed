@@ -17,6 +17,7 @@ import smartphoneVrma from './assets/smartphone.vrma?url';
 import { handleDragAndDrop } from './utils/handleDragAndDrop';
 import type { KHRNodeCameraHint } from './khr-character/camera-hint/KHRNodeCameraHint';
 import { KHRNodeCameraHintHelper } from './khr-character/camera-hint/KHRNodeCameraHintHelper';
+import type { KHRCharacterNodeVisibility } from './khr-character/node-visibility/KHRCharacterNodeVisibility';
 
 // == basic Three.js stuff =========================================================================
 const canvas = document.getElementById('canvas') as HTMLCanvasElement;
@@ -44,7 +45,6 @@ scene.add(light);
 // == gui for skeletons ============================================================================
 const paramsSkeleton: Record<string, any> = {
   'vrmAnimation': 'none',
-  'hideHead': false,
 };
 const guiSkeletons = inspector.createParameters('Skeleton');
 
@@ -56,37 +56,15 @@ guiSkeletons.add(paramsSkeleton, 'vrmAnimation', [ 'none', 'smartphone' ]).onCha
     handleLoadGLTF(smartphoneVrma);
   }
 });
-guiSkeletons.add(paramsSkeleton, 'hideHead');
 
-/**
- * Apply head hiding during given callback, and restore it afterward.
- * It is only applied when "hideHead" is true.
- */
-function applyHideHead(callback: () => void) {
-  if (!paramsSkeleton.hideHead) {
-    callback();
-    return;
-  }
-
-  const headBone = currentVRMHumanoidRestPose?.get('head')?.node;
-  if (headBone == null || currentVRMHumanoidRestPose == null) {
-    callback();
-    return;
-  }
-
-  const localScale = currentVRMHumanoidRestPose.get('head')?.localScale;
-  if (localScale == null) {
-    console.error('Unreachable. The head bone should have local scale data in the rest pose.');
-    return;
-  }
-
-  headBone.scale.setScalar(0.0);
-  try {
-    callback();
-  } finally {
-    headBone.scale.copy(localScale);
-  }
-}
+// == gui for visibility ===========================================================================
+const paramsVisibility = {
+  view: 'thirdPerson' as 'firstPerson' | 'thirdPerson',
+};
+const guiVisibility = inspector.createParameters('Visibility');
+guiVisibility.add(paramsVisibility, 'view', ['firstPerson', 'thirdPerson']).onChange(() => {
+  updateNodeVisibility();
+});
 
 // == gui for expressions ==========================================================================
 const paramsExpressions: Record<string, number> = {};
@@ -140,6 +118,7 @@ let currentVRMHumanoidRestPose: KHRCharacterVRMHumanoidRestPose | null = null;
 let currentVRMAnimation: VRMAnimation | null = null;
 let currentAnimationMixer: THREE.AnimationMixer | null = null;
 let currentCameraHints: KHRNodeCameraHint[] | null = null;
+let currentNodeVisibility: KHRCharacterNodeVisibility | null = null;
 
 function playVRMAnimation() {
   // stop existing animation
@@ -161,7 +140,15 @@ function playVRMAnimation() {
 }
 
 async function handleLoadGLTF(url: string) {
-  const { gltf, skeletonMapping, expressionManager, lookat, cameraHints, vrmAnimations } = await loadGLTF(url);
+  const {
+    gltf,
+    skeletonMapping,
+    expressionManager,
+    lookat,
+    cameraHints,
+    nodeVisibility,
+    vrmAnimations,
+  } = await loadGLTF(url);
 
   // when loaded GLTF is animation, skip setting character stuff
   if (vrmAnimations != null) {
@@ -186,9 +173,11 @@ async function handleLoadGLTF(url: string) {
       ? new THREE.AnimationMixer(gltf.scene)
       : null;
     currentCameraHints = cameraHints ?? null;
+    currentNodeVisibility = nodeVisibility ?? null;
 
     // setup GUI
     setupExpressionsGUI();
+    updateNodeVisibility();
 
     // add the gltf root to the scene
     scene.add(gltf.scene);
@@ -218,6 +207,11 @@ function updateCameraHintHelper() {
   hint.node.updateWorldMatrix(true, false);
   cameraHintHelper.matrix.copy(hint.node.matrixWorld);
 }
+
+function updateNodeVisibility() {
+  currentNodeVisibility?.setView(paramsVisibility.view);
+}
+
 // == animation loop ===============================================================================
 const timer = new THREE.Timer();
 const lookatTarget = new THREE.Vector3();
@@ -234,12 +228,9 @@ renderer.setAnimationLoop(() => {
   }
 
   updateCameraHintHelper();
-
   currentAnimationMixer?.update(delta);
   currentExpressionManager?.update(delta);
-  applyHideHead(() => {
-    renderer.render(scene, camera);
-  });
+  renderer.render(scene, camera);
 });
 
 // == handle dnd ===================================================================================

@@ -9,6 +9,8 @@ import type { VRMCCharacterExpressionLookat } from './khr-character/lookat/VRMCC
 import type { KHRCharacterSkeletonMapping } from './khr-character/skeleton/KHRCharacterSkeletonMapping';
 import { KHRNodeCameraHintLoaderPlugin } from './khr-character/camera-hint/KHRNodeCameraHintLoaderPlugin';
 import type { KHRNodeCameraHint } from './khr-character/camera-hint/KHRNodeCameraHint';
+import { KHRCharacterNodeVisibilityLoaderPlugin } from './khr-character/node-visibility/KHRCharacterNodeVisibilityLoaderPlugin';
+import type { KHRCharacterNodeVisibility } from './khr-character/node-visibility/KHRCharacterNodeVisibility';
 
 /**
  * Create a GLTFLoader with bunch of KHR_character related plugins registered.
@@ -21,6 +23,7 @@ function createLoader(): GLTFLoader {
   loader.register((parser) => new KHRCharacterExpressionLoaderPlugin(parser));
   loader.register((parser) => new VRMCCharacterExpressionLookatLoaderPlugin(parser));
   loader.register((parser) => new KHRNodeCameraHintLoaderPlugin(parser));
+  loader.register((parser) => new KHRCharacterNodeVisibilityLoaderPlugin(parser));
   loader.register((parser) => new VRMAnimationLoaderPlugin(parser));
 
   return loader;
@@ -39,6 +42,7 @@ export async function loadGLTF(url: string): Promise<{
   expressionManager: KHRCharacterExpressionManager | undefined;
   lookat: VRMCCharacterExpressionLookat | undefined;
   cameraHints: KHRNodeCameraHint[] | undefined;
+  nodeVisibility: KHRCharacterNodeVisibility | undefined;
   vrmAnimations: VRMAnimation[] | undefined;
 }> {
   const loader = createLoader();
@@ -49,8 +53,17 @@ export async function loadGLTF(url: string): Promise<{
   const expressionManager = gltf.userData.khrCharacterExpressionManager as KHRCharacterExpressionManager | undefined;
   const lookat = gltf.userData.vrmcCharacterExpressionLookat as VRMCCharacterExpressionLookat | undefined;
   const cameraHints = gltf.userData.khrNodeCameraHints as KHRNodeCameraHint[] | undefined;
+  const nodeVisibility = gltf.userData.khrCharacterNodeVisibility as KHRCharacterNodeVisibility | undefined;
 
   const vrmAnimations = gltf.userData.vrmAnimations as VRMAnimation[] | undefined;
 
-  return { gltf, skeletonMapping, expressionManager, lookat, cameraHints, vrmAnimations };
+  return {
+    gltf,
+    skeletonMapping,
+    expressionManager,
+    lookat,
+    cameraHints,
+    nodeVisibility,
+    vrmAnimations,
+  };
 }
