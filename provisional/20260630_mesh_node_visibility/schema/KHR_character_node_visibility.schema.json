@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "title": "KHR_character_node_visibility",
+  "type": "object",
+  "description": "glTF extension defining the visibility of nodes in a KHR_character model.",
+  "allOf": [ { "$ref": "glTFProperty.schema.json" } ],
+  "properties": {
+    "visibility": {
+      "type": "string",
+      "description": "The visibility of the node.",
+      "enum": [
+        "firstPerson",
+        "thirdPerson",
+        "always"
+      ]
+    },
+    "extensions": { },
+    "extras": { }
+  },
+  "required": [
+    "visibility"
+  ]
+}

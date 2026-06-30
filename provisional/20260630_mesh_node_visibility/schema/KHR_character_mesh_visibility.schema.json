@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "title": "KHR_character_mesh_visibility",
+  "type": "object",
+  "description": "glTF extension defining the visibility of mesh primitives in a KHR_character model.",
+  "allOf": [ { "$ref": "glTFProperty.schema.json" } ],
+  "properties": {
+    "visibility": {
+      "type": "string",
+      "description": "The visibility of the mesh primitive.",
+      "enum": [
+        "firstPerson",
+        "thirdPerson",
+        "always"
+      ]
+    },
+    "extensions": { },
+    "extras": { }
+  },
+  "required": [
+    "visibility"
+  ]
+}
