@@ -7,6 +7,7 @@ const spanDndMeta = document.getElementById('span-dnd-meta');
 const buttonConvert = document.getElementById('button-convert');
 const aDownload = document.getElementById('a-download');
 const textareaLog = document.getElementById('textarea-log');
+const checkboxAutoVisibility = document.getElementById('checkbox-auto-visibility');
 
 let selectedFile: File | null = null;
 let downloadUrl: string | null = null;
@@ -47,7 +48,10 @@ function outputFileName(inputName: string): string {
 }
 
 function convert(input: Uint8Array): void {
-  const { glb } = convertVRMToKHRCharacter(input, { verboseHandler: appendLog });
+  const { glb } = convertVRMToKHRCharacter(input, {
+    autoVisibility: checkboxAutoVisibility.checked,
+    verboseHandler: appendLog,
+  });
   const blob = new Blob([glb], { type: 'model/gltf-binary' });
   downloadUrl = URL.createObjectURL(blob);
 

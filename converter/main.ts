@@ -3,7 +3,7 @@ import { convertVRMToKHRCharacter } from './converter/index.ts';
 
 // == options ======================================================================================
 const options = parseArgs(Deno.args, {
-  boolean: ['spit-json', 'verbose'],
+  boolean: ['spit-json', 'verbose', 'auto-visibility'],
   string: ['input', 'output'],
   alias: { i: 'input', o: 'output' },
 });
@@ -12,6 +12,7 @@ const filepath = options.input;
 const outpath = options.output;
 const spitJson = options['spit-json'];
 const verbose = options.verbose;
+const autoVisibility = options['auto-visibility'];
 
 if (!filepath || !outpath) {
   console.error(
@@ -29,7 +30,10 @@ function logVerbose(...message: string[]): void {
 logVerbose('Reading file:', filepath);
 
 const file = await Deno.readFile(filepath);
-const { glb, gltf } = convertVRMToKHRCharacter(file, { verboseHandler: logVerbose });
+const { glb, gltf } = convertVRMToKHRCharacter(file, {
+  autoVisibility,
+  verboseHandler: logVerbose,
+});
 
 logVerbose('Writing file:', outpath);
 

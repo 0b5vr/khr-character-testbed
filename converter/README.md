@@ -12,7 +12,9 @@ expect too much.
 import { convertVRMToKHRCharacter } from './converter/index.ts';
 
 const input = await file.arrayBuffer();
-const { glb, gltf } = convertVRMToKHRCharacter(input);
+const { glb, gltf } = convertVRMToKHRCharacter(input, {
+  autoVisibility: true,
+});
 ```
 
 The module API only depends on standard JavaScript binary APIs for input and
@@ -42,3 +44,4 @@ deno run --allow-read --allow-write main.ts -i <input_vrm1_glb> -o <output_khr_c
 - `--output`, `-o` to specify output glb file (required).
 - `--spit-json` to output JSON separately for inspection.
 - `--verbose` to output detailed logs.
+- `--auto-visibility` to set mesh nodes named `Face` or `Hair` to `KHR_character_node_visibility` with `visibility: "thirdPerson"`.
