@@ -19,11 +19,21 @@ import type { KHRNodeCameraHint } from './khr-character/camera-hint/KHRNodeCamer
 import { KHRNodeCameraHintHelper } from './khr-character/camera-hint/KHRNodeCameraHintHelper';
 import type { KHRCharacterNodeVisibility } from './khr-character/node-visibility/KHRCharacterNodeVisibility';
 import type { KHRCharacterMeshVisibility } from './khr-character/mesh-visibility/KHRCharacterMeshVisibility';
+import { checkMaxTextureArrayLayers } from './utils/checkMaxTextureArrayLayers';
 
 // == basic Three.js stuff =========================================================================
 const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 
-const renderer = new WebGPURenderer({ canvas, antialias: true });
+const maxTextureArrayLayers = await checkMaxTextureArrayLayers();
+console.log(maxTextureArrayLayers);
+
+const renderer = new WebGPURenderer({
+  canvas,
+  antialias: true,
+  requiredLimits: {
+    maxTextureArrayLayers,
+  },
+});
 renderer.setClearColor(0x000000, 1);
 renderer.setSize(window.innerWidth, window.innerHeight);
 
