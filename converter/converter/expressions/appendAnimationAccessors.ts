@@ -1,5 +1,9 @@
 import type { GLTF } from '@gltf-transform/core';
 
+function alignTo4(byteLength: number): number {
+  return byteLength + ((4 - (byteLength % 4)) % 4);
+}
+
 /**
  * Appends raw bytes to the given BIN chunk and creates a matching bufferView.
  *
@@ -13,7 +17,7 @@ function appendBufferView(
   gltf: GLTF.IGLTF,
   binChunkBox: [Uint8Array],
 ): number {
-  const byteOffset = binChunkBox[0].byteLength;
+  const byteOffset = alignTo4(binChunkBox[0].byteLength);
   const byteLength = data.byteLength;
 
   const newBinChunk = new Uint8Array(byteOffset + byteLength);

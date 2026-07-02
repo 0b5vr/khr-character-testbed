@@ -13,8 +13,13 @@ function constructGLBChunk(data: Uint8Array, type: string): Uint8Array {
   return chunk;
 }
 
-function padText(text: string): string {
-  return text + ' '.repeat((4 - (text.length % 4)) % 4);
+function padJSONChunk(jsonData: Uint8Array): Uint8Array {
+  const paddedLength = jsonData.byteLength +
+    ((4 - (jsonData.byteLength % 4)) % 4);
+  const paddedJsonData = new Uint8Array(paddedLength);
+  paddedJsonData.fill(0x20);
+  paddedJsonData.set(jsonData);
+  return paddedJsonData;
 }
 
 function padBinary(bin: Uint8Array): Uint8Array {
@@ -30,9 +35,8 @@ export function constructGLB(gltf: GLTF.IGLTF, bin: Uint8Array): Uint8Array {
   // fix buffer length
   gltf.buffers = [{ byteLength: binChunk.byteLength - 8 }];
 
-  const jsonText = padText(JSON.stringify(gltf));
-  const jsonData = new TextEncoder().encode(jsonText);
-  const jsonChunk = constructGLBChunk(jsonData, 'JSON');
+  const jsonData = new TextEncoder().encode(JSON.stringify(gltf));
+  const jsonChunk = constructGLBChunk(padJSONChunk(jsonData), 'JSON');
 
   const totalLength = 12 + jsonChunk.byteLength + binChunk.byteLength;
   const glb = new Uint8Array(totalLength);
