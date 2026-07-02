@@ -1,4 +1,4 @@
-import { convertVRMToKHRCharacter } from '../converter/index.ts';
+import { convert } from './convert.ts';
 import './style.css';
 
 const inputFile = document.getElementById('input-file');
@@ -47,18 +47,6 @@ function outputFileName(inputName: string): string {
   return `${name}.khr-character.glb`;
 }
 
-function convert(input: Uint8Array): void {
-  const { glb } = convertVRMToKHRCharacter(input, {
-    autoVisibility: checkboxAutoVisibility.checked,
-    verboseHandler: appendLog,
-  });
-  const blob = new Blob([glb], { type: 'model/gltf-binary' });
-  downloadUrl = URL.createObjectURL(blob);
-
-  aDownload.href = downloadUrl;
-  aDownload.download = outputFileName(selectedFile?.name ?? 'output.glb');
-}
-
 inputFile.addEventListener('change', () => {
   setSelectedFile(inputFile.files?.[0] ?? null);
 });
@@ -81,7 +69,16 @@ buttonConvert.addEventListener('click', async () => {
 
   try {
     const input = await selectedFile.arrayBuffer();
-    convert(new Uint8Array(input));
+    const glb = await convert(input, {
+      autoVisibility: checkboxAutoVisibility.checked,
+      onLog: appendLog,
+    });
+    const blob = new Blob([glb], { type: 'model/gltf-binary' });
+    downloadUrl = URL.createObjectURL(blob);
+
+    aDownload.href = downloadUrl;
+    aDownload.download = outputFileName(selectedFile?.name ?? 'output.glb');
+
     appendLog('Conversion successful');
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
