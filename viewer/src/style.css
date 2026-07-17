@@ -6,6 +6,10 @@
   top: 0;
 }
 
+#css2d-element {
+  pointer-events: none;
+}
+
 #info {
   position: fixed;
   left: 8px;
@@ -19,6 +23,28 @@
   background-color: rgba(255, 255, 255, 0.9);
   padding: 0px 8px;
   border-radius: 0.5em;
+}
+
+.skeleton-mapping-helper-point {
+  position: absolute;
+  background: #000000;
+  width: 8px;
+  height: 8px;
+  transform: translate(-50%, -50%);
+  border-radius: 6px;
+  border: 1px solid #00ffff;
+}
+
+.skeleton-mapping-helper-label {
+  position: absolute;
+  padding: 0px 2px;
+  border-radius: 2px;
+  font-size: 10px;
+  font-family: monospace;
+  color: #00ffff;
+  transform: translate(8px, -50%);
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid #00ffff;
 }
 
 h1 {

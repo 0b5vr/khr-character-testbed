@@ -20,9 +20,12 @@ import { KHRNodeCameraHintHelper } from './khr-character/camera-hint/KHRNodeCame
 import type { KHRCharacterNodeVisibility } from './khr-character/node-visibility/KHRCharacterNodeVisibility';
 import type { KHRCharacterMeshVisibility } from './khr-character/mesh-visibility/KHRCharacterMeshVisibility';
 import { checkMaxTextureArrayLayers } from './utils/checkMaxTextureArrayLayers';
+import { CSS2DRenderer } from 'three/addons/renderers/CSS2DRenderer.js';
+import { KHRCharacterSkeletonMappingHelper } from './KHRCharacterSkeletonMappingHelper';
 
 // == basic Three.js stuff =========================================================================
 const canvas = document.getElementById('canvas') as HTMLCanvasElement;
+const css2DElement = document.getElementById('css2d-element') as HTMLDivElement;
 
 const maxTextureArrayLayers = await checkMaxTextureArrayLayers();
 console.log(maxTextureArrayLayers);
@@ -36,6 +39,11 @@ const renderer = new WebGPURenderer({
 });
 renderer.setClearColor(0x000000, 1);
 renderer.setSize(window.innerWidth, window.innerHeight);
+
+const css2dRenderer = new CSS2DRenderer({
+  element: css2DElement,
+});
+css2dRenderer.setSize(window.innerWidth, window.innerHeight);
 
 const inspector = new Inspector();
 renderer.inspector = inspector;
@@ -56,6 +64,7 @@ scene.add(light);
 // == gui for skeletons ============================================================================
 const paramsSkeleton: Record<string, any> = {
   'vrmAnimation': 'none',
+  'showHelper': false,
 };
 const guiSkeletons = inspector.createParameters('Skeleton');
 
@@ -66,6 +75,10 @@ guiSkeletons.add(paramsSkeleton, 'vrmAnimation', [ 'none', 'smartphone' ]).onCha
   } else if (value === 'smartphone') {
     handleLoadGLTF(smartphoneVrma);
   }
+});
+
+guiSkeletons.add(paramsSkeleton, 'showHelper').onChange(() => {
+  updateSkeletonMappingHelperVisibility();
 });
 
 // == gui for visibility ===========================================================================
@@ -123,6 +136,7 @@ guiCameraHint.add(paramsCameraHint, 'showCameraHint');
 
 // == gltf =========================================================================================
 let currentGLTF: GLTF | null = null;
+let currentSkeletonMappingHelper: KHRCharacterSkeletonMappingHelper | null = null;
 let currentExpressionManager: KHRCharacterExpressionManager | null = null;
 let currentLookat: VRMCCharacterExpressionLookat | null = null;
 let currentVRMHumanoidRestPose: KHRCharacterVRMHumanoidRestPose | null = null;
@@ -175,8 +189,15 @@ async function handleLoadGLTF(url: string) {
       VRMUtils.deepDispose(currentGLTF.scene);
     }
 
+    if (currentSkeletonMappingHelper != null) {
+      currentSkeletonMappingHelper.dispose();
+    }
+
     // assign new resources
     currentGLTF = gltf;
+    currentSkeletonMappingHelper = skeletonMapping != null
+      ? new KHRCharacterSkeletonMappingHelper(skeletonMapping)
+      : null;
     currentExpressionManager = expressionManager ?? null;
     currentLookat = lookat ?? null;
     currentVRMHumanoidRestPose = skeletonMapping != null
@@ -192,6 +213,7 @@ async function handleLoadGLTF(url: string) {
     // setup GUI
     setupExpressionsGUI();
     updateVisibility();
+    updateSkeletonMappingHelperVisibility();
 
     // add the gltf root to the scene
     scene.add(gltf.scene);
@@ -227,6 +249,10 @@ function updateVisibility() {
   currentMeshVisibility?.setView(paramsVisibility.view);
 }
 
+function updateSkeletonMappingHelperVisibility() {
+  currentSkeletonMappingHelper?.setVisible(paramsSkeleton.showHelper);
+}
+
 // == animation loop ===============================================================================
 const timer = new THREE.Timer();
 const lookatTarget = new THREE.Vector3();
@@ -245,6 +271,7 @@ renderer.setAnimationLoop(() => {
   updateCameraHintHelper();
   currentAnimationMixer?.update(delta);
   currentExpressionManager?.update(delta);
+  css2dRenderer.render(scene, camera);
   renderer.render(scene, camera);
 });
 
