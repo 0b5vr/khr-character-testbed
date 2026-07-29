@@ -21,6 +21,14 @@ function getMaskMultiplier(mask: KHRCharacterExpressionMask, sourceWeight: numbe
     return sourceWeight > threshold ? 1.0 - amount : 1.0;
   }
 
+  // `blend` is the schema default.
+  // When we see unknown custom types here, we warn and treat them as `blend` for safety.
+  if (mask.type && mask.type !== 'blend') {
+    console.warn(
+      `Unknown mask type "${mask.type}" on expression "${mask.target}". Using "blend" behavior instead`,
+    );
+  }
+
   return 1.0 - saturate(sourceWeight * amount);
 }
 
