@@ -1,5 +1,5 @@
 import type { Expression as VRMExpression } from '@pixiv/types-vrmc-vrm-1.0';
-import type { KHRCharacterExpressionMasksMask } from '../../../schematypes/KHRCharacterExpressionMasks.ts';
+import type { KHRCharacterExpressionMaskMask } from '../../../schematypes/KHRCharacterExpressionMask.ts';
 import { logVerbose } from '../logVerbose.ts';
 
 /**
@@ -12,7 +12,7 @@ export function appendExpressionMasksFromOverride(
   vrmExpression: VRMExpression,
   extensions: Record<string, unknown>,
 ): void {
-  const masks: KHRCharacterExpressionMasksMask[] = [];
+  const masks: KHRCharacterExpressionMaskMask[] = [];
 
   const isBinary = vrmExpression.isBinary ?? false;
 
@@ -38,7 +38,7 @@ export function appendExpressionMasksFromOverride(
     const value = vrmExpression[propertyName];
     if (value != null && value !== 'none') {
       logVerbose(
-        `KHR_character_expression_masks: The expression has ${propertyName} == "${value}", masking all ${name} morph targets`,
+        `KHR_character_expression_mask: The expression has ${propertyName} == "${value}", masking all ${name} morph targets`,
       );
 
       for (const target of targets) {
@@ -60,9 +60,9 @@ export function appendExpressionMasksFromOverride(
 
   if (masks.length > 0) {
     logVerbose(
-      'KHR_character_expression_masks: Appending expression masks for expression with override settings',
+      'KHR_character_expression_mask: Appending expression masks for expression with override settings',
     );
-    extensions['KHR_character_expression_masks'] = {
+    extensions['KHR_character_expression_mask'] = {
       masks,
     };
   }

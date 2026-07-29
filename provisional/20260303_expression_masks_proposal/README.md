@@ -7,7 +7,7 @@
 - Compatibility with VRM expressions: VRM has a similar mechanism called "overrides", which tries to resolve the issue above.
 
 ## Overview
-The `KHR_character_expression_masks` extension is designed to enhance the control over character expressions in glTF animations. It allows artists to define masks that can blend or block the influence of one expression on another, preventing unwanted interactions between different expressions.
+The `KHR_character_expression_mask` extension is designed to enhance the control over character expressions in glTF animations. It allows artists to define masks that can blend or block the influence of one expression on another, preventing unwanted interactions between different expressions.
 
 ## Behavior
 The expression that influences another expression have a mask object that defines how the influence is applied.
@@ -68,7 +68,7 @@ Not exhaustive, just to show the structure of the extension.
                 0
               ]
             },
-            "KHR_character_expression_masks": {
+            "KHR_character_expression_mask": {
               "masks": [
                 {
                   "target": "aa",
@@ -88,7 +88,7 @@ Not exhaustive, just to show the structure of the extension.
                 0
               ]
             },
-            "KHR_character_expression_masks": {
+            "KHR_character_expression_mask": {
               "masks": [
                 {
                   "target": "aa",
@@ -107,14 +107,14 @@ Not exhaustive, just to show the structure of the extension.
 ```
 
 ## glTF Schema
-### KHR_character_expression_masks
+### KHR_character_expression_mask
 The root object of the extension, which contains an array of masks.
 
 | | Type | Description | Required |
 |-|-|-|-|
 | `masks` | `array` | An array of a mask object. | ✅ Yes |
 
-#### KHR_character_expression_masks.masks ✅
+#### KHR_character_expression_mask.masks ✅
 An array of mask objects.
 
 - Type: `array`

@@ -3,7 +3,7 @@ import type { GLTF, GLTFLoaderPlugin, GLTFParser } from 'three/examples/jsm/load
 import { type GLTF as GLTFSchema } from '@gltf-transform/core';
 import { KHRCharacterExpressionManager } from './KHRCharacterExpressionManager';
 import { type KHRCharacterExpressionExpression, type KHRCharacterExpression as KHRCharacterExpressionSchema } from '../../../../schematypes/KHRCharacterExpression.ts';
-import { type KHRCharacterExpressionMasks, type KHRCharacterExpressionMasksMask } from '../../../../schematypes/KHRCharacterExpressionMasks.ts';
+import { type KHRCharacterExpressionMask, type KHRCharacterExpressionMaskMask } from '../../../../schematypes/KHRCharacterExpressionMask.ts';
 import { KHRCharacterExpression } from './KHRCharacterExpression';
 import { validateKHRCharacterExpressionChannelTargets } from './validateKHRCharacterExpressionChannelTargets.ts';
 
@@ -82,8 +82,8 @@ export class KHRCharacterExpressionLoaderPlugin implements GLTFLoaderPlugin {
    * @param expressionDef - The expression definition from the GLTF schema.
    * @returns The imported masks.
    */
-  private _importMasks(expressionDef: KHRCharacterExpressionExpression): KHRCharacterExpressionMasksMask[] {
-    const extension = expressionDef.extensions?.['KHR_character_expression_masks'] as KHRCharacterExpressionMasks | undefined;
+  private _importMasks(expressionDef: KHRCharacterExpressionExpression): KHRCharacterExpressionMaskMask[] {
+    const extension = expressionDef.extensions?.['KHR_character_expression_mask'] as KHRCharacterExpressionMask | undefined;
 
     return extension?.masks ?? [];
   }

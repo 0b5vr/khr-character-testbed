@@ -2,7 +2,7 @@
 
 ## Converter script update
 
-I was able to convert VRM expressions’ overrides into KHR_character_expression_masks successfully in my converter script.
+I was able to convert VRM expressions’ overrides into KHR_character_expression_mask successfully in my converter script.
 
 https://github.com/0b5vr/khr-character-testbed/tree/main/converter
 
@@ -23,7 +23,7 @@ Below is an example of the generated JSON for the "happy" expression, which is c
                 0
               ]
             },
-            "KHR_character_expression_masks": {
+            "KHR_character_expression_mask": {
               "masks": [
                 {
                   "target": "blink",

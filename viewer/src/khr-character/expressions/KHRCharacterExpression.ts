@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 import { type KHRCharacterExpressionManager } from './KHRCharacterExpressionManager.ts';
-import type { KHRCharacterExpressionMasksMask } from '../../../../schematypes/KHRCharacterExpressionMasks.ts';
+import type { KHRCharacterExpressionMaskMask } from '../../../../schematypes/KHRCharacterExpressionMask.ts';
 
-export type KHRCharacterExpressionMask = KHRCharacterExpressionMasksMask;
+export type KHRCharacterExpressionMask = KHRCharacterExpressionMaskMask;
 
 /**
  * Represents a character expression.
