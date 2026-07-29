@@ -1,18 +1,18 @@
 import type { GLTF } from '@gltf-transform/core';
-import type { KHRCharacterNodeVisibility } from '../../schematypes/KHRCharacterNodeVisibility.ts';
+import type { KHRNodeVisibilityHint } from '../../schematypes/KHRNodeVisibilityHint.ts';
 import { logVerbose } from './logVerbose.ts';
 
-const EXTENSION_NAME = 'KHR_character_node_visibility';
+const EXTENSION_NAME = 'KHR_node_visibility_hint';
 
 /**
- * Appends `KHR_character_node_visibility` to nodes with the specified names.
+ * Appends `KHR_node_visibility_hint` to nodes with the specified names.
  *
- * When a node has a mesh and its name is in `thirdPersonNodeNames`, this function adds `KHR_character_node_visibility` to the node with `visibility: "thirdPerson"`.
+ * When a node has a mesh and its name is in `thirdPersonNodeNames`, this function adds `KHR_node_visibility_hint` to the node with `role: "third_person"`.
  *
  * @param gltf - The glTF object to modify.
  * @param thirdPersonNodeNames - The names of the nodes to which the extension should be applied.
  */
-export function appendKHRCharacterNodeVisibility(
+export function appendKHRNodeVisibilityHint(
   gltf: GLTF.IGLTF,
   thirdPersonNodeNames: readonly string[],
 ): void {
@@ -34,11 +34,11 @@ export function appendKHRCharacterNodeVisibility(
         logVerbose(`${EXTENSION_NAME}: Node #${nodeIndex} ("${node.name}") already has ${EXTENSION_NAME}, skipping`);
       } else {
         node.extensions[EXTENSION_NAME] = {
-          visibility: 'thirdPerson',
-        } satisfies KHRCharacterNodeVisibility;
+          role: 'third_person',
+        } satisfies KHRNodeVisibilityHint;
         isExtensionUsed = true;
 
-        logVerbose(`${EXTENSION_NAME}: Setting "visibility": "thirdPerson" to node #${nodeIndex} ("${node.name}")`);
+        logVerbose(`${EXTENSION_NAME}: Setting "role": "third_person" to node #${nodeIndex} ("${node.name}")`);
       }
     }
   }

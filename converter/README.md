@@ -44,4 +44,4 @@ deno run --allow-read --allow-write main.ts -i <input_vrm1_glb> -o <output_khr_c
 - `--output`, `-o` to specify output glb file (required).
 - `--spit-json` to output JSON separately for inspection.
 - `--verbose` to output detailed logs.
-- `--auto-visibility` to set mesh nodes named `Face` or `Hair` to `KHR_character_node_visibility` with `visibility: "thirdPerson"`.
+- `--auto-visibility` to set mesh nodes named `Face` or `Hair` to `KHR_node_visibility_hint` with `role: "third_person"`.

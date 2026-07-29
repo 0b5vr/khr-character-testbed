@@ -1,7 +1,7 @@
 import { appendKHRCharacter } from './appendKHRCharacter.ts';
-import { appendKHRCharacterNodeVisibility } from './appendKHRCharacterNodeVisibility.ts';
 import { appendKHRCharacterSkeleton } from './appendKHRCharacterSkeleton.ts';
 import { appendKHRNodeCameraHint } from './appendKHRNodeCameraHint.ts';
+import { appendKHRNodeVisibilityHint } from './appendKHRNodeVisibilityHint.ts';
 import { appendKHRXmpJsonLd } from './appendKHRXmpJsonLd.ts';
 import { appendVRMCCharacterExpressionLookat } from './appendVRMCCharacterExpressionLookat.ts';
 import { collectNodeBoneMap } from './collectNodeBoneMap.ts';
@@ -42,7 +42,7 @@ export function convertVRMToKHRCharacter(
   appendVRMCCharacterExpressionLookat(gltf, nodeBoneMap);
   appendKHRNodeCameraHint(gltf, nodeBoneMap);
   if (options.autoVisibility === true) {
-    appendKHRCharacterNodeVisibility(gltf, ['Face', 'Hair']);
+    appendKHRNodeVisibilityHint(gltf, ['Face', 'Hair']);
   }
 
   logVerbose('Constructing new GLB');

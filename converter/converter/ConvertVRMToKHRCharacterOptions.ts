@@ -5,7 +5,7 @@ import { type convertVRMToKHRCharacter } from './convertVRMToKHRCharacter.ts';
  */
 export interface ConvertVRMToKHRCharacterOptions {
   /**
-   * When set, mesh nodes named "Face" or "Hair" get KHR_character_node_visibility with `visibility: "thirdPerson"`.
+   * When set, mesh nodes named "Face" or "Hair" get KHR_node_visibility_hint with `role: "third_person"`.
    */
   autoVisibility?: boolean;
 
