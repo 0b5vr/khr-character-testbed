@@ -1,6 +1,8 @@
-import { GLTFProperty } from './GLTFProperty.ts';
+import type { GLTFProperty } from './GLTFProperty.ts';
 
 export interface KHRNodeCameraHint extends GLTFProperty {
   role: string;
-  label: string;
-};
+  camera?: number;
+  targetNode?: number;
+  label?: string;
+}

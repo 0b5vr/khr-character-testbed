@@ -230,6 +230,28 @@ const cameraHintHelper = new KHRNodeCameraHintHelper();
 cameraHintHelper.matrixAutoUpdate = false;
 scene.add(cameraHintHelper);
 
+const _v3CameraHintPosition = new THREE.Vector3();
+const _v3CameraHintTargetPosition = new THREE.Vector3();
+const _v3CameraHintUp = new THREE.Vector3();
+
+function updateCameraHintHelperTransform(hint: KHRNodeCameraHint): void {
+  hint.node.updateWorldMatrix(true, false);
+
+  if (hint.targetNode == null) {
+    cameraHintHelper.matrix.copy(hint.node.matrixWorld);
+  } else {
+    hint.node.getWorldPosition(_v3CameraHintPosition);
+    hint.node.getWorldQuaternion(cameraHintHelper.quaternion);
+    _v3CameraHintUp.set(0, 1, 0).applyQuaternion(cameraHintHelper.quaternion);
+    hint.targetNode.updateWorldMatrix(true, false);
+    hint.targetNode.getWorldPosition(_v3CameraHintTargetPosition);
+    cameraHintHelper.matrix.lookAt(_v3CameraHintPosition, _v3CameraHintTargetPosition, _v3CameraHintUp);
+    cameraHintHelper.matrix.setPosition(_v3CameraHintPosition);
+  }
+
+  cameraHintHelper.matrixWorldNeedsUpdate = true;
+}
+
 function updateCameraHintHelper() {
   const hint = currentCameraHints?.find((h) => h.role === 'first_person');
 
@@ -239,9 +261,7 @@ function updateCameraHintHelper() {
   }
 
   cameraHintHelper.visible = true;
-
-  hint.node.updateWorldMatrix(true, false);
-  cameraHintHelper.matrix.copy(hint.node.matrixWorld);
+  updateCameraHintHelperTransform(hint);
 }
 
 function updateVisibility() {
