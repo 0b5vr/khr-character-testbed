@@ -30,6 +30,7 @@ import { appendExpressionMasksFromOverride } from './appendExpressionMasksFromOv
  * @param vrmExpression The source VRM expression object
  * @param gltf The glTF object to modify
  * @param binChunkBox The reference box to the binary chunk
+ * @param extensionsUsedSet Extension names used by the generated animation
  * @returns `[animationIndex, morphtargetChannelIndices, textureChannelIndices]`
  */
 function appendAnimation(
@@ -37,6 +38,7 @@ function appendAnimation(
   vrmExpression: VRMExpression,
   gltf: GLTF.IGLTF,
   binChunkBox: [Uint8Array],
+  extensionsUsedSet: Set<string>,
 ): [
   animationIndex: number | null,
   morphtargetChannelIndices: number[],
@@ -63,6 +65,7 @@ function appendAnimation(
       gltf,
       binChunkBox,
       animation,
+      extensionsUsedSet,
     );
     if (i != null) {
       morphtargetChannelIndices.push(i);
@@ -79,6 +82,7 @@ function appendAnimation(
       gltf,
       binChunkBox,
       animation,
+      extensionsUsedSet,
     );
     textureChannelIndices.push(...i);
   }
@@ -113,6 +117,7 @@ function appendAnimation(
  * @param gltf The glTF object to modify
  * @param binChunkBox The reference box to the binary chunk
  * @param outExpressions Output expression list to append to
+ * @param extensionsUsedSet Extension names used by the generated expression
  * @returns Appended expression index, or `null` if no animation was created
  */
 function appendExpression(
@@ -121,9 +126,16 @@ function appendExpression(
   gltf: GLTF.IGLTF,
   binChunkBox: [Uint8Array],
   outExpressions: KHRCharacterExpressionExpression[],
+  extensionsUsedSet: Set<string>,
 ): number | null {
   const [animationIndex, morphtargetChannelIndices, textureChannelIndices] =
-    appendAnimation(name, vrmExpression, gltf, binChunkBox);
+    appendAnimation(
+      name,
+      vrmExpression,
+      gltf,
+      binChunkBox,
+      extensionsUsedSet,
+    );
   if (animationIndex == null) {
     return null;
   }
@@ -139,6 +151,7 @@ function appendExpression(
     extensions['KHR_character_expression_morphtarget'] = {
       channels: morphtargetChannelIndices,
     } satisfies KHRCharacterExpressionMorphtarget;
+    extensionsUsedSet.add('KHR_character_expression_morphtarget');
   }
 
   if (textureChannelIndices.length > 0) {
@@ -150,9 +163,14 @@ function appendExpression(
     extensions['KHR_character_expression_texture'] = {
       channels: textureChannelIndices,
     };
+    extensionsUsedSet.add('KHR_character_expression_texture');
   }
 
-  appendExpressionMasksFromOverride(vrmExpression, extensions);
+  appendExpressionMasksFromOverride(
+    vrmExpression,
+    extensions,
+    extensionsUsedSet,
+  );
 
   const expression: KHRCharacterExpressionExpression = {
     expression: name,
@@ -199,6 +217,9 @@ export function appendKHRCharacterExpression(
   const expressions: KHRCharacterExpressionExpression[] = [];
   const mappingName = 'vrmExpressionPresets';
   const mapping: KHRCharacterExpressionMappingExpressionSetMapping = {};
+  const extensionsUsed = new Set(gltf.extensionsUsed ?? []);
+  extensionsUsed.add('KHR_character_expression');
+  extensionsUsed.add('KHR_character_expression_mapping');
 
   // preset expressions (except look expressions, which are handled later)
   for (
@@ -210,7 +231,14 @@ export function appendKHRCharacterExpression(
     }
 
     logVerbose(`KHR_character_expression: Appending expression "${name}"`);
-    appendExpression(name, vrmExpression, gltf, binChunkBox, expressions);
+    appendExpression(
+      name,
+      vrmExpression,
+      gltf,
+      binChunkBox,
+      expressions,
+      extensionsUsed,
+    );
     mapping[name] = [{ source: name, weight: 1 }];
     logVerbose(
       `KHR_character_expression_mapping: "${mappingName}" mapping, "${name}": [{ source: "${name}", weight: 1 }]`,
@@ -228,7 +256,14 @@ export function appendKHRCharacterExpression(
       logVerbose(
         `KHR_character_expression: Appending look expression "${lookName}"`,
       );
-      appendExpression(lookName, vrmExpression, gltf, binChunkBox, expressions);
+      appendExpression(
+        lookName,
+        vrmExpression,
+        gltf,
+        binChunkBox,
+        expressions,
+        extensionsUsed,
+      );
 
       mapping[lookName] = [{ source: lookName, weight: 1 }];
       logVerbose(
@@ -249,6 +284,7 @@ export function appendKHRCharacterExpression(
         binChunkBox,
         expressions,
         nodeBoneMap,
+        extensionsUsed,
       );
 
       mapping[lookName] = [{ source: lookName, weight: 1 }];
@@ -263,13 +299,17 @@ export function appendKHRCharacterExpression(
     const [name, vrmExpression] of Object.entries(vrm.expressions?.custom ?? {})
   ) {
     logVerbose(`KHR_character_expression: Appending expression "${name}"`);
-    appendExpression(name, vrmExpression, gltf, binChunkBox, expressions);
+    appendExpression(
+      name,
+      vrmExpression,
+      gltf,
+      binChunkBox,
+      expressions,
+      extensionsUsed,
+    );
   }
 
-  gltf.extensionsUsed ||= [];
-  gltf.extensionsUsed.push('KHR_character_expression');
-  gltf.extensionsUsed.push('KHR_character_expression_mapping');
-  // TODO: conditionally add 'KHR_character_expression_morphtarget' and 'KHR_character_expression_texture' and 'KHR_character_expression_joint'
+  gltf.extensionsUsed = [...extensionsUsed];
 
   gltf.extensions ||= {};
   gltf.extensions['KHR_character_expression'] = {

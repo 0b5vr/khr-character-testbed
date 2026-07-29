@@ -64,6 +64,7 @@ function compileTextureTransformExtPaths(
  * @param gltf The glTF object to modify
  * @param binChunkBox The reference box to the binary chunk
  * @param outAnimation The animation object to which new samplers and channels will be appended
+ * @param extensionsUsedSet Extension names used by the generated animation
  * @returns `[samplerIndices, channelIndices]`
  */
 export function appendTextureAnimation(
@@ -72,6 +73,7 @@ export function appendTextureAnimation(
   gltf: GLTF.IGLTF,
   binChunkBox: [Uint8Array],
   outAnimation: GLTF.IAnimation,
+  extensionsUsedSet: Set<string>,
 ): [samplerIndices: number[], channelIndices: number[]] {
   const samplerIndices: number[] = [];
   const channelIndices: number[] = [];
@@ -115,10 +117,7 @@ export function appendTextureAnimation(
     for (const extPath of extPaths) {
       const channelIndex = outAnimation.channels.length;
 
-      gltf.extensionsUsed ||= [];
-      if (!gltf.extensionsUsed.includes('KHR_animation_pointer')) {
-        gltf.extensionsUsed.push('KHR_animation_pointer');
-      }
+      extensionsUsedSet.add('KHR_animation_pointer');
 
       const pointer = `${extPath}/${propName}`;
       outAnimation.channels.push({

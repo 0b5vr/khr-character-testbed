@@ -32,6 +32,7 @@ function createOutputWeights(
  * @param gltf The glTF object to modify
  * @param binChunkBox The reference box to the binary chunk
  * @param outAnimation The animation object to which new samplers and channels will be appended
+ * @param extensionsUsedSet Extension names used by the generated animation
  * @returns `[samplerIndex, channelIndex]` when appended. `[null, null]` when skipped
  */
 export function appendMorphtargetAnimation(
@@ -40,6 +41,7 @@ export function appendMorphtargetAnimation(
   gltf: GLTF.IGLTF,
   binChunkBox: [Uint8Array],
   outAnimation: GLTF.IAnimation,
+  extensionsUsedSet: Set<string>,
 ): [samplerIndex: number | null, channelIndex: number | null] {
   if (vrmBind.weight === 0) {
     return [null, null];
@@ -78,10 +80,7 @@ export function appendMorphtargetAnimation(
       output: outputIndex,
     });
 
-    gltf.extensionsUsed ||= [];
-    if (!gltf.extensionsUsed.includes('KHR_animation_pointer')) {
-      gltf.extensionsUsed.push('KHR_animation_pointer');
-    }
+    extensionsUsedSet.add('KHR_animation_pointer');
 
     const channelIndex = outAnimation.channels.length;
     const pointer = `/nodes/${nodeIndex}/weights/${targetIndex}`;

@@ -190,6 +190,7 @@ function appendBoneLookAnimation(
  * @param binChunkBox The reference box to the binary chunk
  * @param outExpressions Output expression list to append to
  * @param nodeBoneMap Node index to bone map
+ * @param extensionsUsedSet Extension names used by the generated expression
  * @returns Appended expression index, or `null` if not created
  */
 export function appendBoneLookExpression(
@@ -200,6 +201,7 @@ export function appendBoneLookExpression(
   binChunkBox: [Uint8Array],
   outExpressions: KHRCharacterExpressionExpression[],
   nodeBoneMap: Record<number, Bone>,
+  extensionsUsedSet: Set<string>,
 ): number | null {
   const [animationIndex, channelIndices] = appendBoneLookAnimation(
     name,
@@ -223,6 +225,7 @@ export function appendBoneLookExpression(
     },
   };
   outExpressions.push(expression);
+  extensionsUsedSet.add('KHR_character_expression_joint');
 
   return outExpressions.length - 1;
 }
