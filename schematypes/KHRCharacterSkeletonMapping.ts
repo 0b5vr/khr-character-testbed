@@ -1,10 +1,10 @@
 import type { GLTFProperty } from './GLTFProperty.ts';
 
 /**
- * Joint mapping dictionary. Each key is a target joint name in the target rig vocabulary, each value is the source joint name from the model's native rig.
+ * Joint mapping dictionary. Each key is a target joint name in the target rig vocabulary, each value is the source joint node index from the model's native rig.
  */
 export interface KHRCharacterSkeletonMappingSkeletalRigMapping {
-  [rigName: string]: string;
+  [rigName: string]: number;
 }
 
 /**

@@ -41,28 +41,19 @@ export class KHRCharacterSkeletonLoaderPlugin implements GLTFLoaderPlugin {
 
     const skeletonMapping = new KHRCharacterSkeletonMapping();
 
-    // Build a map, native name -> node
-    const nativeNameToNodeMap: Map<string, THREE.Object3D> = new Map();
-    for (const node of await gltf.parser.getDependencies('node')) {
-      if (node.name) {
-        nativeNameToNodeMap.set(node.name, node);
-      }
-    }
-
     // build a map, target rig name -> (target joint name -> node)
     const skeletalRigMappings: Map<string, Map<string, THREE.Object3D>> = new Map();
     for (const [targetRigName, mapping] of Object.entries(extension.skeletalRigMappings)) {
       // build a map, target joint name -> node
       const targetJointNameToNodeMap: Map<string, THREE.Object3D> = new Map();
 
-      for (const [targetJointName, nativeName] of Object.entries(mapping)) {
-        const sanitizedNativeName = THREE.PropertyBinding.sanitizeNodeName(nativeName);
-        const node = nativeNameToNodeMap.get(sanitizedNativeName);
-        if (!node) {
-          console.warn(`Bone with native name "${sanitizedNativeName}" not found for mapping "${targetRigName}".`);
+      for (const [targetJointName, sourceNodeIndex] of Object.entries(mapping)) {
+        if (!Number.isInteger(sourceNodeIndex) || sourceNodeIndex < 0 || sourceNodeIndex >= (json.nodes?.length ?? 0)) {
+          console.warn(`Invalid source node index "${sourceNodeIndex}" for joint "${targetJointName}" in mapping "${targetRigName}".`);
           continue;
         }
 
+        const node = await gltf.parser.getDependency('node', sourceNodeIndex);
         targetJointNameToNodeMap.set(targetJointName, node);
       }
       skeletalRigMappings.set(targetRigName, targetJointNameToNodeMap);
