@@ -130,7 +130,13 @@ function appendBoneLookAnimation(
       continue;
     }
 
-    const bone = nodeBoneMap[nodeIndex]!;
+    const bone = nodeBoneMap[nodeIndex];
+    if (bone == null) {
+      console.warn(
+        `KHR_character_expression_joint: Eye bone node #${nodeIndex} is missing from the skeleton.`,
+      );
+      continue;
+    }
     const inputIndexAndOutputIndex = appendBoneRotationAccessors(
       bone,
       vrmLookAt,
@@ -167,6 +173,10 @@ function appendBoneLookAnimation(
       `KHR_character_expression_joint: New animation channel, rotation for node #${nodeIndex}`,
     );
     channelIndices.push(channelIndex);
+  }
+
+  if (channelIndices.length === 0) {
+    return [null, []];
   }
 
   gltf.animations ||= [];

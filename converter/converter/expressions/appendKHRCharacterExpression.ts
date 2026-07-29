@@ -218,8 +218,6 @@ export function appendKHRCharacterExpression(
   const mappingName = 'vrmExpressionPresets';
   const mapping: KHRCharacterExpressionMappingExpressionSetMapping = {};
   const extensionsUsed = new Set(gltf.extensionsUsed ?? []);
-  extensionsUsed.add('KHR_character_expression');
-  extensionsUsed.add('KHR_character_expression_mapping');
 
   // preset expressions (except look expressions, which are handled later)
   for (
@@ -231,7 +229,7 @@ export function appendKHRCharacterExpression(
     }
 
     logVerbose(`KHR_character_expression: Appending expression "${name}"`);
-    appendExpression(
+    const expressionIndex = appendExpression(
       name,
       vrmExpression,
       gltf,
@@ -239,10 +237,12 @@ export function appendKHRCharacterExpression(
       expressions,
       extensionsUsed,
     );
-    mapping[name] = [{ source: name, weight: 1 }];
-    logVerbose(
-      `KHR_character_expression_mapping: "${mappingName}" mapping, "${name}": [{ source: "${name}", weight: 1 }]`,
-    );
+    if (expressionIndex != null) {
+      mapping[name] = [{ source: name, weight: 1 }];
+      logVerbose(
+        `KHR_character_expression_mapping: "${mappingName}" mapping, "${name}": [{ source: "${name}", weight: 1 }]`,
+      );
+    }
   }
 
   // look expressions from lookAt
@@ -256,7 +256,7 @@ export function appendKHRCharacterExpression(
       logVerbose(
         `KHR_character_expression: Appending look expression "${lookName}"`,
       );
-      appendExpression(
+      const expressionIndex = appendExpression(
         lookName,
         vrmExpression,
         gltf,
@@ -264,11 +264,12 @@ export function appendKHRCharacterExpression(
         expressions,
         extensionsUsed,
       );
-
-      mapping[lookName] = [{ source: lookName, weight: 1 }];
-      logVerbose(
-        `KHR_character_expression_mapping: "${mappingName}" mapping, "${lookName}": [{ source: "${lookName}", weight: 1 }]`,
-      );
+      if (expressionIndex != null) {
+        mapping[lookName] = [{ source: lookName, weight: 1 }];
+        logVerbose(
+          `KHR_character_expression_mapping: "${mappingName}" mapping, "${lookName}": [{ source: "${lookName}", weight: 1 }]`,
+        );
+      }
     }
   } else if (vrm.lookAt?.type === 'bone') {
     // create look expressions out of vrm lookAt
@@ -276,7 +277,7 @@ export function appendKHRCharacterExpression(
       logVerbose(
         `KHR_character_expression: Appending look expression "${lookName}"`,
       );
-      appendBoneLookExpression(
+      const expressionIndex = appendBoneLookExpression(
         lookName,
         vrm.humanoid,
         vrm.lookAt,
@@ -286,11 +287,12 @@ export function appendKHRCharacterExpression(
         nodeBoneMap,
         extensionsUsed,
       );
-
-      mapping[lookName] = [{ source: lookName, weight: 1 }];
-      logVerbose(
-        `KHR_character_expression_mapping: "${mappingName}" mapping, "${lookName}": [{ source: "${lookName}", weight: 1 }]`,
-      );
+      if (expressionIndex != null) {
+        mapping[lookName] = [{ source: lookName, weight: 1 }];
+        logVerbose(
+          `KHR_character_expression_mapping: "${mappingName}" mapping, "${lookName}": [{ source: "${lookName}", weight: 1 }]`,
+        );
+      }
     }
   }
 
@@ -309,15 +311,27 @@ export function appendKHRCharacterExpression(
     );
   }
 
-  gltf.extensionsUsed = [...extensionsUsed];
+  if (expressions.length === 0) {
+    logVerbose(
+      'KHR_character_expression: No animation channels were generated, skipping expression extensions',
+    );
+    return;
+  }
 
   gltf.extensions ||= {};
   gltf.extensions['KHR_character_expression'] = {
     expressions,
   } satisfies KHRCharacterExpression;
-  gltf.extensions['KHR_character_expression_mapping'] = {
-    expressionSetMappings: {
-      [mappingName]: mapping,
-    },
-  } satisfies KHRCharacterExpressionMapping;
+  extensionsUsed.add('KHR_character_expression');
+
+  if (Object.keys(mapping).length > 0) {
+    gltf.extensions['KHR_character_expression_mapping'] = {
+      expressionSetMappings: {
+        [mappingName]: mapping,
+      },
+    } satisfies KHRCharacterExpressionMapping;
+    extensionsUsed.add('KHR_character_expression_mapping');
+  }
+
+  gltf.extensionsUsed = [...extensionsUsed];
 }

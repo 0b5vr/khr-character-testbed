@@ -6,7 +6,8 @@ import type { GLTF } from '@gltf-transform/core';
 import type { ExpressionTextureTransformBind } from '@pixiv/types-vrmc-vrm-1.0';
 
 /**
- * Collects all KHR_texture_transform extension pointer base paths available on a material.
+ * Ensures KHR_texture_transform is present on every texture info in a material,
+ * then collects their extension pointer base paths.
  *
  * @param materialIndex Material index to inspect
  * @param gltf The glTF object to inspect
@@ -49,11 +50,29 @@ function compileTextureTransformExtPaths(
     'extensions/VRMC_materials_mtoon/uvAnimationMaskTexture',
   ];
 
-  return texturePaths
-    .filter((path) => dig(material, path) != null)
-    .map((path) =>
-      `/materials/${materialIndex}/${path}/extensions/KHR_texture_transform`
+  const extPaths: string[] = [];
+  for (const path of texturePaths) {
+    const textureInfo = dig<Record<string, unknown>>(material, path);
+    if (textureInfo == null) {
+      continue;
+    }
+
+    const extensions = textureInfo.extensions ??= {};
+    if (typeof extensions !== 'object') {
+      console.warn(
+        `KHR_character_expression_texture: Texture info at material #${materialIndex} path "${path}" has an invalid \`extensions\` property (not an object). Skipping the path.`,
+      );
+      continue;
+    }
+
+    const extensionMap = extensions as Record<string, unknown>;
+    extensionMap['KHR_texture_transform'] ??= {};
+    extPaths.push(
+      `/materials/${materialIndex}/${path}/extensions/KHR_texture_transform`,
     );
+  }
+
+  return extPaths;
 }
 
 /**
@@ -84,6 +103,9 @@ export function appendTextureAnimation(
 
   const materialIndex = vrmBind.material;
   const extPaths = compileTextureTransformExtPaths(materialIndex, gltf);
+  if (extPaths.length > 0) {
+    extensionsUsedSet.add('KHR_texture_transform');
+  }
 
   for (const propName of ['offset', 'scale'] as const) {
     const prop = vrmBind[propName];
