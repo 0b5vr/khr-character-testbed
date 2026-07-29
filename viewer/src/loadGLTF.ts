@@ -9,10 +9,10 @@ import type { VRMCCharacterExpressionLookat } from './khr-character/lookat/VRMCC
 import type { KHRCharacterSkeletonMapping } from './khr-character/skeleton/KHRCharacterSkeletonMapping';
 import { KHRNodeCameraHintLoaderPlugin } from './khr-character/camera-hint/KHRNodeCameraHintLoaderPlugin';
 import type { KHRNodeCameraHint } from './khr-character/camera-hint/KHRNodeCameraHint';
-import { KHRCharacterNodeVisibilityLoaderPlugin } from './khr-character/node-visibility/KHRCharacterNodeVisibilityLoaderPlugin';
-import type { KHRCharacterNodeVisibility } from './khr-character/node-visibility/KHRCharacterNodeVisibility';
-import { KHRCharacterMeshVisibilityLoaderPlugin } from './khr-character/mesh-visibility/KHRCharacterMeshVisibilityLoaderPlugin';
-import type { KHRCharacterMeshVisibility } from './khr-character/mesh-visibility/KHRCharacterMeshVisibility';
+import { KHRMeshPrimitiveVisibilityHintLoaderPlugin } from './khr-character/mesh-primitive-visibility-hint/KHRMeshPrimitiveVisibilityHintLoaderPlugin';
+import type { KHRMeshPrimitiveVisibilityHint } from './khr-character/mesh-primitive-visibility-hint/KHRMeshPrimitiveVisibilityHint';
+import { KHRNodeVisibilityHintLoaderPlugin } from './khr-character/node-visibility-hint/KHRNodeVisibilityHintLoaderPlugin';
+import type { KHRNodeVisibilityHint } from './khr-character/node-visibility-hint/KHRNodeVisibilityHint';
 
 /**
  * Create a GLTFLoader with bunch of KHR_character related plugins registered.
@@ -25,8 +25,8 @@ function createLoader(): GLTFLoader {
   loader.register((parser) => new KHRCharacterExpressionLoaderPlugin(parser));
   loader.register((parser) => new VRMCCharacterExpressionLookatLoaderPlugin(parser));
   loader.register((parser) => new KHRNodeCameraHintLoaderPlugin(parser));
-  loader.register((parser) => new KHRCharacterNodeVisibilityLoaderPlugin(parser));
-  loader.register((parser) => new KHRCharacterMeshVisibilityLoaderPlugin(parser));
+  loader.register((parser) => new KHRNodeVisibilityHintLoaderPlugin(parser));
+  loader.register((parser) => new KHRMeshPrimitiveVisibilityHintLoaderPlugin(parser));
   loader.register((parser) => new VRMAnimationLoaderPlugin(parser));
 
   return loader;
@@ -45,8 +45,8 @@ export async function loadGLTF(url: string): Promise<{
   expressionManager: KHRCharacterExpressionManager | undefined;
   lookat: VRMCCharacterExpressionLookat | undefined;
   cameraHints: KHRNodeCameraHint[] | undefined;
-  nodeVisibility: KHRCharacterNodeVisibility | undefined;
-  meshVisibility: KHRCharacterMeshVisibility | undefined;
+  nodeVisibilityHint: KHRNodeVisibilityHint | undefined;
+  meshPrimitiveVisibilityHint: KHRMeshPrimitiveVisibilityHint | undefined;
   vrmAnimations: VRMAnimation[] | undefined;
 }> {
   const loader = createLoader();
@@ -57,8 +57,8 @@ export async function loadGLTF(url: string): Promise<{
   const expressionManager = gltf.userData.khrCharacterExpressionManager as KHRCharacterExpressionManager | undefined;
   const lookat = gltf.userData.vrmcCharacterExpressionLookat as VRMCCharacterExpressionLookat | undefined;
   const cameraHints = gltf.userData.khrNodeCameraHints as KHRNodeCameraHint[] | undefined;
-  const nodeVisibility = gltf.userData.khrCharacterNodeVisibility as KHRCharacterNodeVisibility | undefined;
-  const meshVisibility = gltf.userData.khrCharacterMeshVisibility as KHRCharacterMeshVisibility | undefined;
+  const nodeVisibilityHint = gltf.userData.khrNodeVisibilityHint as KHRNodeVisibilityHint | undefined;
+  const meshPrimitiveVisibilityHint = gltf.userData.khrMeshPrimitiveVisibilityHint as KHRMeshPrimitiveVisibilityHint | undefined;
 
   const vrmAnimations = gltf.userData.vrmAnimations as VRMAnimation[] | undefined;
 
@@ -68,8 +68,8 @@ export async function loadGLTF(url: string): Promise<{
     expressionManager,
     lookat,
     cameraHints,
-    nodeVisibility,
-    meshVisibility,
+    nodeVisibilityHint,
+    meshPrimitiveVisibilityHint,
     vrmAnimations,
   };
 }

@@ -24,7 +24,7 @@ Following extensions are supported in this testbed:
 - [x] [`KHR_character_expression_texture`](https://github.com/Kjakubzak/glTF/tree/kjakubzak/avatar_ext/extensions/2.0/Khronos/KHR_character_expression_texture)
 - [ ] [`KHR_character_reference_pose`](https://github.com/Kjakubzak/glTF/tree/kjakubzak/avatar_ext/extensions/2.0/Khronos/KHR_character_reference_pose)
 - [x] [`KHR_character_skeleton_mapping`](https://github.com/Kjakubzak/glTF/tree/kjakubzak/avatar_ext/extensions/2.0/Khronos/KHR_character_skeleton_mapping)
-- [ ] [`KHR_mesh_primitive_visibility_hint`](https://github.com/Kjakubzak/glTF/tree/kjakubzak/avatar_ext/extensions/2.0/Khronos/KHR_mesh_primitive_visibility_hint)
+- [x] [`KHR_mesh_primitive_visibility_hint`](https://github.com/Kjakubzak/glTF/tree/kjakubzak/avatar_ext/extensions/2.0/Khronos/KHR_mesh_primitive_visibility_hint)
 - [x] [`KHR_node_camera_hint`](https://github.com/Kjakubzak/glTF/tree/kjakubzak/avatar_ext/extensions/2.0/Khronos/KHR_node_camera_hint)
 - [ ] [`KHR_node_lookat_target`](https://github.com/Kjakubzak/glTF/tree/kjakubzak/avatar_ext/extensions/2.0/Khronos/KHR_node_lookat_target)
 - [x] [`KHR_node_visibility_hint`](https://github.com/Kjakubzak/glTF/tree/kjakubzak/avatar_ext/extensions/2.0/Khronos/KHR_node_visibility_hint)

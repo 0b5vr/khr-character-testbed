@@ -17,11 +17,11 @@ import smartphoneVrma from './assets/smartphone.vrma?url';
 import { handleDragAndDrop } from './utils/handleDragAndDrop';
 import type { KHRNodeCameraHint } from './khr-character/camera-hint/KHRNodeCameraHint';
 import { KHRNodeCameraHintHelper } from './khr-character/camera-hint/KHRNodeCameraHintHelper';
-import type { KHRCharacterNodeVisibility } from './khr-character/node-visibility/KHRCharacterNodeVisibility';
-import type { KHRCharacterMeshVisibility } from './khr-character/mesh-visibility/KHRCharacterMeshVisibility';
 import { checkMaxTextureArrayLayers } from './utils/checkMaxTextureArrayLayers';
 import { CSS2DRenderer } from 'three/addons/renderers/CSS2DRenderer.js';
 import { KHRCharacterSkeletonMappingHelper } from './KHRCharacterSkeletonMappingHelper';
+import type { KHRMeshPrimitiveVisibilityHint } from './khr-character/mesh-primitive-visibility-hint/KHRMeshPrimitiveVisibilityHint';
+import type { KHRNodeVisibilityHint } from './khr-character/node-visibility-hint/KHRNodeVisibilityHint';
 
 // == basic Three.js stuff =========================================================================
 const canvas = document.getElementById('canvas') as HTMLCanvasElement;
@@ -83,10 +83,10 @@ guiSkeletons.add(paramsSkeleton, 'showHelper').onChange(() => {
 
 // == gui for visibility ===========================================================================
 const paramsVisibility = {
-  view: 'thirdPerson' as 'firstPerson' | 'thirdPerson',
+  view: 'third_person' as 'first_person' | 'third_person',
 };
 const guiVisibility = inspector.createParameters('Visibility');
-guiVisibility.add(paramsVisibility, 'view', ['firstPerson', 'thirdPerson']).onChange(() => {
+guiVisibility.add(paramsVisibility, 'view', ['first_person', 'third_person']).onChange(() => {
   updateVisibility();
 });
 
@@ -143,8 +143,8 @@ let currentVRMHumanoidRestPose: KHRCharacterVRMHumanoidRestPose | null = null;
 let currentVRMAnimation: VRMAnimation | null = null;
 let currentAnimationMixer: THREE.AnimationMixer | null = null;
 let currentCameraHints: KHRNodeCameraHint[] | null = null;
-let currentNodeVisibility: KHRCharacterNodeVisibility | null = null;
-let currentMeshVisibility: KHRCharacterMeshVisibility | null = null;
+let currentNodeVisibilityHint: KHRNodeVisibilityHint | null = null;
+let currentMeshPrimitiveVisibilityHint: KHRMeshPrimitiveVisibilityHint | null = null;
 
 function playVRMAnimation() {
   // stop existing animation
@@ -172,8 +172,8 @@ async function handleLoadGLTF(url: string) {
     expressionManager,
     lookat,
     cameraHints,
-    nodeVisibility,
-    meshVisibility,
+    nodeVisibilityHint,
+    meshPrimitiveVisibilityHint,
     vrmAnimations,
   } = await loadGLTF(url);
 
@@ -207,8 +207,8 @@ async function handleLoadGLTF(url: string) {
       ? new THREE.AnimationMixer(gltf.scene)
       : null;
     currentCameraHints = cameraHints ?? null;
-    currentNodeVisibility = nodeVisibility ?? null;
-    currentMeshVisibility = meshVisibility ?? null;
+    currentNodeVisibilityHint = nodeVisibilityHint ?? null;
+    currentMeshPrimitiveVisibilityHint = meshPrimitiveVisibilityHint ?? null;
 
     // setup GUI
     setupExpressionsGUI();
@@ -245,8 +245,8 @@ function updateCameraHintHelper() {
 }
 
 function updateVisibility() {
-  currentNodeVisibility?.setView(paramsVisibility.view);
-  currentMeshVisibility?.setView(paramsVisibility.view);
+  currentNodeVisibilityHint?.setView(paramsVisibility.view);
+  currentMeshPrimitiveVisibilityHint?.setView(paramsVisibility.view);
 }
 
 function updateSkeletonMappingHelperVisibility() {
