@@ -47,10 +47,15 @@ export class KHRCharacterSkeletonLoaderPlugin implements GLTFLoaderPlugin {
       // build a map, target joint name -> node
       const targetJointNameToNodeMap: Map<string, THREE.Object3D> = new Map();
 
-      for (const [targetJointName, sourceNodeIndex] of Object.entries(mapping)) {
+      for (const [targetJointName, association] of Object.entries(mapping)) {
+        const sourceNodeIndex = association.node;
         if (!Number.isInteger(sourceNodeIndex) || sourceNodeIndex < 0 || sourceNodeIndex >= (json.nodes?.length ?? 0)) {
           console.warn(`Invalid source node index "${sourceNodeIndex}" for joint "${targetJointName}" in mapping "${targetRigName}".`);
           continue;
+        }
+        if (association.name != null && association.name !== json.nodes?.[sourceNodeIndex]?.name) {
+          console.warn(`Source node #${sourceNodeIndex} for joint "${targetJointName}" in mapping "${targetRigName}" is named "${json.nodes?.[sourceNodeIndex]?.name}", not "${association.name}".`);
+          // no need to skip, we can still use the node even if the name doesn't match
         }
 
         const node = await gltf.parser.getDependency('node', sourceNodeIndex);

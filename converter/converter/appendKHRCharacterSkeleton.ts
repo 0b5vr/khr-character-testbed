@@ -44,9 +44,12 @@ export function appendKHRCharacterSkeleton(gltf: GLTF.IGLTF): void {
     const sourceNodeIndex = humanBone.node;
     const node = nodes?.[sourceNodeIndex];
     if (node != null) {
-      mapping[boneName] = sourceNodeIndex;
+      mapping[boneName] = {
+        node: sourceNodeIndex,
+        ...(node.name != null ? { name: node.name } : {}),
+      };
       logVerbose(
-        `KHR_character_skeleton_mapping: "${mappingName}" mapping, "${boneName}": node #${sourceNodeIndex}`,
+        `KHR_character_skeleton_mapping: "${mappingName}" mapping, "${boneName}": { node: #${sourceNodeIndex}, name: "${node.name}" }`,
       );
     }
   }
