@@ -166,12 +166,6 @@ function appendExpression(
     extensionsUsedSet.add('KHR_character_expression_texture');
   }
 
-  appendExpressionMasksFromOverride(
-    vrmExpression,
-    extensions,
-    extensionsUsedSet,
-  );
-
   const expression: KHRCharacterExpressionExpression = {
     expression: name,
     animation: animationIndex,
@@ -238,9 +232,9 @@ export function appendKHRCharacterExpression(
       extensionsUsed,
     );
     if (expressionIndex != null) {
-      mapping[name] = [{ source: name, weight: 1 }];
+      mapping[name] = [{ source: expressionIndex, name, weight: 1 }];
       logVerbose(
-        `KHR_character_expression_mapping: "${mappingName}" mapping, "${name}": [{ source: "${name}", weight: 1 }]`,
+        `KHR_character_expression_mapping: "${mappingName}" mapping, "${name}": [{ source: ${expressionIndex}, name: "${name}", weight: 1 }]`,
       );
     }
   }
@@ -265,9 +259,9 @@ export function appendKHRCharacterExpression(
         extensionsUsed,
       );
       if (expressionIndex != null) {
-        mapping[lookName] = [{ source: lookName, weight: 1 }];
+        mapping[lookName] = [{ source: expressionIndex, name: lookName, weight: 1 }];
         logVerbose(
-          `KHR_character_expression_mapping: "${mappingName}" mapping, "${lookName}": [{ source: "${lookName}", weight: 1 }]`,
+          `KHR_character_expression_mapping: "${mappingName}" mapping, "${lookName}": [{ source: ${expressionIndex}, name: "${lookName}", weight: 1 }]`,
         );
       }
     }
@@ -288,9 +282,9 @@ export function appendKHRCharacterExpression(
         extensionsUsed,
       );
       if (expressionIndex != null) {
-        mapping[lookName] = [{ source: lookName, weight: 1 }];
+        mapping[lookName] = [{ source: expressionIndex, name: lookName, weight: 1 }];
         logVerbose(
-          `KHR_character_expression_mapping: "${mappingName}" mapping, "${lookName}": [{ source: "${lookName}", weight: 1 }]`,
+          `KHR_character_expression_mapping: "${mappingName}" mapping, "${lookName}": [{ source: ${expressionIndex}, name: "${lookName}", weight: 1 }]`,
         );
       }
     }
@@ -316,6 +310,28 @@ export function appendKHRCharacterExpression(
       'KHR_character_expression: No animation channels were generated, skipping expression extensions',
     );
     return;
+  }
+
+  const expressionNameIndexMap = new Map(
+    expressions.map((expression, index) => [expression.expression, index]),
+  );
+  const vrmExpressionsByName = new Map([
+    ...Object.entries(vrm.expressions.preset ?? {}),
+    ...Object.entries(vrm.expressions.custom ?? {}),
+  ]);
+  for (const expression of expressions) {
+    const vrmExpression = vrmExpressionsByName.get(expression.expression);
+    if (vrmExpression == null) {
+      continue;
+    }
+
+    expression.extensions ||= {};
+    appendExpressionMasksFromOverride(
+      vrmExpression,
+      expression.extensions,
+      extensionsUsed,
+      expressionNameIndexMap,
+    );
   }
 
   gltf.extensions ||= {};

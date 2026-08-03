@@ -1,8 +1,13 @@
 import * as THREE from 'three';
 import { type KHRCharacterExpressionManager } from './KHRCharacterExpressionManager.ts';
-import type { KHRCharacterExpressionMaskMask } from '../../../../schematypes/KHRCharacterExpressionMask.ts';
 
-export type KHRCharacterExpressionMask = KHRCharacterExpressionMaskMask;
+/** A resolved expression mask, keyed by target expression name at runtime. */
+export interface KHRCharacterExpressionMask {
+  target: string;
+  type?: string;
+  amount?: number;
+  threshold?: number;
+}
 
 /**
  * Represents a character expression.

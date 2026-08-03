@@ -8,11 +8,13 @@ import { logVerbose } from '../logVerbose.ts';
  * @param vrmExpression The source VRM expression object
  * @param extensions The extensions object of a KHR_character_expression expression to append the masks to
  * @param extensionsUsedSet Extension names used by the generated expression
+ * @param expressionNameIndexMap Expression indices keyed by expression name
  */
 export function appendExpressionMasksFromOverride(
   vrmExpression: VRMExpression,
   extensions: Record<string, unknown>,
   extensionsUsedSet: Set<string>,
+  expressionNameIndexMap: ReadonlyMap<string, number>,
 ): void {
   const masks: KHRCharacterExpressionMaskMask[] = [];
 
@@ -44,15 +46,22 @@ export function appendExpressionMasksFromOverride(
       );
 
       for (const target of targets) {
+        const targetIndex = expressionNameIndexMap.get(target);
+        if (targetIndex == null) {
+          continue;
+        }
+
         if (isBinary) {
           masks.push({
-            target,
+            target: targetIndex,
+            name: target,
             type: 'block',
             threshold: 0.5,
           });
         } else {
           masks.push({
-            target,
+            target: targetIndex,
+            name: target,
             type: value,
           });
         }
