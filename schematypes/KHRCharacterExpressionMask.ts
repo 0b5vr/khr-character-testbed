@@ -1,5 +1,8 @@
 import type { GLTFProperty } from './GLTFProperty.ts';
 
+/**
+ * Defines how the parent expression affects a target expression.
+ */
 export interface KHRCharacterExpressionMaskMask extends GLTFProperty {
   /**
    * Index of the target expression that this mask will affect.
@@ -27,6 +30,12 @@ export interface KHRCharacterExpressionMaskMask extends GLTFProperty {
   threshold?: number;
 }
 
+/**
+ * glTF extension that extends KHR_character_expression to define how this expression masks or influences other expressions.
+ */
 export interface KHRCharacterExpressionMask extends GLTFProperty {
+  /**
+   * An array of mask objects that define how this expression affects other expressions.
+   */
   masks: KHRCharacterExpressionMaskMask[];
 }
