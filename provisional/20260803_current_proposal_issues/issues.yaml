@@ -1,0 +1,1650 @@
+---
+schema_version: 1
+inventory:
+  title: "KHR Character Phase 1: Release Candidate Issue Inventory"
+  purpose: >-
+    Independent technical review of KhronosGroup/glTF pull request #2512 to identify unresolved specification work before the proposed extension set can be called a Release Candidate.
+  provenance:
+    generated_by: Codex (GPT-5.6 Sol)
+    review_status: Unorganized and not reviewed by a human; intended as a starting point for discussion, not a final assessment.
+    pull_request: https://github.com/KhronosGroup/glTF/pull/2512
+    reviewed_commit: bf38201bc5f4ed5de815c79ad43f4fc281bee83f
+    retrieved_on: "2026-08-03"
+    pull_request_status_at_retrieval: draft
+  scope:
+    included: >-
+      Unresolved design questions, contradictions, missing validation rules, naming concerns, and editorial defects. Some findings may be resolved by narrowing the scope and documenting the decision rather than adding a feature.
+    excluded: >-
+      Release Candidate deliverables and process topics, including registry entries, official Sample Viewer or glTF Validator support, official sample assets, conformance and interoperability matrices, and CLA status.
+    extensions:
+    - area: character-root
+      name: KHR_character
+      placement: glTF document
+    - area: expressions
+      name: KHR_character_expression
+      placement: glTF document
+    - area: expressions
+      name: KHR_character_expression_joint
+      placement: KHR_character_expression.expressions[]
+    - area: expressions
+      name: KHR_character_expression_morphtarget
+      placement: KHR_character_expression.expressions[]
+    - area: expressions
+      name: KHR_character_expression_texture
+      placement: KHR_character_expression.expressions[]
+    - area: expressions
+      name: KHR_character_expression_mapping
+      placement: glTF document
+    - area: expressions
+      name: KHR_character_expression_mask
+      placement: KHR_character_expression.expressions[]
+    - area: rigging
+      name: KHR_character_reference_pose
+      placement: animation
+    - area: rigging
+      name: KHR_character_skeleton_mapping
+      placement: glTF document
+    - area: view-context
+      name: KHR_node_visibility_hint
+      placement: node
+    - area: view-context
+      name: KHR_mesh_primitive_visibility_hint
+      placement: mesh primitive
+    - area: camera-metadata
+      name: KHR_node_camera_hint
+      placement: node
+    - area: target-metadata
+      name: KHR_node_lookat_target
+      placement: node
+  executive_assessment:
+    recommendation: Do not advance the set to Release Candidate yet.
+    main_blockers:
+    - Expression evaluation does not define the treatment of animation channels not selected by an expression extension or the mixing behavior when expressions overlap.
+    - KHR_node_visibility_hint cannot implement its stated descendant-override behavior by setting KHR_node_visibility on an ancestor because the latter always hides the entire subtree.
+    - Camera and visibility roles mix normative behavior with advisory hints, and the active view-context model is not defined.
+    - Several schemas validate structurally invalid or semantically empty objects, and most cross-object rules are not fully specified.
+    release_strategy: >-
+      Advance independently useful extensions separately. In particular, do not freeze the expression execution model, reference-pose model, or view-context model merely because they are included in one pull request.
+
+taxonomies:
+  severity:
+    blocker: Different conforming implementations can produce materially different results or valid data cannot be implemented reliably.
+    major: The design or schema permits ambiguous, non-interoperable, or internally inconsistent data.
+    minor: Naming, examples, wording, or documentation should be corrected before the Release Candidate text is frozen.
+  status:
+    open: Unresolved and not yet ready for a concrete change.
+    decision-needed: Requires an explicit design decision.
+    ready: Decision is settled and the change can be implemented.
+    resolved: Required work is complete.
+    rejected: Finding was considered and intentionally rejected.
+    out-of-scope: Finding does not belong to the current review scope.
+  primary_workstream:
+    design: Settle behavior, scope, ownership, composition, or the data model before drafting changes.
+    schema-and-naming: Change machine-readable structure, constraints, extension names, property names, tokens, or vocabulary identifiers.
+    normative: Define required behavior, validity, formulas, fallback behavior, or conformance requirements.
+    validator: Implement semantic checks that JSON Schema cannot express by itself.
+    non-normative: Improve rationale, implementation guidance, explanatory prose, or other informative material.
+    examples-tests: Add or correct examples, fixtures, boundary cases, and conformance tests.
+  classification_rules:
+  - Severity, status, and primary_workstream are independent axes.
+  - primary_workstream identifies the next kind of work and is intentionally singular.
+  - A design finding remains under design until its decision is settled, even if it will later require schema, normative text, validator logic, and tests.
+  - Machine-readable public names are managed with schema; behavior-affecting terminology belongs under normative; prose-only terminology belongs under non-normative.
+
+release_candidate_gates:
+- id: RC-01
+  gate: Stable normative behavior
+  current_issue: Expression sampling, animation mixing, view contexts, and hierarchy behavior remain runtime-defined or contradictory.
+- id: RC-04
+  gate: Schema completeness
+  current_issue: Semantic constraints are prose-only; empty mappings, empty identifiers, invalid combinations, and duplicate semantic references remain valid.
+- id: RC-11
+  gate: Stable naming
+  current_issue: At minimum, morphtarget, lookat, expression, label, and several role names need a final naming decision.
+- id: RC-12
+  gate: Self-contained specification
+  current_issue: A private or working Google document is referenced as animation guidance, and some required behavior exists only in pull-request discussion.
+
+proposed_resolution_order:
+- Define the object and ownership model, including one character per asset, scene membership, and skin association.
+- Define the expression execution model with exact sampling and mixing equations, then decide whether separate channel-type extensions remain necessary.
+- Resolve the node-visibility inheritance contradiction and define a per-view render predicate shared by node and primitive visibility.
+- Simplify camera and look-at metadata into testable roles and explicit relationships; remove examples whose behavior is not encoded.
+- Freeze extension, property, and token names.
+
+minimum_rc_acceptance_checklist:
+- Every standard token has normative, testable behavior.
+- Expression value-to-animation sampling is exact.
+- Overlapping expression outputs are deterministic or prohibited.
+- Scene membership and skins have defined scope.
+- Visibility inheritance and KHR_node_visibility composition are consistent.
+- Camera target orientation and role-specific property combinations are complete.
+- Reference poses select a skin or rig and obey static-pose constraints.
+- Skeleton and expression mappings have deterministic semantics.
+- No normative requirement exists only in a pull-request comment or private document.
+
+references:
+- label: "PR #2512: Khronos Avatar Extensions — Phase 1"
+  url: https://github.com/KhronosGroup/glTF/pull/2512
+- label: PR file changes
+  url: https://github.com/KhronosGroup/glTF/pull/2512/files
+- label: KHR_node_visibility subtree semantics
+  url: https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_node_visibility
+- label: KHR_animation_pointer mutable-property requirements
+  url: https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_animation_pointer
+- label: KHR_xmp_json_ld
+  url: https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_xmp_json_ld
+- label: VRM 1.0 expression specification
+  url: https://github.com/vrm-c/vrm-specification/blob/master/specification/VRMC_vrm-1.0/expressions.md
+- label: VRM 1.0 humanoid specification
+  url: https://github.com/vrm-c/vrm-specification/blob/master/specification/VRMC_vrm-1.0/humanoid.md
+
+issues:
+- id: GEN-01
+  title: Normative language is inconsistent
+  area: cross-cutting
+  component: cross-cutting
+  severity: major
+  status: open
+  primary_workstream: normative
+  details: The visibility and camera documents declare RFC 2119, while the character documents use lowercase “must”, “should”, and “may” for requirements. Adopt RFC 2119/8174 consistently and distinguish normative text from recommendations.
+- id: GEN-02
+  title: "“Advisory” support conflicts with `extensionsRequired`"
+  area: cross-cutting
+  component: cross-cutting
+  severity: blocker
+  status: open
+  primary_workstream: normative
+  details: Several hint extensions say supporting runtimes MAY ignore the feature, while also recommending `extensionsRequired` when presentation depends on it. A runtime that claims support must have a testable minimum behavior; otherwise `extensionsRequired` gives no guarantee.
+- id: GEN-03
+  title: Required-extension guidance is incomplete
+  area: cross-cutting
+  component: cross-cutting
+  severity: major
+  status: open
+  primary_workstream: normative
+  details: The character and expression documents mandate `extensionsUsed` declarations but do not state when they belong in `extensionsRequired`, even when losing expressions or retargeting data may make the asset unusable for its intended purpose.
+- id: GEN-04
+  title: The transitive `KHR_xmp_json_ld` dependency is unnecessary
+  area: cross-cutting
+  component: cross-cutting
+  severity: major
+  status: open
+  primary_workstream: design
+  details: Every character-family asset must advertise and every consumer must support XMP even when no metadata packet exists. Make XMP optional unless actual character metadata is present, or justify what required behavior an XMP-capable consumer provides when there is no packet.
+- id: GEN-06
+  title: Multiple-scene semantics are missing
+  area: cross-cutting
+  component: cross-cutting
+  severity: major
+  status: open
+  primary_workstream: design
+  details: "`rootNode`, camera targets, look-at targets, and world-space hints do not say which scene owns them, whether they must be reachable from the default scene, or what happens when the same document has several scenes."
+- id: GEN-07
+  title: Visibility-extension scope needs an explicit note
+  area: cross-cutting
+  component: cross-cutting
+  severity: major
+  status: open
+  primary_workstream: normative
+  details: In both visibility extension specifications, state that, since `KHR_character` assumes one character per glTF asset, these extensions do not define character ownership or per-character view-context selection.
+- id: GEN-12
+  title: Cross-object containment is not defined
+  area: cross-cutting
+  component: cross-cutting
+  severity: major
+  status: open
+  primary_workstream: design
+  details: Referenced nodes and channels are checked only as document indices. The specifications must say whether they must belong to the character subtree, an applicable skin, or the same scene.
+- id: GEN-13
+  title: Redundant index/name pairs add a failure mode
+  area: cross-cutting
+  component: cross-cutting
+  severity: major
+  status: open
+  primary_workstream: design
+  details: Mask, expression mapping, and skeleton mapping objects resolve by index but optionally repeat a name that MUST match. This adds edit fragility without changing identity. Remove the duplicate name, make it purely non-normative debug metadata, or give it a defined recovery purpose.
+- id: GEN-14
+  title: Array-edit behavior is not stated
+  area: cross-cutting
+  component: cross-cutting
+  severity: minor
+  status: open
+  primary_workstream: normative
+  details: Tools must update expression, animation, node, camera, and channel indices when arrays are reordered. Add a common authoring/round-trip requirement.
+- id: GEN-15
+  title: Extension partitioning is not justified
+  area: cross-cutting
+  component: cross-cutting
+  severity: major
+  status: open
+  primary_workstream: design
+  details: The three expression target extensions contain only channel-index arrays whose target domain can usually be inferred from animation paths. Specify the capability-negotiation benefit and unsupported-domain fallback, or merge them into one expression-channel binding model.
+- id: GEN-16
+  title: Partial implementation is not defined
+  area: cross-cutting
+  component: cross-cutting
+  severity: blocker
+  status: open
+  primary_workstream: design
+  details: A runtime may support morph expressions but not joint or texture expressions. The proposal does not define whether an expression is partially applied, rejected, or considered unsupported, nor how this interacts with `extensionsRequired`.
+- id: GEN-17
+  title: Composition across extensions is not fully specified
+  area: cross-cutting
+  component: cross-cutting
+  severity: blocker
+  status: open
+  primary_workstream: design
+  details: Expressions, masks, mappings, visibility, camera hints, and look-at targets make cross-extension claims, but there is no normative evaluation pipeline or state diagram.
+- id: GEN-18
+  title: KHR scope and maturity are mixed
+  area: cross-cutting
+  component: cross-cutting
+  severity: major
+  status: open
+  primary_workstream: design
+  details: General camera, visibility, and look-at metadata are bundled with the character family even though they are independently useful and have different implementation risks. Evaluate and advance them separately.
+- id: GEN-19
+  title: Requirements are repeated and drift
+  area: cross-cutting
+  component: cross-cutting
+  severity: minor
+  status: open
+  primary_workstream: normative
+  details: The same expression timing, interpolation, and blending prose is copied across several READMEs and already differs. Put shared normative behavior in `KHR_character_expression` and make subextensions reference it.
+- id: GEN-20
+  title: No explicit error model exists
+  area: cross-cutting
+  component: cross-cutting
+  severity: major
+  status: open
+  primary_workstream: normative
+  details: Define whether invalid references, duplicate mappings, unsupported custom types, and contradictory annotations make an asset invalid, make an extension instance ignored, or trigger a warning with fallback.
+- id: CHAR-01
+  title: "`rootNode` has only a SHOULD-level meaning"
+  area: character-root
+  component: KHR_character
+  severity: blocker
+  status: open
+  primary_workstream: design
+  details: The only required property may reference any node. If all character meshes, skins, mappings, and hints need not be under it, consumers cannot reliably determine character membership. Define mandatory containment or a precise alternative.
+- id: CHAR-02
+  title: Scene reachability is unspecified
+  area: character-root
+  component: KHR_character
+  severity: major
+  status: open
+  primary_workstream: normative
+  details: "`rootNode` may be absent from every scene or present only in a non-default scene. Define validity and behavior for both cases."
+- id: CHAR-03
+  title: Multiple-character scope needs an explicit statement
+  area: character-root
+  component: KHR_character
+  severity: major
+  status: open
+  primary_workstream: normative
+  details: State that `KHR_character` describes at most one character in a glTF asset and that representation of multiple characters within a single asset is outside the scope of this extension.
+- id: CHAR-04
+  title: The marker's conformance value is unclear
+  area: character-root
+  component: KHR_character
+  severity: major
+  status: open
+  primary_workstream: design
+  details: The document says the marker causes character-specific pipelines to be used, but gives no minimum behavior for a consumer that supports only `KHR_character`. Define what support means beyond reading `rootNode`.
+- id: CHAR-06
+  title: The proposed Khronos JSON-LD namespace does not exist
+  area: character-root
+  component: KHR_character
+  severity: blocker
+  status: open
+  primary_workstream: schema-and-naming
+  details: The example uses `https://www.khronos.org/registry/glTF/character/metadata/`, while the text admits it is unpublished. Do not publish RC examples using terms without a resolvable, versioned context.
+- id: CHAR-07
+  title: Dublin Core terms are mixed incorrectly
+  area: character-root
+  component: KHR_character
+  severity: major
+  status: open
+  primary_workstream: schema-and-naming
+  details: "`dc:created` and `dc:license` are shown under the Dublin Core Elements 1.1 namespace, but those terms belong to DCMI Terms. Correct the context and define value shapes."
+- id: CHAR-08
+  title: "`khr:thumbnailImage` embeds a glTF index in generic metadata"
+  area: character-root
+  component: KHR_character
+  severity: major
+  status: open
+  primary_workstream: design
+  details: Its reference semantics, allowed image types, index-update requirements, and validator rules are not defined by either schema. Prefer an ordinary typed extension property if it is a glTF object reference.
+- id: CHAR-09
+  title: The example does not demonstrate character membership
+  area: character-root
+  component: KHR_character
+  severity: minor
+  status: open
+  primary_workstream: examples-tests
+  details: It has one empty root node and metadata, but no mesh, skin, expression, or descendant validation case. Provide a minimal complete character and a negative out-of-subtree case.
+- id: EXP-01
+  title: The expression driver API is undefined
+  area: expressions
+  component: KHR_character_expression
+  severity: major
+  status: open
+  primary_workstream: design
+  details: Specify whether applications address expressions by array index, label, mapping-set target, or another handle; whether multiple entries with the same label are driven together; and how missing names are handled.
+- id: EXP-02
+  title: Expression labels may be empty
+  area: expressions
+  component: KHR_character_expression
+  severity: major
+  status: open
+  primary_workstream: schema-and-naming
+  details: 'The schema needs `minLength: 1` or a defined meaning for an empty label.'
+- id: EXP-03
+  title: Duplicate expression labels are deliberately possible but unresolved
+  area: expressions
+  component: KHR_character_expression
+  severity: blocker
+  status: open
+  primary_workstream: design
+  details: Indices disambiguate internal references, but an application receiving a semantic command such as `blink` cannot know which duplicate to drive.
+- id: EXP-07
+  title: Out-of-range input behavior is not an expression rule
+  area: expressions
+  component: KHR_character_expression
+  severity: major
+  status: open
+  primary_workstream: normative
+  details: Make `[0, 1]` a MUST for supplied and masked values, and say whether implementations clamp, reject, or preserve out-of-range values.
+- id: EXP-08
+  title: The inactive pose is not guaranteed
+  area: expressions
+  component: KHR_character_expression
+  severity: blocker
+  status: open
+  primary_workstream: normative
+  details: At expression value `0`, glTF clamps to the first sampler output. Nothing requires that output to equal the node, morph, or material base value. Define and validate the inactive state.
+- id: EXP-09
+  title: A single-keyframe animation cannot interpolate from rest
+  area: expressions
+  component: KHR_character_expression
+  severity: major
+  status: open
+  primary_workstream: normative
+  details: It produces the same output for every expression value. If implicit interpolation from the base value is intended, specify it; otherwise require at least two keys for continuous expressions.
+- id: EXP-10
+  title: Channels not selected by an expression extension have no defined behavior
+  area: expressions
+  component: KHR_character_expression
+  severity: major
+  status: open
+  primary_workstream: design
+  details: When an expression references an animation, the proposal does not specify what happens to channels absent from its typed `channels` list. Decide whether the specification should explicitly leave these channels undefined, or prescribe ignoring, ordinary animation behavior, or invalidation.
+- id: EXP-11
+  title: Untyped expression entries have undefined output
+  area: expressions
+  component: KHR_character_expression
+  severity: blocker
+  status: open
+  primary_workstream: design
+  details: The core examples contain entries with no joint, morph, or texture subextension. State whether all channels execute, none execute, or the asset is invalid.
+- id: EXP-12
+  title: Channel overlap across subextensions is allowed
+  area: expressions
+  component: KHR_character_expression
+  severity: major
+  status: open
+  primary_workstream: design
+  details: A channel can appear in more than one typed list. Require disjoint sets or define why duplicate classification is meaningful.
+- id: EXP-13
+  title: Channel overlap across expressions is allowed
+  area: expressions
+  component: KHR_character_expression
+  severity: blocker
+  status: open
+  primary_workstream: design
+  details: Different expressions may target the same property through different animations. The proposal explicitly leaves mixing runtime-defined, preventing reproducible rendering.
+- id: EXP-14
+  title: Reusing one animation for several expressions is ambiguous
+  area: expressions
+  component: KHR_character_expression
+  severity: blocker
+  status: open
+  primary_workstream: design
+  details: The mapping example assigns three expression entries to animation 0. Driving them to different values requires evaluating one animation at multiple times and then resolving overlapping outputs.
+- id: EXP-15
+  title: Mixing semantics are a core requirement, not a known limitation
+  area: expressions
+  component: KHR_character_expression
+  severity: blocker
+  status: open
+  primary_workstream: design
+  details: Define override/additive behavior, base values, ordering, normalization, quaternion handling, and conflict resolution, or constrain assets so overlapping targets are invalid.
+- id: EXP-16
+  title: "“Transforms scale proportionally” is not glTF sampling behavior"
+  area: expressions
+  component: KHR_character_expression
+  severity: major
+  status: open
+  primary_workstream: normative
+  details: Animation outputs are sampled values; translations, scales, and quaternions are not multiplied by expression input. Replace this prose with an exact sampling and composition algorithm.
+- id: EXP-17
+  title: Binary-expression guidance is underspecified
+  area: expressions
+  component: KHR_character_expression
+  severity: major
+  status: open
+  primary_workstream: normative
+  details: With `STEP`, the transition point comes from sampler input keys, not simply from values 0 and 1. Define authoring requirements and avoid treating inherently continuous controls such as `jawOpen` as necessarily binary.
+- id: EXP-18
+  title: Facial scope is inconsistent
+  area: expressions
+  component: KHR_character_expression
+  severity: minor
+  status: open
+  primary_workstream: design
+  details: The overview says facial expressions, while the category text permits down-chain meshes and broad gestures. Decide whether non-facial pose controls belong here and name the feature accordingly.
+- id: EXP-19
+  title: Character containment is not validated
+  area: expressions
+  component: KHR_character_expression
+  severity: major
+  status: open
+  primary_workstream: validator
+  details: Selected channels can animate unrelated scene nodes and materials. Define whether that is legal and how a character-scoped expression is identified.
+- id: EXP-20
+  title: The schema closes expression entries to future properties
+  area: expressions
+  component: KHR_character_expression
+  severity: major
+  status: open
+  primary_workstream: schema-and-naming
+  details: 'The anonymous expression item uses `additionalProperties: false`, contrary to the repository convention that glTF property schemas allow additional properties. Factor it into a named schema inheriting `glTFProperty`.'
+- id: JNT-01
+  title: "“Joint” channels need not target joints"
+  area: expressions
+  component: KHR_character_expression_joint
+  severity: blocker
+  status: open
+  primary_workstream: design
+  details: Any node TRS channel satisfies the prose. Require membership in an applicable `skin.joints`, or rename the extension to node-transform expressions.
+- id: JNT-02
+  title: The applicable skin is unknown
+  area: expressions
+  component: KHR_character_expression_joint
+  severity: major
+  status: open
+  primary_workstream: design
+  details: A document may contain multiple skins and the same node may participate in none or several. Define how the character and selected joint channels associate with skins.
+- id: JNT-03
+  title: "`KHR_animation_pointer` handling is missing"
+  area: expressions
+  component: KHR_character_expression_joint
+  severity: major
+  status: open
+  primary_workstream: normative
+  details: Clarify whether pointers to `/nodes/{}/rotation`, translation, or scale are allowed, and align the rule with the morph-target extension.
+- id: JNT-04
+  title: A core target without `node` must be rejected
+  area: expressions
+  component: KHR_character_expression_joint
+  severity: major
+  status: open
+  primary_workstream: validator
+  details: The channel classification needs a semantic validation rule requiring an actual TRS target node.
+- id: JNT-05
+  title: Quaternion mixing guidance is not sufficient
+  area: expressions
+  component: KHR_character_expression_joint
+  severity: blocker
+  status: open
+  primary_workstream: normative
+  details: "`exp(lerp(log(q0), log(q1), w))` does not by itself define sign selection, normalization, branch choice, or accumulation of multiple rotations. Use a rigorously specified operation and test vectors."
+- id: JNT-06
+  title: Multi-expression joint composition is undefined
+  area: expressions
+  component: KHR_character_expression_joint
+  severity: blocker
+  status: open
+  primary_workstream: normative
+  details: Eye-up plus eye-right, or smile plus blink on the same face joint, can produce different results depending on order and engine animation mixer behavior.
+- id: JNT-07
+  title: Absolute versus additive transforms are unspecified
+  area: expressions
+  component: KHR_character_expression_joint
+  severity: blocker
+  status: open
+  primary_workstream: normative
+  details: State whether sampled TRS replaces the base transform, blends from it, or composes as a delta. Translation, rotation, and scale need separate exact formulas.
+- id: JNT-08
+  title: The extension is structurally redundant
+  area: expressions
+  component: KHR_character_expression_joint
+  severity: major
+  status: open
+  primary_workstream: design
+  details: Its only data is a list of channels whose ordinary targets already identify TRS. Either document the capability-negotiation requirement or simplify the extension family.
+- id: MOR-01
+  title: The extension name is not tokenized snake case
+  area: expressions
+  component: KHR_character_expression_morphtarget
+  severity: major
+  status: open
+  primary_workstream: schema-and-naming
+  details: Use `KHR_character_expression_morph_target` unless “morphtarget” is deliberately accepted as one term before the name freezes.
+- id: MOR-02
+  title: The claimed morph-target binding is not represented
+  area: expressions
+  component: KHR_character_expression_morphtarget
+  severity: blocker
+  status: open
+  primary_workstream: design
+  details: The schema lists animation channel indices, not mesh or morph-target indices. The prose repeatedly claims direct semantic binding to particular blendshapes.
+- id: MOR-03
+  title: Ordinary `weights` channels affect the complete weight vector
+  area: expressions
+  component: KHR_character_expression_morphtarget
+  severity: major
+  status: open
+  primary_workstream: design
+  details: They cannot identify only the nonzero targets without inspecting output accessors, and they may overwrite weights controlled by other active expressions.
+- id: MOR-04
+  title: Pointer and non-pointer forms have different granularity
+  area: expressions
+  component: KHR_character_expression_morphtarget
+  severity: major
+  status: open
+  primary_workstream: design
+  details: "`/nodes/{}/weights/{}` selects one weight while a core `weights` channel selects all. Define equivalent behavior, base values, and conflict rules."
+- id: MOR-05
+  title: Pointer targets must exist in the Asset Object Model
+  area: expressions
+  component: KHR_character_expression_morphtarget
+  severity: blocker
+  status: open
+  primary_workstream: validator
+  details: Require the pointed-to `node.weights` property and index to exist, or define whether inherited `mesh.weights` is materialized before animation.
+- id: MOR-06
+  title: Morph topology constraints are missing
+  area: expressions
+  component: KHR_character_expression_morphtarget
+  severity: major
+  status: open
+  primary_workstream: validator
+  details: Validate that the targeted node has a mesh, that relevant primitives have compatible morph-target counts, and that each pointer index is in range.
+- id: MOR-07
+  title: The Step 1 example makes a false claim
+  area: expressions
+  component: KHR_character_expression_morphtarget
+  severity: major
+  status: open
+  primary_workstream: examples-tests
+  details: It says the fragment binds morph target index 2 on mesh 0, primitive 0, but the fragment contains only expression names, animation indices, and channel indices.
+- id: MOR-08
+  title: Unselected weight preservation is undefined
+  area: expressions
+  component: KHR_character_expression_morphtarget
+  severity: blocker
+  status: open
+  primary_workstream: normative
+  details: Specify how an expression changes a subset of a packed weight vector without resetting other active expressions or authored defaults.
+- id: MOR-09
+  title: Sparse-accessor advice is not expression sparsity
+  area: expressions
+  component: KHR_character_expression_morphtarget
+  severity: minor
+  status: open
+  primary_workstream: non-normative
+  details: Sparse accessors compress stored data but do not create independent runtime ownership of individual morph weights. Avoid implying otherwise.
+- id: MOR-10
+  title: The external “Expressions Tab” is not an RC reference
+  area: expressions
+  component: KHR_character_expression_morphtarget
+  severity: major
+  status: open
+  primary_workstream: normative
+  details: Move all required guidance into the public specification or a stable normative reference.
+- id: TEX-01
+  title: The name overstates the supported domain
+  area: expressions
+  component: KHR_character_expression_texture
+  severity: major
+  status: open
+  primary_workstream: schema-and-naming
+  details: The extension supports only `KHR_texture_transform` offset, scale, and rotation—not texture selection, image blending, material color, or other texture expression techniques. Consider `KHR_character_expression_texture_transform` or broaden the schema and semantics.
+- id: TEX-02
+  title: Third-party texture slots are not automatically animatable
+  area: expressions
+  component: KHR_character_expression_texture
+  severity: blocker
+  status: open
+  primary_workstream: design
+  details: A pointer such as a `KHR_texture_transform` nested under `VRMC_materials_mtoon` is valid only if the containing property is part of the glTF Asset Object Model. The open PR question about MToon remains unresolved in the specification.
+- id: TEX-03
+  title: Pointer target validation is prose-only
+  area: expressions
+  component: KHR_character_expression_texture
+  severity: major
+  status: open
+  primary_workstream: validator
+  details: The validator must confirm the target is an actual mutable `KHR_texture_transform.offset`, `scale`, or `rotation` property and that all required dependencies are declared.
+- id: TEX-04
+  title: Material sharing changes scope
+  area: expressions
+  component: KHR_character_expression_texture
+  severity: blocker
+  status: open
+  primary_workstream: design
+  details: Animating a material texture transform affects every primitive using that material, including primitives outside the intended character subtree. Define whether cloning/material instancing is required or prohibit sharing an animated material with unrelated content.
+- id: TEX-05
+  title: Rotation mixing is omitted
+  area: expressions
+  component: KHR_character_expression_texture
+  severity: major
+  status: open
+  primary_workstream: normative
+  details: The blending section covers offset and scale only. Define angular interpolation, wrapping, and combination for rotation.
+- id: TEX-06
+  title: Atlas transitions need sampling guidance
+  area: expressions
+  component: KHR_character_expression_texture
+  severity: major
+  status: open
+  primary_workstream: normative
+  details: Linear offset interpolation can expose unintended atlas cells and filtering bleed. Define when `STEP` is required and any padding/wrap-mode assumptions.
+- id: TEX-07
+  title: The proposal does not cover texture switching or image blending
+  area: expressions
+  component: KHR_character_expression_texture
+  severity: major
+  status: open
+  primary_workstream: design
+  details: These are listed as follow-up work in PR discussion but are natural interpretations of the current extension name. Narrow the stated use cases for RC.
+- id: TEX-08
+  title: Shared-channel and base-value conflicts remain undefined
+  area: expressions
+  component: KHR_character_expression_texture
+  severity: blocker
+  status: open
+  primary_workstream: design
+  details: Multiple expressions can animate the same texture transform without deterministic mixing.
+- id: MAP-02
+  title: The mathematical direction is ambiguous
+  area: expressions
+  component: KHR_character_expression_mapping
+  severity: blocker
+  status: open
+  primary_workstream: design
+  details: The prose says model source expressions contribute to endpoint target expressions, but a runtime commonly receives a target command and needs to drive model sources. Specify the exact function in both authoring and playback terms.
+- id: MAP-03
+  title: No evaluation equation is provided
+  area: expressions
+  component: KHR_character_expression_mapping
+  severity: blocker
+  status: open
+  primary_workstream: design
+  details: Define how target values, source values, and weights are combined, including clamping, accumulation, missing entries, and simultaneous targets.
+- id: MAP-04
+  title: "`weight` is unconstrained"
+  area: expressions
+  component: KHR_character_expression_mapping
+  severity: major
+  status: open
+  primary_workstream: schema-and-naming
+  details: Negative, zero, and arbitrarily large values validate. Specify the allowed interval and meaning; do not rely on “relative influence.”
+- id: MAP-05
+  title: Weight normalization is unspecified
+  area: expressions
+  component: KHR_character_expression_mapping
+  severity: major
+  status: open
+  primary_workstream: design
+  details: The text says weights need not sum to any value but does not define the consequence. Provide deterministic examples with sums below, equal to, and above 1.
+- id: MAP-06
+  title: The advertised cardinality is inaccurate
+  area: expressions
+  component: KHR_character_expression_mapping
+  severity: major
+  status: open
+  primary_workstream: design
+  details: Each target key contains multiple source entries, which is many-to-one in the stored direction. A source reused under several targets creates one-to-many behavior. Name and specify both cases correctly.
+- id: MAP-07
+  title: Simultaneous target collisions are undefined
+  area: expressions
+  component: KHR_character_expression_mapping
+  severity: blocker
+  status: open
+  primary_workstream: design
+  details: If two target expressions drive the same source expression, define whether inputs add, take a maximum, normalize, or conflict.
+- id: MAP-08
+  title: Duplicate source entries are valid
+  area: expressions
+  component: KHR_character_expression_mapping
+  severity: major
+  status: open
+  primary_workstream: validator
+  details: The same `source` may appear repeatedly in one target list. Prohibit duplicates or define intentional repeated contribution.
+- id: MAP-09
+  title: Empty mappings are valid
+  area: expressions
+  component: KHR_character_expression_mapping
+  severity: major
+  status: open
+  primary_workstream: schema-and-naming
+  details: 'Add `minProperties: 1` to the set dictionary and each mapping dictionary unless an empty set has defined behavior.'
+- id: MAP-10
+  title: Empty and misleading dictionary keys are valid
+  area: expressions
+  component: KHR_character_expression_mapping
+  severity: major
+  status: open
+  primary_workstream: schema-and-naming
+  details: Add `propertyNames` constraints and define case sensitivity and Unicode normalization.
+- id: MAP-11
+  title: Mapping-set selection is unspecified
+  area: expressions
+  component: KHR_character_expression_mapping
+  severity: major
+  status: open
+  primary_workstream: design
+  details: When several sets exist, define how a consumer recognizes and chooses one, and whether sets may be composed.
+- id: MAP-13
+  title: Optional `name` repeats `source` identity
+  area: expressions
+  component: KHR_character_expression_mapping
+  severity: minor
+  status: open
+  primary_workstream: schema-and-naming
+  details: Remove it or define a recovery/debugging role that does not make otherwise valid index-based data invalid after a harmless rename.
+- id: MAP-14
+  title: The example demonstrates the core ambiguity
+  area: expressions
+  component: KHR_character_expression_mapping
+  severity: major
+  status: open
+  primary_workstream: examples-tests
+  details: Three expressions reference the same translation animation, with no typed bindings or deterministic way to evaluate different expression values.
+- id: MASK-01
+  title: The general composition equation is missing
+  area: expressions
+  component: KHR_character_expression_mask
+  severity: blocker
+  status: open
+  primary_workstream: normative
+  details: Provide one normative formula for all masks affecting each target, including the per-mask factor and the final output.
+- id: MASK-02
+  title: Input range is only a recommendation
+  area: expressions
+  component: KHR_character_expression_mask
+  severity: blocker
+  status: open
+  primary_workstream: normative
+  details: Values outside `[0, 1]` can produce negative or amplified outputs. Make the domain and clamping/rejection rule normative.
+- id: MASK-03
+  title: Unknown custom mask types have no runtime fallback
+  area: expressions
+  component: KHR_character_expression_mask
+  severity: blocker
+  status: open
+  primary_workstream: design
+  details: Preservation alone is insufficient. State whether an unsupported type is ignored, treated as `blend`, or makes the expression/asset unsupported.
+- id: MASK-04
+  title: Custom type names can collide
+  area: expressions
+  component: KHR_character_expression_mask
+  severity: major
+  status: open
+  primary_workstream: schema-and-naming
+  details: Require a vendor/URI namespace and reserve standard names. Otherwise a future standard type can change the meaning of existing assets.
+- id: MASK-05
+  title: The schema's `anyOf` is misleading
+  area: expressions
+  component: KHR_character_expression_mask
+  severity: minor
+  status: open
+  primary_workstream: schema-and-naming
+  details: Because one branch accepts every nonempty string, the `blend` and `block` `const` branches impose no additional validation. Use documented reserved values plus a clear custom-name schema.
+- id: MASK-06
+  title: "“Block” does not necessarily block"
+  area: expressions
+  component: KHR_character_expression_mask
+  severity: major
+  status: open
+  primary_workstream: schema-and-naming
+  details: With `amount < 1`, the target is only attenuated. Rename the type or describe it as step attenuation rather than full blocking.
+- id: MASK-07
+  title: Threshold boundary behavior needs tests
+  area: expressions
+  component: KHR_character_expression_mask
+  severity: major
+  status: open
+  primary_workstream: normative
+  details: The formula uses `source > threshold`, not `>=`. Preserve that exact choice normatively and add tests at `threshold - epsilon`, `threshold`, and `threshold + epsilon`.
+- id: MASK-08
+  title: Irrelevant properties remain valid
+  area: expressions
+  component: KHR_character_expression_mask
+  severity: major
+  status: open
+  primary_workstream: schema-and-naming
+  details: "`threshold` is accepted on `blend`, and both parameters are accepted on custom types. Use conditional schema rules where possible and define how readers preserve/ignore unused properties."
+- id: MASK-09
+  title: Self-masking is valid but unspecified
+  area: expressions
+  component: KHR_character_expression_mask
+  severity: major
+  status: open
+  primary_workstream: design
+  details: An expression may target itself. Explicitly prohibit it or define the output from the raw input.
+- id: MASK-10
+  title: Cyclic masks need an explicit rule
+  area: expressions
+  component: KHR_character_expression_mask
+  severity: major
+  status: open
+  primary_workstream: normative
+  details: The order-independence claim relies on every mask reading pre-mask inputs. State that normatively and test mutual and longer cycles.
+- id: MASK-11
+  title: Duplicate masks are valid
+  area: expressions
+  component: KHR_character_expression_mask
+  severity: major
+  status: open
+  primary_workstream: design
+  details: Repeating the same source-to-target mask changes the curve multiplicatively. State whether this is intentional and how exact duplicates are validated.
+- id: MASK-12
+  title: Text and schema disagree about sources
+  area: expressions
+  component: KHR_character_expression_mask
+  severity: minor
+  status: open
+  primary_workstream: non-normative
+  details: The README describes multiple masks “from different expressions,” but the schema permits repeated masks from one source expression to one target.
+- id: MASK-13
+  title: "`name` is redundant and rename-fragile"
+  area: expressions
+  component: KHR_character_expression_mask
+  severity: minor
+  status: open
+  primary_workstream: schema-and-naming
+  details: Resolution always uses `target`; requiring a duplicated display name to match adds no behavior.
+- id: MASK-14
+  title: The blending recommendation is unrelated
+  area: expressions
+  component: KHR_character_expression_mask
+  severity: major
+  status: open
+  primary_workstream: non-normative
+  details: Generic lerp of property values does not define expression-driver masking or solve cross-animation mixing. Move property mixing to the core execution model.
+- id: MASK-15
+  title: "“Mask” may be misleading terminology"
+  area: expressions
+  component: KHR_character_expression_mask
+  severity: minor
+  status: open
+  primary_workstream: schema-and-naming
+  details: In graphics and animation, a mask often selects spatial components or channels; this extension applies directed expression-level attenuation. Consider `inhibition`, `override`, or clearly define the term.
+- id: POSE-01
+  title: The schema only tags an arbitrary animation
+  area: rigging
+  component: KHR_character_reference_pose
+  severity: blocker
+  status: open
+  primary_workstream: normative
+  details: A tagged animation may contain many frames, morph weights, unrelated nodes, or animation pointers. Normatively restrict allowed channels, targets, and sampler shape.
+- id: POSE-02
+  title: "“Single frame” is not a requirement"
+  area: rigging
+  component: KHR_character_reference_pose
+  severity: blocker
+  status: open
+  primary_workstream: normative
+  details: Require exactly one key time per selected sampler, or define how a time is chosen from a multi-key animation.
+- id: POSE-03
+  title: Joint coverage is only a recommendation
+  area: rigging
+  component: KHR_character_reference_pose
+  severity: major
+  status: open
+  primary_workstream: design
+  details: Define required joints for a useful pose, how omitted joints obtain values, and whether inherited default node transforms are part of the reference pose.
+- id: POSE-04
+  title: No skin or rig mapping is selected
+  area: rigging
+  component: KHR_character_reference_pose
+  severity: blocker
+  status: open
+  primary_workstream: design
+  details: A document can have multiple skins and mappings. The tagged animation does not identify which one the pose describes.
+- id: POSE-05
+  title: Pose nodes need not belong to the character
+  area: rigging
+  component: KHR_character_reference_pose
+  severity: major
+  status: open
+  primary_workstream: validator
+  details: Add semantic validation against `KHR_character.rootNode`, the selected skin, and skeleton mapping.
+- id: POSE-06
+  title: Standard pose semantics are too vague
+  area: rigging
+  component: KHR_character_reference_pose
+  severity: blocker
+  status: open
+  primary_workstream: design
+  details: "“Arms horizontal” or “about 45 degrees” does not specify palms, thumb direction, shoulder rotation, leg spacing, foot direction, spine, head, or finger state. Define measurable canonical conventions or make these labels informative only."
+- id: POSE-07
+  title: Coordinate and facing conventions are incomplete
+  area: rigging
+  component: KHR_character_reference_pose
+  severity: major
+  status: open
+  primary_workstream: normative
+  details: State the expected character forward/up directions and whether the pose is defined in character-root, skin, model, or world space.
+- id: POSE-08
+  title: Empty extension objects silently mean T-pose
+  area: rigging
+  component: KHR_character_reference_pose
+  severity: major
+  status: open
+  primary_workstream: schema-and-naming
+  details: An omitted `poseType` defaults to `TPose` even when the animation does not satisfy any T-pose constraints. Consider making the type required.
+- id: POSE-11
+  title: Bind-pose explanation is oversimplified
+  area: rigging
+  component: KHR_character_reference_pose
+  severity: major
+  status: open
+  primary_workstream: non-normative
+  details: "`inverse(skin.inverseBindMatrices)` is not universally a local bind pose; coordinate spaces, the skinned mesh transform, joint hierarchy, and absent inverse-bind matrices matter."
+- id: POSE-12
+  title: The migration formula is incomplete
+  area: rigging
+  component: KHR_character_reference_pose
+  severity: major
+  status: open
+  primary_workstream: normative
+  details: Converting global matrices to local TRS must account for coordinate space, non-joint parents, mesh bind transforms, matrix decomposability, negative scale, and numerical tolerance.
+- id: POSE-13
+  title: "“Playback” can affect unrelated animation targets"
+  area: rigging
+  component: KHR_character_reference_pose
+  severity: major
+  status: open
+  primary_workstream: normative
+  details: Until channel restrictions exist, playing a tagged animation is not a safe way to set a skeleton reference pose.
+- id: RIG-03
+  title: Target hierarchy is not represented
+  area: rigging
+  component: KHR_character_skeleton_mapping
+  severity: major
+  status: open
+  primary_workstream: design
+  details: Joint-name keys alone do not describe parent relationships, required/optional joints, axes, reference pose, or retargeting rules.
+- id: RIG-04
+  title: "“One-to-one” is not enforced"
+  area: rigging
+  component: KHR_character_skeleton_mapping
+  severity: major
+  status: open
+  primary_workstream: validator
+  details: Several target joint keys may reference the same source node. Add uniqueness requirements or rename the supported cardinality.
+- id: RIG-05
+  title: Source nodes need not be joints
+  area: rigging
+  component: KHR_character_skeleton_mapping
+  severity: blocker
+  status: open
+  primary_workstream: validator
+  details: Any node index is accepted. Define required membership in `skins[].joints[]` and the applicable skin.
+- id: RIG-06
+  title: Character containment is missing
+  area: rigging
+  component: KHR_character_skeleton_mapping
+  severity: major
+  status: open
+  primary_workstream: validator
+  details: Mapped nodes may lie outside `KHR_character.rootNode` and outside every scene.
+- id: RIG-07
+  title: Empty rig sets and mappings are valid
+  area: rigging
+  component: KHR_character_skeleton_mapping
+  severity: major
+  status: open
+  primary_workstream: schema-and-naming
+  details: Add `minProperties` and key constraints, or define empty-object behavior.
+- id: RIG-10
+  title: Optional node `name` is redundant
+  area: rigging
+  component: KHR_character_skeleton_mapping
+  severity: minor
+  status: open
+  primary_workstream: schema-and-naming
+  details: The node index is authoritative. A node rename should not invalidate the mapping.
+- id: RIG-11
+  title: The example hierarchy is internally misleading
+  area: rigging
+  component: KHR_character_skeleton_mapping
+  severity: major
+  status: open
+  primary_workstream: examples-tests
+  details: Feet and hands are not descendants of `CharacterRoot`; only `Hips` and `Head` are connected. It therefore fails the stated common-ancestor recommendation.
+- id: RIG-12
+  title: Retargeting behavior is outside the data contract
+  area: rigging
+  component: KHR_character_skeleton_mapping
+  severity: blocker
+  status: open
+  primary_workstream: design
+  details: A mapping alone does not define rest/reference pose, joint orientation, scale compensation, translation policy, twist distribution, or missing-joint behavior. Either specify a minimum retargeting contract or narrow the claim to semantic labeling.
+- id: RIG-13
+  title: Multiple skins and skeletons are unresolved
+  area: rigging
+  component: KHR_character_skeleton_mapping
+  severity: blocker
+  status: open
+  primary_workstream: design
+  details: One document-global dictionary cannot say which mapping applies to which skin or character component.
+- id: NVIS-01
+  title: Descendant override contradicts `KHR_node_visibility`
+  area: view-context
+  component: KHR_node_visibility_hint
+  severity: blocker
+  status: open
+  primary_workstream: design
+  details: 'If a `third_person` parent becomes `visible: false` in first-person, `KHR_node_visibility` recursively hides every child, so a child annotated `always` cannot override it as promised.'
+- id: NVIS-02
+  title: The implementation model must be per-node-content, not parent toggling
+  area: view-context
+  component: KHR_node_visibility_hint
+  severity: blocker
+  status: open
+  primary_workstream: design
+  details: Define an exact render predicate that permits an explicit descendant role to override an inherited hint while still honoring actual `KHR_node_visibility` on all ancestors.
+- id: NVIS-03
+  title: Per-view evaluation cannot mutate one global visibility property
+  area: view-context
+  component: KHR_node_visibility_hint
+  severity: blocker
+  status: open
+  primary_workstream: design
+  details: Simultaneous first-person and mirror/spectator renders require different results from the same nodes in the same frame.
+- id: NVIS-04
+  title: Active view context is undefined
+  area: view-context
+  component: KHR_node_visibility_hint
+  severity: blocker
+  status: open
+  primary_workstream: design
+  details: Specify the state, its scope, how applications set it, whether multiple contexts can be active, and whether it is tied to a particular camera hint.
+- id: NVIS-05
+  title: "`third_person` does not mean third-person-only"
+  area: view-context
+  component: KHR_node_visibility_hint
+  severity: major
+  status: open
+  primary_workstream: design
+  details: Its actual semantics are “visible in every context except first-person.” Rename it (for example, `not_first_person`) or make the asymmetry unmistakable.
+- id: NVIS-06
+  title: "`first_person` is asymmetric with custom contexts"
+  area: view-context
+  component: KHR_node_visibility_hint
+  severity: major
+  status: open
+  primary_workstream: design
+  details: It is hidden in portrait, mirror, detail, and unknown contexts, while `third_person` is visible in them. Confirm this is intentional with a complete truth table.
+- id: NVIS-07
+  title: Custom roles have no visibility function
+  area: view-context
+  component: KHR_node_visibility_hint
+  severity: major
+  status: open
+  primary_workstream: design
+  details: A custom string does not say whether it is inclusive, exclusive, or compatible with multiple contexts. A list of included/excluded contexts may be more extensible than one role token.
+- id: NVIS-08
+  title: Camera-hint activation is asserted but not defined
+  area: view-context
+  component: KHR_node_visibility_hint
+  severity: blocker
+  status: open
+  primary_workstream: design
+  details: The visibility README says activating a camera hint enters a context, but the camera extension does not normatively define such a state transition.
+- id: NVIS-10
+  title: "`always` override semantics need a normative example"
+  area: view-context
+  component: KHR_node_visibility_hint
+  severity: major
+  status: open
+  primary_workstream: examples-tests
+  details: This is the case that exposes the incompatibility with ancestor `KHR_node_visibility`; include it in tests.
+- id: NVIS-11
+  title: Support requirements are too weak
+  area: view-context
+  component: KHR_node_visibility_hint
+  severity: major
+  status: open
+  primary_workstream: normative
+  details: A supporting implementation only SHOULD resolve and render roles correctly. For testable extension support, standard-role behavior must be MUST-level.
+- id: NVIS-12
+  title: Required/fallback guidance is inconsistent
+  area: view-context
+  component: KHR_node_visibility_hint
+  severity: major
+  status: open
+  primary_workstream: normative
+  details: The document discourages `extensionsRequired`, even though rendering the inside of a head may be unacceptable. State exact author guidance and exact behavior for supporting runtimes.
+- id: NVIS-13
+  title: Inheritance through non-visual nodes needs definition
+  area: view-context
+  component: KHR_node_visibility_hint
+  severity: major
+  status: open
+  primary_workstream: normative
+  details: Clarify whether inherited roles affect lights and other visual features consistently with `KHR_node_visibility`, while cameras and interactivity remain unaffected.
+- id: PVIS-01
+  title: It inherits the undefined view-context model
+  area: view-context
+  component: KHR_mesh_primitive_visibility_hint
+  severity: blocker
+  status: open
+  primary_workstream: design
+  details: Resolve the active context before freezing primitive roles.
+- id: PVIS-02
+  title: "`third_person` has the same misleading asymmetric meaning"
+  area: view-context
+  component: KHR_mesh_primitive_visibility_hint
+  severity: major
+  status: open
+  primary_workstream: design
+  details: Publish a full context truth table and settle the name.
+- id: PVIS-03
+  title: Node/primitive composition is incomplete
+  area: view-context
+  component: KHR_mesh_primitive_visibility_hint
+  severity: major
+  status: open
+  primary_workstream: design
+  details: Define the exact predicate for inherited node hints, explicit node hints, core `KHR_node_visibility`, primitive hints, and unknown roles.
+- id: PVIS-04
+  title: Runtime requirements are SHOULD-level
+  area: view-context
+  component: KHR_mesh_primitive_visibility_hint
+  severity: major
+  status: open
+  primary_workstream: normative
+  details: An implementation that claims support can still ignore standard roles. Use MUST for the standard behavior.
+- id: PVIS-05
+  title: Transparent-material substitution is not equivalent to culling
+  area: view-context
+  component: KHR_mesh_primitive_visibility_hint
+  severity: major
+  status: open
+  primary_workstream: non-normative
+  details: It may alter depth, shadows, picking, ray tracing, sorting, motion vectors, and performance, and alpha zero is ignored by `OPAQUE` materials. Do not RECOMMEND it as semantically equivalent without listing these constraints.
+- id: PVIS-06
+  title: Mesh reuse is not discussed
+  area: view-context
+  component: KHR_mesh_primitive_visibility_hint
+  severity: major
+  status: open
+  primary_workstream: normative
+  details: A mesh primitive may be instanced by several nodes. Specify that primitive-role evaluation occurs per node instance and combines with that instance's context.
+- id: PVIS-08
+  title: Required-extension capability needs a definition
+  area: view-context
+  component: KHR_mesh_primitive_visibility_hint
+  severity: major
+  status: open
+  primary_workstream: normative
+  details: A runtime that can hide nodes but cannot independently suppress a primitive must not claim support for this extension.
+- id: PVIS-09
+  title: No tests cover non-color passes
+  area: view-context
+  component: KHR_mesh_primitive_visibility_hint
+  severity: major
+  status: open
+  primary_workstream: examples-tests
+  details: Add expected results for shadows, depth prepass, picking, outlines, reflections, and ray queries, or explicitly limit the extension to camera color rendering.
+- id: CAM-01
+  title: The extension duplicates core camera-node composition
+  area: camera-metadata
+  component: KHR_node_camera_hint
+  severity: major
+  status: open
+  primary_workstream: design
+  details: A node can already reference a camera with `node.camera`. Explain why a second `camera` property is necessary instead of annotating an ordinary camera node with role metadata.
+- id: CAM-02
+  title: "`camera` is confusingly named"
+  area: camera-metadata
+  component: KHR_node_camera_hint
+  severity: minor
+  status: open
+  primary_workstream: schema-and-naming
+  details: On a node that already has core `camera`, the extension property looks equivalent but has weaker advisory semantics. Rename it to `cameraReference`/`projection` or reuse core.
+- id: CAM-03
+  title: Roles have two incompatible transform meanings
+  area: camera-metadata
+  component: KHR_node_camera_hint
+  severity: blocker
+  status: open
+  primary_workstream: design
+  details: Most roles interpret the node position as camera position, while `orbit_center` and `framing_target` interpret it as a target point. Split these concepts or enforce role-specific schemas.
+- id: CAM-04
+  title: Role/property combinations are unconstrained
+  area: camera-metadata
+  component: KHR_node_camera_hint
+  severity: major
+  status: open
+  primary_workstream: schema-and-naming
+  details: "`orbit_center` may contain a camera and `targetNode`; `framing_target` may contain projection data; none has defined meaning. Add conditional rules or prohibit meaningless combinations."
+- id: CAM-05
+  title: "“Full body” and “portrait” lack a subject"
+  area: camera-metadata
+  component: KHR_node_camera_hint
+  severity: blocker
+  status: open
+  primary_workstream: design
+  details: The runtime cannot know which hierarchy to frame, especially in multi-object scenes. Add a subject/root reference or narrow these roles to authored camera poses only.
+- id: CAM-06
+  title: Framing is not reproducible
+  area: camera-metadata
+  component: KHR_node_camera_hint
+  severity: major
+  status: open
+  primary_workstream: design
+  details: Aspect ratio, safe margins, viewport, bounding volume, and whether hidden geometry contributes are unspecified. Do not promise interoperability for framing roles without these inputs.
+- id: CAM-07
+  title: "`targetNode` does not define roll/up"
+  area: camera-metadata
+  component: KHR_node_camera_hint
+  severity: blocker
+  status: open
+  primary_workstream: design
+  details: A look direction alone leaves one rotational degree of freedom. Define how node rotation, local +Y, or world up determines roll.
+- id: CAM-08
+  title: Coincident target positions are not handled
+  area: camera-metadata
+  component: KHR_node_camera_hint
+  severity: major
+  status: open
+  primary_workstream: design
+  details: Self-reference is forbidden, but a different target node may occupy the same world-space point. Define fallback orientation.
+- id: CAM-09
+  title: Same-scene/world-space validity is missing
+  area: camera-metadata
+  component: KHR_node_camera_hint
+  severity: blocker
+  status: open
+  primary_workstream: validator
+  details: A hint and target in different scenes have no shared instantiated world space. Require a common scene and define behavior for uninstantiated nodes.
+- id: CAM-10
+  title: Animation timing is unspecified
+  area: camera-metadata
+  component: KHR_node_camera_hint
+  severity: major
+  status: open
+  primary_workstream: design
+  details: Hint and target nodes may be animated. State whether hints are sampled at initial time, continuously followed, or evaluated by the application.
+- id: CAM-11
+  title: Ignoring scale is incomplete
+  area: camera-metadata
+  component: KHR_node_camera_hint
+  severity: major
+  status: open
+  primary_workstream: design
+  details: Parent scale still affects world position, and nonuniform/negative scale affects extracted orientation. Define transform decomposition and invalid cases.
+- id: CAM-12
+  title: Multiple `default_view` selection is not deterministic
+  area: camera-metadata
+  component: KHR_node_camera_hint
+  severity: major
+  status: open
+  primary_workstream: design
+  details: "“First in node traversal order” has no canonical meaning across multiple scenes and traversal algorithms. Use explicit priority/default selection or a defined array order."
+- id: CAM-13
+  title: Standard-role guarantees are only SHOULD-level
+  area: camera-metadata
+  component: KHR_node_camera_hint
+  severity: major
+  status: open
+  primary_workstream: normative
+  details: If runtimes may ignore all hints, the stated interoperability guarantee and use in `extensionsRequired` are not testable.
+- id: CAM-14
+  title: Custom-role fallback may expose unintended UI
+  area: camera-metadata
+  component: KHR_node_camera_hint
+  severity: minor
+  status: open
+  primary_workstream: non-normative
+  details: Treating every unknown role as a selectable generic camera position can show internal markers. Define a safer discovery/UI rule.
+- id: CAM-15
+  title: "`label` overlaps core `node.name`"
+  area: camera-metadata
+  component: KHR_node_camera_hint
+  severity: minor
+  status: open
+  primary_workstream: schema-and-naming
+  details: Explain why both exist, how localization works, and which one tools should display.
+- id: CAM-16
+  title: The viewer comparison table is unsourced and unstable
+  area: camera-metadata
+  component: KHR_node_camera_hint
+  severity: minor
+  status: open
+  primary_workstream: non-normative
+  details: Remove it or cite reproducible versions and tests; it is motivation, not normative evidence.
+- id: CAM-17
+  title: Contributor metadata is unfinished
+  area: camera-metadata
+  component: KHR_node_camera_hint
+  severity:
+  status: open
+  primary_workstream: non-normative
+  details: The README still contains “Additional contributors TBD.”
+  flags:
+  - rc-gate
+- id: LOOK-01
+  title: There is no consumer-to-target link
+  area: target-metadata
+  component: KHR_node_lookat_target
+  severity: blocker
+  status: open
+  primary_workstream: design
+  details: Discovery of all marked nodes does not tell an eye, head, camera, sign, turret, or constraint which target to use.
+- id: LOOK-02
+  title: "`hint` is optional and free-form"
+  area: target-metadata
+  component: KHR_node_lookat_target
+  severity: blocker
+  status: open
+  primary_workstream: design
+  details: An empty extension object carries only “something may look here,” which is insufficient for deterministic interoperability.
+- id: LOOK-04
+  title: One node cannot express several hints
+  area: target-metadata
+  component: KHR_node_lookat_target
+  severity: major
+  status: open
+  primary_workstream: design
+  details: The text says a node may serve as `eye_target`, `head_target`, and `gaze_target` simultaneously, but the schema has one scalar `hint` string.
+- id: LOOK-05
+  title: Multiple matching targets have no selection or priority
+  area: target-metadata
+  component: KHR_node_lookat_target
+  severity: blocker
+  status: open
+  primary_workstream: design
+  details: This is acknowledged as a known limitation but prevents deterministic behavior for common scenes.
+- id: LOOK-06
+  title: Target ownership and scene scope are missing
+  area: target-metadata
+  component: KHR_node_lookat_target
+  severity: blocker
+  status: open
+  primary_workstream: design
+  details: Generic discovery can select a target belonging to another scene or application subsystem.
+- id: LOOK-07
+  title: Examples infer behavior not encoded by the extension
+  area: target-metadata
+  component: KHR_node_lookat_target
+  severity: major
+  status: open
+  primary_workstream: examples-tests
+  details: "`tour_stop` does not define sequence; wayfinding targets do not link signs to destinations; feature callouts have no labels/content; network replication is outside static glTF data."
+- id: LOOK-08
+  title: VRM integration is not formal
+  area: target-metadata
+  component: KHR_node_lookat_target
+  severity: major
+  status: open
+  primary_workstream: design
+  details: The known limitations admit there is no link from VRM look-at to the target. Do not describe automatic composition as if it were portable behavior.
+- id: LOOK-09
+  title: The expression integration diagram overclaims
+  area: target-metadata
+  component: KHR_node_lookat_target
+  severity: major
+  status: open
+  primary_workstream: non-normative
+  details: The current expression extensions do not define the procedural gaze-angle/range-map pipeline shown in the diagram.
+- id: LOOK-10
+  title: "`lookat` naming should be settled"
+  area: target-metadata
+  component: KHR_node_lookat_target
+  severity: minor
+  status: open
+  primary_workstream: schema-and-naming
+  details: Confirm whether glTF naming should use `look_at` to follow lowercase snake-case tokenization.
+- id: LOOK-11
+  title: Required-extension guidance is too absolute
+  area: target-metadata
+  component: KHR_node_lookat_target
+  severity: major
+  status: open
+  primary_workstream: normative
+  details: If application behavior depends on discovering targets, normal glTF mechanics allow `extensionsRequired`; the document's blanket SHOULD NOT needs justification.
+- id: LOOK-12
+  title: The empty-object KHR extension needs a stronger value proposition
+  area: target-metadata
+  component: KHR_node_lookat_target
+  severity: major
+  status: open
+  primary_workstream: design
+  details: If no standard identity, relationship, or behavior is added, node names or application `extras` can provide equivalent nonportable discovery.
+- id: LOOK-13
+  title: Contributor metadata is unfinished
+  area: target-metadata
+  component: KHR_node_lookat_target
+  severity:
+  status: open
+  primary_workstream: non-normative
+  details: The README still contains “Additional contributors TBD.”
+  flags:
+  - rc-gate
+- id: SCH-01
+  title: Semantic validation is not implemented
+  area: schema-validation
+  component: cross-cutting
+  severity: blocker
+  status: open
+  primary_workstream: validator
+  details: Index bounds, name equality, channel target type, character containment, skin membership, same-scene relationships, uniqueness, and animation-domain rules require validator logic beyond the provided schemas.
+- id: SCH-03
+  title: Expression entries do not inherit `glTFProperty`
+  area: schema-validation
+  component: cross-cutting
+  severity: major
+  status: open
+  primary_workstream: schema-and-naming
+  details: 'They manually declare `extensions` and `extras`, then forbid additional properties. Use a named child schema with `allOf: glTFProperty`.'
+- id: SCH-04
+  title: Extension-on-extension placement needs tooling support
+  area: schema-validation
+  component: cross-cutting
+  severity: major
+  status: open
+  primary_workstream: schema-and-naming
+  details: The `KHR_character_expression.*` schema filenames introduce nested extension locations not used elsewhere in the current Khronos set. Document and test how validators discover these schemas.
+- id: SCH-05
+  title: Required arrays are structurally nonempty but semantically unchecked
+  area: schema-validation
+  component: cross-cutting
+  severity: major
+  status: open
+  primary_workstream: validator
+  details: Channel arrays can reference the wrong animation domain; mask arrays can contain self/duplicate/unknown entries.
+- id: SCH-06
+  title: Mapping dictionaries may be empty
+  area: schema-validation
+  component: cross-cutting
+  severity: major
+  status: open
+  primary_workstream: schema-and-naming
+  details: "`expressionSetMappings`, individual expression sets, `skeletalRigMappings`, and individual rig maps need `minProperties` if empty objects are useless."
+- id: SCH-07
+  title: Dictionary keys have no constraints
+  area: schema-validation
+  component: cross-cutting
+  severity: major
+  status: open
+  primary_workstream: schema-and-naming
+  details: Add `propertyNames` rules for nonempty identifiers, namespace syntax, and any reserved names.
+- id: SCH-08
+  title: Standard-value `anyOf` schemas are redundant
+  area: schema-validation
+  component: cross-cutting
+  severity: minor
+  status: open
+  primary_workstream: schema-and-naming
+  details: "`poseType` accepts every string, and mask `type` accepts every nonempty string, so standard `const` branches do not constrain data."
+- id: SCH-09
+  title: Conditional property rules are absent
+  area: schema-validation
+  component: cross-cutting
+  severity: major
+  status: open
+  primary_workstream: schema-and-naming
+  details: Mask properties and camera-hint properties validate in combinations for which the specification defines no behavior.
+- id: SCH-10
+  title: Duplicate semantic references are not caught
+  area: schema-validation
+  component: cross-cutting
+  severity: major
+  status: open
+  primary_workstream: validator
+  details: JSON Schema `uniqueItems` only catches identical JSON values, not repeated `source` indices, node mappings, or masks with the same semantic endpoints.
+- id: SCH-11
+  title: Defaults are not consistently safe
+  area: schema-validation
+  component: cross-cutting
+  severity: major
+  status: open
+  primary_workstream: schema-and-naming
+  details: An empty reference-pose object defaults to T-pose; an omitted mask type defaults to blend. Defaults must be valid without hidden semantic prerequisites.
+- id: SCH-14
+  title: No version/future-extension strategy exists for dictionary objects
+  area: schema-validation
+  component: cross-cutting
+  severity: major
+  status: open
+  primary_workstream: schema-and-naming
+  details: Mapping dictionaries themselves are not `glTFProperty` objects, so a mapping set cannot carry `extensions` or `extras` without colliding with ordinary mapping keys.
+- id: NAME-01
+  title: "`morphtarget` should be reviewed as `morph_target`"
+  area: naming-terminology
+  component: cross-cutting
+  severity: major
+  status: open
+  primary_workstream: schema-and-naming
+  details: This is the last safe time to fix the public extension name.
+- id: NAME-02
+  title: "`lookat` should be reviewed as `look_at`"
+  area: naming-terminology
+  component: cross-cutting
+  severity: minor
+  status: open
+  primary_workstream: schema-and-naming
+  details: Use consistent English tokenization across extension names and prose.
+- id: NAME-03
+  title: "`expression` is both object type and label property"
+  area: naming-terminology
+  component: cross-cutting
+  severity: minor
+  status: open
+  primary_workstream: schema-and-naming
+  details: "`expressions[].name`, `id`, or `semantic` would be clearer than `expressions[].expression`."
+- id: NAME-04
+  title: "`joint` may be false terminology"
+  area: naming-terminology
+  component: cross-cutting
+  severity: major
+  status: open
+  primary_workstream: schema-and-naming
+  details: Unless targets are validated as skin joints, use `node_transform`.
+- id: NAME-05
+  title: "`texture` is broader than texture transform"
+  area: naming-terminology
+  component: cross-cutting
+  severity: major
+  status: open
+  primary_workstream: schema-and-naming
+  details: Rename or expand it before RC.
+- id: NAME-06
+  title: "`third_person` means “not first person”"
+  area: naming-terminology
+  component: cross-cutting
+  severity: major
+  status: open
+  primary_workstream: schema-and-naming
+  details: The token name and truth table disagree.
+- id: NAME-07
+  title: "`hint` versus normative behavior is inconsistent"
+  area: naming-terminology
+  component: cross-cutting
+  severity: major
+  status: open
+  primary_workstream: schema-and-naming
+  details: If a supporting runtime must honor standard roles, the feature is a view-context annotation; if it may ignore them, `extensionsRequired` is inappropriate.
+- id: NAME-08
+  title: "`label` versus `name` is inconsistent"
+  area: naming-terminology
+  component: cross-cutting
+  severity: minor
+  status: open
+  primary_workstream: schema-and-naming
+  details: Define a project-wide rule for human-readable labels, debugging names, stable identifiers, and localization.
+- id: NAME-09
+  title: Mapping endpoint terminology is inconsistent
+  area: naming-terminology
+  component: cross-cutting
+  severity: major
+  status: open
+  primary_workstream: schema-and-naming
+  details: "`KHR_character_skeleton_mapping` uses `node` for the model-side endpoint, while `KHR_character_expression_mapping` uses `source` for the analogous endpoint. Expression mapping, masking, constraints, and skeleton mapping also use `source` and `target` differently. Define a common terminology and data-flow direction, or explain why the terms intentionally differ."
+- id: NAME-10
+  title: Pose type spelling is inconsistent with other tokens
+  area: naming-terminology
+  component: cross-cutting
+  severity: minor
+  status: open
+  primary_workstream: schema-and-naming
+  details: Decide between `TPose`/`APose`/`IPose` and a consistent style such as `t_pose`/`a_pose`/`i_pose`, including custom-name collision rules.
+- id: NAME-11
+  title: Rig and expression-set container names are overly abstract
+  area: naming-terminology
+  component: cross-cutting
+  severity: minor
+  status: open
+  primary_workstream: schema-and-naming
+  details: "`skeletalRigMappings` and `expressionSetMappings` do not reveal identity/version requirements. Settle the identity model before shortening or freezing property names."
+- id: DOC-12
+  title: Private or unstable working documents remain referenced
+  area: documentation-examples
+  component: cross-cutting
+  severity: major
+  status: open
+  primary_workstream: non-normative
+  details: Replace the Google “Expressions Tab” reference with public specification text.
+- id: DOC-13
+  title: Examples repeat grammar and factual errors
+  area: documentation-examples
+  component: cross-cutting
+  severity: minor
+  status: open
+  primary_workstream: examples-tests
+  details: Examples include a skeleton whose mapped limbs are outside the root hierarchy and a morph-target fragment that claims an index it does not contain. Audit every explanatory sentence against its JSON.
+- id: DOC-16
+  title: No performance guidance is measured
+  area: documentation-examples
+  component: cross-cutting
+  severity: minor
+  status: open
+  primary_workstream: non-normative
+  details: Primitive suppression, repeated animation evaluation, material cloning, and many mapping sets may be expensive. Provide representative measurements without making them normative.
+- id: DOC-17
+  title: Scope exclusions need normative consequences
+  area: documentation-examples
+  component: cross-cutting
+  severity: major
+  status: open
+  primary_workstream: design
+  details: "“Known limitations” that cause divergent output—especially animation mixing and target selection—must be resolved or turned into explicit validity restrictions before RC."
