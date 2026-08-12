@@ -8,6 +8,7 @@ This repository aims to support the development of the KHR_character extension b
 - [converter](./converter): A Deno script that converts VRM 1.0 models to KHR_character glTF files.
 - [provisional](./provisional): A collection of provisional documents and prototypes related to the KHR_character extension.
 - [schematypes](./schematypes): TypeScript type definitions for the KHR_character extension schema.
+- [specification](./specification): A submodule containing the proposal branch of the KHR_character extension in the glTF repository.
 - [viewer](./viewer): A Three.js-based web viewer for testing KHR_character models.
     - It contains a sample KHR_character model converted from a VRM 1.0 model: [viewer/src/assets/khr-character-example.glb](./viewer/src/assets/khr-character-example.glb).
 
