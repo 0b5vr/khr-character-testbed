@@ -411,69 +411,50 @@ issues:
   details: 'The inline schema for `KHR_character_expression.expressions[]` uses `additionalProperties: false`, contrary to the repository convention that glTF property schemas allow additional properties. Factor this expression-entry schema into a named schema inheriting `glTFProperty`.'
   0b5vr_confidence: 5
 - id: JNT-01
-  title: "“Joint” channels need not target joints"
+  title: "“Joint” terminology suggests an unintended skin-joint scope"
   area: expressions
   component: KHR_character_expression_joint
   severity: blocker
   status: open
   primary_workstream: design
-  details: Any node TRS channel satisfies the prose. Require membership in an applicable `skin.joints`, or rename the extension to node-transform expressions.
-- id: JNT-02
-  title: The applicable skin is unknown
-  area: expressions
-  component: KHR_character_expression_joint
-  severity: major
-  status: open
-  primary_workstream: design
-  details: A document may contain multiple skins and the same node may participate in none or several. Define how the character and selected joint channels associate with skins.
+  details: The extension name and description suggest that targets are `skin.joints`, but the current rules allow expression animations to control arbitrary node transforms in the scene, including nodes not listed in any `skin.joints`. State this scope explicitly and reconsider whether `KHR_character_expression_joint` remains an appropriate extension name.
+  0b5vr_confidence: 5
 - id: JNT-03
-  title: "`KHR_animation_pointer` handling is missing"
+  title: "`KHR_animation_pointer` support should be stated explicitly"
   area: expressions
   component: KHR_character_expression_joint
   severity: major
   status: open
   primary_workstream: normative
-  details: Clarify whether pointers to `/nodes/{}/rotation`, translation, or scale are allowed, and align the rule with the morph-target extension.
-- id: JNT-04
-  title: A core target without `node` must be rejected
-  area: expressions
-  component: KHR_character_expression_joint
-  severity: major
-  status: open
-  primary_workstream: validator
-  details: The channel classification needs a semantic validation rule requiring an actual TRS target node.
+  details: Explicitly state that selected channels MAY use `KHR_animation_pointer` targets resolving to `/nodes/{}/rotation`, `/nodes/{}/translation`, or `/nodes/{}/scale`, in addition to ordinary animation targets.
+  0b5vr_confidence: 5
 - id: JNT-05
-  title: Quaternion mixing guidance is not sufficient
+  title: Quaternion blending guidance should recommend nlerp without prescribing an exact algorithm
   area: expressions
   component: KHR_character_expression_joint
   severity: blocker
   status: open
   primary_workstream: normative
-  details: "`exp(lerp(log(q0), log(q1), w))` does not by itself define sign selection, normalization, branch choice, or accumulation of multiple rotations. Use a rigorously specified operation and test vectors."
+  details: Replace the current log/exp formula with prose stating that implementations SHOULD use normalized linear interpolation (nlerp) for quaternion blending where feasible, while allowing another method when nlerp is impractical due to implementation-specific constraints. Defer pseudocode and exact algorithmic details to a later revision.
+  0b5vr_confidence: 5
 - id: JNT-06
-  title: Multi-expression joint composition is undefined
+  title: Multi-expression joint composition should be order-independent
   area: expressions
   component: KHR_character_expression_joint
   severity: blocker
   status: open
   primary_workstream: normative
-  details: Eye-up plus eye-right, or smile plus blink on the same face joint, can produce different results depending on order and engine animation mixer behavior.
+  details: When multiple expressions affect the same transform, especially quaternion rotations, combine their contributions in a single nlerp operation rather than applying them sequentially so that the result does not depend on expression order. Determine whether this requirement needs to be stated explicitly in the specification, and defer pseudocode and exact algorithmic details to a later revision.
+  0b5vr_confidence: 5
 - id: JNT-07
-  title: Absolute versus additive transforms are unspecified
+  title: Base-pose-relative composition semantics are unspecified
   area: expressions
   component: KHR_character_expression_joint
   severity: blocker
   status: open
   primary_workstream: normative
-  details: State whether sampled TRS replaces the base transform, blends from it, or composes as a delta. Translation, rotation, and scale need separate exact formulas.
-- id: JNT-08
-  title: The extension is structurally redundant
-  area: expressions
-  component: KHR_character_expression_joint
-  severity: major
-  status: open
-  primary_workstream: design
-  details: Its only data is a list of channels whose ordinary targets already identify TRS. Either document the capability-negotiation requirement or simplify the extension family.
+  details: Define the composition model under the assumption that expression-driven TRS animations are internally represented as contributions relative to a shared base pose. This assumption defines the required composition semantics but does not prescribe a particular internal data representation. Specify the transform-specific composition semantics for translation, rotation, and scale in a later revision.
+  0b5vr_confidence: 5
 - id: MOR-01
   title: The extension name is not tokenized snake case
   area: expressions
