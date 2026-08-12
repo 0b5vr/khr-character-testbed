@@ -1,0 +1,4 @@
+[submodule "specification/glTF"]
+	path = specification/glTF
+	url = https://github.com/Kjakubzak/glTF.git
+	branch = kjakubzak/avatar_ext
