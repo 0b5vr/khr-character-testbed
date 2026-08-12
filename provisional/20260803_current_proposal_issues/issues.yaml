@@ -463,78 +463,34 @@ issues:
   status: open
   primary_workstream: schema-and-naming
   details: Use `KHR_character_expression_morph_target` unless “morphtarget” is deliberately accepted as one term before the name freezes.
-- id: MOR-02
-  title: The claimed morph-target binding is not represented
-  area: expressions
-  component: KHR_character_expression_morphtarget
-  severity: blocker
-  status: open
-  primary_workstream: design
-  details: The schema lists animation channel indices, not mesh or morph-target indices. The prose repeatedly claims direct semantic binding to particular blendshapes.
+  0b5vr_confidence: 1
 - id: MOR-03
-  title: Ordinary `weights` channels affect the complete weight vector
+  title: Weight-vector composition for multiple expressions is unspecified
   area: expressions
   component: KHR_character_expression_morphtarget
   severity: major
   status: open
   primary_workstream: design
-  details: They cannot identify only the nonzero targets without inspecting output accessors, and they may overwrite weights controlled by other active expressions.
-- id: MOR-04
-  title: Pointer and non-pointer forms have different granularity
-  area: expressions
-  component: KHR_character_expression_morphtarget
-  severity: major
-  status: open
-  primary_workstream: design
-  details: "`/nodes/{}/weights/{}` selects one weight while a core `weights` channel selects all. Define equivalent behavior, base values, and conflict rules."
-- id: MOR-05
-  title: Pointer targets must exist in the Asset Object Model
-  area: expressions
-  component: KHR_character_expression_morphtarget
-  severity: blocker
-  status: open
-  primary_workstream: validator
-  details: Require the pointed-to `node.weights` property and index to exist, or define whether inherited `mesh.weights` is materialized before animation.
-- id: MOR-06
-  title: Morph topology constraints are missing
-  area: expressions
-  component: KHR_character_expression_morphtarget
-  severity: major
-  status: open
-  primary_workstream: validator
-  details: Validate that the targeted node has a mesh, that relevant primitives have compatible morph-target counts, and that each pointer index is in range.
+  details: Define that expression-driven weight outputs are combined additively relative to the shared base weight vector defined by MOR-08, preserving contributions from all active expressions rather than allowing one full-vector channel to overwrite another. Define the treatment of unchanged weight elements and its interaction with individual-weight pointer targets.
+  0b5vr_confidence: 4
 - id: MOR-07
-  title: The Step 1 example makes a false claim
-  area: expressions
-  component: KHR_character_expression_morphtarget
-  severity: major
-  status: open
-  primary_workstream: examples-tests
-  details: It says the fragment binds morph target index 2 on mesh 0, primitive 0, but the fragment contains only expression names, animation indices, and channel indices.
-- id: MOR-08
-  title: Unselected weight preservation is undefined
-  area: expressions
-  component: KHR_character_expression_morphtarget
-  severity: blocker
-  status: open
-  primary_workstream: normative
-  details: Specify how an expression changes a subset of a packed weight vector without resetting other active expressions or authored defaults.
-- id: MOR-09
-  title: Sparse-accessor advice is not expression sparsity
+  title: Example labels are incorrect
   area: expressions
   component: KHR_character_expression_morphtarget
   severity: minor
   status: open
-  primary_workstream: non-normative
-  details: Sparse accessors compress stored data but do not create independent runtime ownership of individual morph weights. Avoid implying otherwise.
-- id: MOR-10
-  title: The external “Expressions Tab” is not an RC reference
+  primary_workstream: examples-tests
+  details: Correct the Step 1 heading and explanatory labels so they consistently describe associating expressions with morph-target animation channels. The example currently uses `smile` and `frown` but later refers to `blinkLeft` and a specific morph target index.
+  0b5vr_confidence: 5
+- id: MOR-08
+  title: Authored base weights are not preserved by the composition model
   area: expressions
   component: KHR_character_expression_morphtarget
-  severity: major
+  severity: blocker
   status: open
   primary_workstream: normative
-  details: Move all required guidance into the public specification or a stable normative reference.
+  details: Define how the shared base weight vector is derived from authored `node.weights`, fallback `mesh.weights`, or zero defaults, and ensure that expression-driven changes preserve authored defaults and weight elements not changed by an expression.
+  0b5vr_confidence: 5
 - id: TEX-01
   title: The name overstates the supported domain
   area: expressions
