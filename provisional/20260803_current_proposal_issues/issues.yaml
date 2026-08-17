@@ -499,6 +499,7 @@ issues:
   status: open
   primary_workstream: schema-and-naming
   details: The extension supports only `KHR_texture_transform` offset, scale, and rotation—not texture selection, image blending, material color, or other texture expression techniques. Consider `KHR_character_expression_texture_transform` or broaden the schema and semantics.
+  0b5vr_confidence: 2
 - id: TEX-02
   title: Third-party texture slots are not automatically animatable
   area: expressions
@@ -507,22 +508,7 @@ issues:
   status: open
   primary_workstream: design
   details: A pointer such as a `KHR_texture_transform` nested under `VRMC_materials_mtoon` is valid only if the containing property is part of the glTF Asset Object Model. The open PR question about MToon remains unresolved in the specification.
-- id: TEX-03
-  title: Pointer target validation is prose-only
-  area: expressions
-  component: KHR_character_expression_texture
-  severity: major
-  status: open
-  primary_workstream: validator
-  details: The validator must confirm the target is an actual mutable `KHR_texture_transform.offset`, `scale`, or `rotation` property and that all required dependencies are declared.
-- id: TEX-04
-  title: Material sharing changes scope
-  area: expressions
-  component: KHR_character_expression_texture
-  severity: blocker
-  status: open
-  primary_workstream: design
-  details: Animating a material texture transform affects every primitive using that material, including primitives outside the intended character subtree. Define whether cloning/material instancing is required or prohibit sharing an animated material with unrelated content.
+  0b5vr_confidence: 1
 - id: TEX-05
   title: Rotation mixing is omitted
   area: expressions
@@ -531,6 +517,7 @@ issues:
   status: open
   primary_workstream: normative
   details: The blending section covers offset and scale only. Define angular interpolation, wrapping, and combination for rotation.
+  0b5vr_confidence: 5
 - id: TEX-06
   title: Atlas transitions need sampling guidance
   area: expressions
@@ -539,30 +526,25 @@ issues:
   status: open
   primary_workstream: normative
   details: Linear offset interpolation can expose unintended atlas cells and filtering bleed. Define when `STEP` is required and any padding/wrap-mode assumptions.
-- id: TEX-07
-  title: The proposal does not cover texture switching or image blending
-  area: expressions
-  component: KHR_character_expression_texture
-  severity: major
-  status: open
-  primary_workstream: design
-  details: These are listed as follow-up work in PR discussion but are natural interpretations of the current extension name. Narrow the stated use cases for RC.
+  0b5vr_confidence: 1
 - id: TEX-08
-  title: Shared-channel and base-value conflicts remain undefined
+  title: Texture targets do not reference shared expression-mixing rules
   area: expressions
   component: KHR_character_expression_texture
   severity: blocker
   status: open
   primary_workstream: design
-  details: Multiple expressions can animate the same texture transform without deterministic mixing.
+  details: Define shared expression mixing in `KHR_character_expression`, including base values, order-independent composition, normalization, and conflict resolution. This extension should apply those rules to `KHR_texture_transform.offset`, `scale`, and `rotation`.
+  0b5vr_confidence: 5
 - id: MAP-02
-  title: The mathematical direction is ambiguous
+  title: Mapping direction is not explicit
   area: expressions
   component: KHR_character_expression_mapping
   severity: blocker
   status: open
   primary_workstream: design
-  details: The prose says model source expressions contribute to endpoint target expressions, but a runtime commonly receives a target command and needs to drive model sources. Specify the exact function in both authoring and playback terms.
+  details: State that each mapping key names an endpoint input expression whose value drives one or more source expressions in `KHR_character_expression.expressions[]` according to their mapping weights. Reverse mapping from source expressions to endpoint expressions is out of scope.
+  0b5vr_confidence: 5
 - id: MAP-03
   title: No evaluation equation is provided
   area: expressions
@@ -570,7 +552,8 @@ issues:
   severity: blocker
   status: open
   primary_workstream: design
-  details: Define how target values, source values, and weights are combined, including clamping, accumulation, missing entries, and simultaneous targets.
+  details: "Define the source-value equation: multiply each endpoint input by its mapping weight and accumulate contributions for each referenced source expression. Specify missing-input, duplicate-entry, normalization, and out-of-range behavior."
+  0b5vr_confidence: 5
 - id: MAP-04
   title: "`weight` is unconstrained"
   area: expressions
@@ -578,31 +561,17 @@ issues:
   severity: major
   status: open
   primary_workstream: schema-and-naming
-  details: Negative, zero, and arbitrarily large values validate. Specify the allowed interval and meaning; do not rely on “relative influence.”
-- id: MAP-05
-  title: Weight normalization is unspecified
-  area: expressions
-  component: KHR_character_expression_mapping
-  severity: major
-  status: open
-  primary_workstream: design
-  details: The text says weights need not sum to any value but does not define the consequence. Provide deterministic examples with sums below, equal to, and above 1.
+  details: Restrict `weight` to the inclusive range [0, 1]. Negative and greater-than-one weights are not supported.
+  0b5vr_confidence: 5
 - id: MAP-06
-  title: The advertised cardinality is inaccurate
+  title: Mapping cardinality is not explicit
   area: expressions
   component: KHR_character_expression_mapping
   severity: major
   status: open
   primary_workstream: design
-  details: Each target key contains multiple source entries, which is many-to-one in the stored direction. A source reused under several targets creates one-to-many behavior. Name and specify both cases correctly.
-- id: MAP-07
-  title: Simultaneous target collisions are undefined
-  area: expressions
-  component: KHR_character_expression_mapping
-  severity: blocker
-  status: open
-  primary_workstream: design
-  details: If two target expressions drive the same source expression, define whether inputs add, take a maximum, normalize, or conflict.
+  details: State that mapping keys may reference multiple source expressions and that source expressions may be referenced by multiple keys. One-to-one, one-to-many, many-to-one, and many-to-many mappings are supported.
+  0b5vr_confidence: 3
 - id: MAP-08
   title: Duplicate source entries are valid
   area: expressions
@@ -610,7 +579,8 @@ issues:
   severity: major
   status: open
   primary_workstream: validator
-  details: The same `source` may appear repeatedly in one target list. Prohibit duplicates or define intentional repeated contribution.
+  details: The same `source` may appear repeatedly in one target list. Prohibit duplicates on export and define whether a consumer should sum, average, or reject duplicates.
+  0b5vr_confidence: 4
 - id: MAP-09
   title: Empty mappings are valid
   area: expressions
@@ -619,6 +589,7 @@ issues:
   status: open
   primary_workstream: schema-and-naming
   details: 'Add `minProperties: 1` to the set dictionary and each mapping dictionary unless an empty set has defined behavior.'
+  0b5vr_confidence: 5
 - id: MAP-10
   title: Empty and misleading dictionary keys are valid
   area: expressions
@@ -627,14 +598,7 @@ issues:
   status: open
   primary_workstream: schema-and-naming
   details: Add `propertyNames` constraints and define case sensitivity and Unicode normalization.
-- id: MAP-11
-  title: Mapping-set selection is unspecified
-  area: expressions
-  component: KHR_character_expression_mapping
-  severity: major
-  status: open
-  primary_workstream: design
-  details: When several sets exist, define how a consumer recognizes and chooses one, and whether sets may be composed.
+  0b5vr_confidence: 5
 - id: MAP-13
   title: Optional `name` repeats `source` identity
   area: expressions
@@ -643,14 +607,16 @@ issues:
   status: open
   primary_workstream: schema-and-naming
   details: Remove it or define a recovery/debugging role that does not make otherwise valid index-based data invalid after a harmless rename.
+  0b5vr_confidence: 5
 - id: MAP-14
-  title: The example demonstrates the core ambiguity
+  title: Example reuses one animation for several expressions
   area: expressions
   component: KHR_character_expression_mapping
   severity: major
   status: open
   primary_workstream: examples-tests
-  details: Three expressions reference the same translation animation, with no typed bindings or deterministic way to evaluate different expression values.
+  details: The example references animation 0 from `smileLeft`, `smileRight`, and `jawOpen`, conflicting with EXP-14. Update the example to use a distinct animation for each expression.
+  0b5vr_confidence: 5
 - id: MASK-01
   title: The general composition equation is missing
   area: expressions
@@ -658,7 +624,8 @@ issues:
   severity: blocker
   status: open
   primary_workstream: normative
-  details: Provide one normative formula for all masks affecting each target, including the per-mask factor and the final output.
+  details: "Define the normative mask-composition rule for all masks affecting each target expression: derive each mask's influence factor, combine the factors, and apply the result to the target input to obtain the final output."
+  0b5vr_confidence: 5
 - id: MASK-02
   title: Input range is only a recommendation
   area: expressions
@@ -667,6 +634,7 @@ issues:
   status: open
   primary_workstream: normative
   details: Values outside `[0, 1]` can produce negative or amplified outputs. Make the domain and clamping/rejection rule normative.
+  0b5vr_confidence: 5
 - id: MASK-03
   title: Unknown custom mask types have no runtime fallback
   area: expressions
@@ -674,7 +642,8 @@ issues:
   severity: blocker
   status: open
   primary_workstream: design
-  details: Preservation alone is insufficient. State whether an unsupported type is ignored, treated as `blend`, or makes the expression/asset unsupported.
+  details: Preservation alone is insufficient. State explicitly that an unsupported type is ignored.
+  0b5vr_confidence: 5
 - id: MASK-04
   title: Custom type names can collide
   area: expressions
@@ -683,6 +652,7 @@ issues:
   status: open
   primary_workstream: schema-and-naming
   details: Require a vendor/URI namespace and reserve standard names. Otherwise a future standard type can change the meaning of existing assets.
+  0b5vr_confidence: 3
 - id: MASK-05
   title: The schema's `anyOf` is misleading
   area: expressions
@@ -691,6 +661,7 @@ issues:
   status: open
   primary_workstream: schema-and-naming
   details: Because one branch accepts every nonempty string, the `blend` and `block` `const` branches impose no additional validation. Use documented reserved values plus a clear custom-name schema.
+  0b5vr_confidence: 5
 - id: MASK-06
   title: "“Block” does not necessarily block"
   area: expressions
@@ -698,15 +669,8 @@ issues:
   severity: major
   status: open
   primary_workstream: schema-and-naming
-  details: With `amount < 1`, the target is only attenuated. Rename the type or describe it as step attenuation rather than full blocking.
-- id: MASK-07
-  title: Threshold boundary behavior needs tests
-  area: expressions
-  component: KHR_character_expression_mask
-  severity: major
-  status: open
-  primary_workstream: normative
-  details: The formula uses `source > threshold`, not `>=`. Preserve that exact choice normatively and add tests at `threshold - epsilon`, `threshold`, and `threshold + epsilon`.
+  details: "Define `block` as threshold-triggered attenuation: when the source value exceeds `threshold`, multiply the target by `(1 - amount)`; `amount: 1` fully blocks the target."
+  0b5vr_confidence: 5
 - id: MASK-08
   title: Irrelevant properties remain valid
   area: expressions
@@ -715,6 +679,7 @@ issues:
   status: open
   primary_workstream: schema-and-naming
   details: "`threshold` is accepted on `blend`, and both parameters are accepted on custom types. Use conditional schema rules where possible and define how readers preserve/ignore unused properties."
+  0b5vr_confidence: 2
 - id: MASK-09
   title: Self-masking is valid but unspecified
   area: expressions
@@ -722,7 +687,8 @@ issues:
   severity: major
   status: open
   primary_workstream: design
-  details: An expression may target itself. Explicitly prohibit it or define the output from the raw input.
+  details: An expression may target itself. Explicitly prohibit it.
+  0b5vr_confidence: 5
 - id: MASK-10
   title: Cyclic masks need an explicit rule
   area: expressions
@@ -730,23 +696,17 @@ issues:
   severity: major
   status: open
   primary_workstream: normative
-  details: The order-independence claim relies on every mask reading pre-mask inputs. State that normatively and test mutual and longer cycles.
-- id: MASK-11
-  title: Duplicate masks are valid
-  area: expressions
-  component: KHR_character_expression_mask
-  severity: major
-  status: open
-  primary_workstream: design
-  details: Repeating the same source-to-target mask changes the curve multiplicatively. State whether this is intentional and how exact duplicates are validated.
+  details: State normatively that all masks read the pre-mask input value of their source expression and that mask outputs are never used as mask inputs. Mutual and longer cycles are therefore order-independent and do not require a DAG.
+  0b5vr_confidence: 4
 - id: MASK-12
-  title: Text and schema disagree about sources
+  title: README wording excludes same-source masks
   area: expressions
   component: KHR_character_expression_mask
   severity: minor
   status: open
   primary_workstream: non-normative
-  details: The README describes multiple masks “from different expressions,” but the schema permits repeated masks from one source expression to one target.
+  details: Update the README to state that multiple masks may target the same expression, including multiple masks from one source expression; their combined influence is multiplicative. No schema restriction is needed.
+  0b5vr_confidence: 3
 - id: MASK-13
   title: "`name` is redundant and rename-fragile"
   area: expressions
@@ -755,6 +715,7 @@ issues:
   status: open
   primary_workstream: schema-and-naming
   details: Resolution always uses `target`; requiring a duplicated display name to match adds no behavior.
+  0b5vr_confidence: 5
 - id: MASK-14
   title: The blending recommendation is unrelated
   area: expressions
@@ -762,7 +723,8 @@ issues:
   severity: major
   status: open
   primary_workstream: non-normative
-  details: Generic lerp of property values does not define expression-driver masking or solve cross-animation mixing. Move property mixing to the core execution model.
+  details: The README's generic `lerp` recommendation describes property-value blending, not mask attenuation or expression-driver mixing. Remove it from this extension; define expression and animation mixing in `KHR_character_expression` and keep mask composition in this extension.
+  0b5vr_confidence: 5
 - id: MASK-15
   title: "“Mask” may be misleading terminology"
   area: expressions
@@ -771,6 +733,7 @@ issues:
   status: open
   primary_workstream: schema-and-naming
   details: In graphics and animation, a mask often selects spatial components or channels; this extension applies directed expression-level attenuation. Consider `inhibition`, `override`, or clearly define the term.
+  0b5vr_confidence: 2
 - id: POSE-01
   title: The schema only tags an arbitrary animation
   area: rigging
