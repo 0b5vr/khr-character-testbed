@@ -1290,22 +1290,6 @@ issues:
   details: The README still contains “Additional contributors TBD.”
   flags:
   - rc-gate
-- id: SCH-01
-  title: Semantic validation is not implemented
-  area: schema-validation
-  component: cross-cutting
-  severity: blocker
-  status: open
-  primary_workstream: validator
-  details: Index bounds, name equality, channel target type, character containment, skin membership, same-scene relationships, uniqueness, and animation-domain rules require validator logic beyond the provided schemas.
-- id: SCH-03
-  title: Expression entries do not inherit `glTFProperty`
-  area: schema-validation
-  component: cross-cutting
-  severity: major
-  status: open
-  primary_workstream: schema-and-naming
-  details: 'They manually declare `extensions` and `extras`, then forbid additional properties. Use a named child schema with `allOf: glTFProperty`.'
 - id: SCH-04
   title: Extension-on-extension placement needs tooling support
   area: schema-validation
