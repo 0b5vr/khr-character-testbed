@@ -149,6 +149,7 @@ issues:
   primary_workstream: normative
   details: The visibility and camera documents declare RFC 2119, while the character documents use lowercase “must”, “should”, and “may” for requirements. Adopt RFC 2119/8174 consistently and distinguish normative text from recommendations.
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/2
 - id: GEN-04
   title: The transitive `KHR_xmp_json_ld` dependency is unnecessary
   area: cross-cutting
@@ -158,6 +159,7 @@ issues:
   primary_workstream: design
   details: Every character-family asset must advertise and every consumer must support XMP even when no metadata packet exists. Make XMP optional unless actual character metadata is present, or justify what required behavior an XMP-capable consumer provides when there is no packet.
   0b5vr_confidence: 4
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/3
 - id: GEN-06
   title: Multiple-scene semantics are missing
   area: cross-cutting
@@ -167,6 +169,7 @@ issues:
   primary_workstream: design
   details: "`rootNode`, camera targets, look-at targets, and world-space hints do not say which scene owns them, whether they must be reachable from the default scene, or what happens when the same document has several scenes. The specification should state: \"This extension does not define semantics for glTF assets containing multiple scenes.\""
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/4
 - id: GEN-07
   title: Visibility-extension scope needs an explicit note
   area: cross-cutting
@@ -176,6 +179,7 @@ issues:
   primary_workstream: normative
   details: In both visibility extension specifications, state that, since `KHR_character` assumes one character per glTF asset, these extensions do not define character ownership or per-character view-context selection.
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/5
 - id: GEN-12
   title: Cross-object containment is not defined
   area: cross-cutting
@@ -185,6 +189,7 @@ issues:
   primary_workstream: design
   details: Referenced nodes and channels are checked only as document indices. The specifications must say whether they must belong to the character subtree, an applicable skin, or the same scene.
   0b5vr_confidence: 1
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/6
 - id: GEN-13
   title: Redundant index/name pairs add a failure mode
   area: cross-cutting
@@ -194,6 +199,7 @@ issues:
   primary_workstream: design
   details: Mask, expression mapping, and skeleton mapping objects resolve by index but optionally repeat a name that MUST match. This adds edit fragility without changing identity. Remove the duplicate name, make it purely non-normative debug metadata, or give it a defined recovery purpose.
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/7
 - id: GEN-15
   title: Extension partitioning is not justified
   area: cross-cutting
@@ -203,6 +209,7 @@ issues:
   primary_workstream: design
   details: The three expression target extensions contain only channel-index arrays whose target domain can usually be inferred from animation paths. Specify the capability-negotiation benefit and unsupported-domain fallback, or merge them into one expression-channel binding model.
   0b5vr_confidence: 3
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/8
 - id: GEN-16
   title: Partial implementation is not defined
   area: cross-cutting
@@ -212,6 +219,7 @@ issues:
   primary_workstream: design
   details: A runtime may support morph expressions but not joint or texture expressions. The proposal does not define whether an expression is partially applied, rejected, or considered unsupported.
   0b5vr_confidence: 4
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/9
 - id: GEN-17
   title: Composition across extensions is not fully specified
   area: cross-cutting
@@ -221,6 +229,7 @@ issues:
   primary_workstream: design
   details: Expressions, masks, mappings, visibility, camera hints, and look-at targets make cross-extension claims, but there is no normative evaluation pipeline or state diagram.
   0b5vr_confidence: 2
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/10
 - id: GEN-18
   title: KHR scope and maturity are mixed
   area: cross-cutting
@@ -230,6 +239,7 @@ issues:
   primary_workstream: design
   details: General camera, visibility, and look-at metadata are bundled with the character family even though they are independently useful and have different implementation risks. Evaluate and advance them separately.
   0b5vr_confidence: 1
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/11
 - id: GEN-19
   title: Requirements are repeated and drift
   area: cross-cutting
@@ -239,6 +249,7 @@ issues:
   primary_workstream: normative
   details: The expression-related READMEs duplicate rules for input-to-animation-time mapping, sampler interpolation, base values, and overlapping outputs, and the copies already diverge. Define this execution model once in `KHR_character_expression`; subextensions should specify only their target type and refer to the shared rules.
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/12
 - id: CHAR-01
   title: "`rootNode` purpose and normative scope are unresolved"
   area: character-root
@@ -248,6 +259,7 @@ issues:
   primary_workstream: design
   details: The extension marker already identifies the asset as a character, while `rootNode` is only described as a SHOULD-level common ancestor and is not used normatively by the related extensions. If `rootNode` is retained, give it a clear purpose as the normative boundary for character-owned nodes and references, and define the required containment and reachability rules. If that scoping behavior is not needed, remove `rootNode` and make `KHR_character` a marker-only extension whose minimum support is recognizing the asset as a character and discovering related extensions.
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/13
 - id: CHAR-02
   title: Scene reachability is unspecified
   area: character-root
@@ -257,6 +269,7 @@ issues:
   primary_workstream: normative
   details: "`rootNode` may be absent from every scene or present only in a non-default scene. Define validity and behavior for both cases."
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/14
 - id: CHAR-03
   title: Multiple-character scope needs an explicit statement
   area: character-root
@@ -266,6 +279,7 @@ issues:
   primary_workstream: normative
   details: State that `KHR_character` describes at most one character in a glTF asset and that representation of multiple characters within a single asset is outside the scope of this extension.
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/15
 - id: CHAR-06
   title: The proposed Khronos JSON-LD namespace does not exist
   area: character-root
@@ -275,6 +289,7 @@ issues:
   primary_workstream: schema-and-naming
   details: The example uses `https://www.khronos.org/registry/glTF/character/metadata/`, while the text admits it is unpublished. Do not publish RC examples using terms without a resolvable, versioned context.
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/16
 - id: CHAR-07
   title: Dublin Core terms are mixed incorrectly
   area: character-root
@@ -284,6 +299,7 @@ issues:
   primary_workstream: schema-and-naming
   details: "`dc:created` and `dc:license` are shown under the Dublin Core Elements 1.1 namespace, but those terms belong to DCMI Terms. Correct the context and define value shapes."
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/17
 - id: CHAR-08
   title: "`khr:thumbnailImage` embeds a glTF index in generic metadata"
   area: character-root
@@ -293,6 +309,7 @@ issues:
   primary_workstream: design
   details: Its reference semantics, allowed image types, index-update requirements, and validator rules are not defined by either schema. Prefer an ordinary typed extension property if it is a glTF object reference.
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/18
 - id: EXP-01
   title: Expression identity and external control are undefined
   area: expressions
@@ -302,6 +319,7 @@ issues:
   primary_workstream: design
   details: The specification defines expression entries and index-based references for masks and mappings, but does not define how an application addresses an expression for control. Define whether the array index or the expression name is authoritative, and specify duplicate-name and missing-name behavior.
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/19
 - id: EXP-02
   title: Expression labels may be empty
   area: expressions
@@ -311,6 +329,7 @@ issues:
   primary_workstream: schema-and-naming
   details: 'The required property `KHR_character_expression.expressions[].expression` needs `minLength: 1` or a defined meaning for an empty string.'
   0b5vr_confidence: 4
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/20
 - id: EXP-07
   title: Out-of-range input behavior is not an expression rule
   area: expressions
@@ -320,6 +339,7 @@ issues:
   primary_workstream: normative
   details: Make `[0, 1]` a MUST for supplied and masked values, and say whether implementations clamp, reject, or preserve out-of-range values. It probably should be a MUST to clamp.
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/21
 - id: EXP-08
   title: Default expression input and initial state are unspecified
   area: expressions
@@ -329,6 +349,7 @@ issues:
   primary_workstream: normative
   details: "The specification does not define a default input value for each expression or require implementations to apply the corresponding expression driver when no application value has been supplied. Introduce an explicit per-expression default input value and define that the referenced animation is evaluated at that value by default; for a default of `0.0`, this applies each sampler's first output. Define the omitted-value default, mask order, and the distinction between this initial state and the authored node, morph, or material base value."
   0b5vr_confidence: 4
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/22
 - id: EXP-10
   title: Channels not selected by an expression extension have no defined behavior
   area: expressions
@@ -338,6 +359,7 @@ issues:
   primary_workstream: design
   details: When an expression references an animation, the proposal does not specify what happens to channels absent from its typed `channels` list. Decide whether the specification should explicitly leave these channels undefined, or prescribe ignoring, ordinary animation behavior, or invalidation.
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/23
 - id: EXP-12
   title: Channel overlap across subextensions is allowed
   area: expressions
@@ -347,6 +369,7 @@ issues:
   primary_workstream: design
   details: A channel can appear in more than one typed list. Require disjoint sets or define why duplicate classification is meaningful.
   0b5vr_confidence: 4
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/24
 - id: EXP-13
   title: Channel overlap across expressions is allowed
   area: expressions
@@ -356,6 +379,7 @@ issues:
   primary_workstream: design
   details: Different expressions may target the same property through different animations. The proposal mentions blending but does not define deterministic additive composition. State that implementations SHOULD evaluate multiple active expression drivers concurrently and combine their contributions using additive blending rather than selecting one driver. Define additive composition for each target type, including base-value semantics; for rotational outputs, recommend nlerp for quaternion blending and define hemisphere/sign handling and how multiple inputs are combined.
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/25
 - id: EXP-14
   title: Reusing one animation for several expressions is ambiguous
   area: expressions
@@ -365,6 +389,7 @@ issues:
   primary_workstream: design
   details: Require each animation to be referenced by at most one expression entry. Reusing an animation for multiple expressions would require independent time cursors and introduce unnecessary channel-resolution ambiguity; authors must duplicate the animation when separate expression control is needed.
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/26
 - id: EXP-15
   title: Mixing semantics are a core requirement, not a known limitation
   area: expressions
@@ -374,6 +399,7 @@ issues:
   primary_workstream: design
   details: Define override/additive behavior, base values, ordering, normalization, quaternion handling, and conflict resolution, or constrain assets so overlapping targets are invalid.
   0b5vr_confidence: 3
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/27
 - id: EXP-16
   title: "“Transforms scale proportionally” is not glTF sampling behavior"
   area: expressions
@@ -383,6 +409,7 @@ issues:
   primary_workstream: normative
   details: Animation outputs are sampled values; translations, scales, and quaternions are not multiplied by expression input. Replace this prose with an exact sampling and composition algorithm. This is probably an unintended description.
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/28
 - id: EXP-17
   title: Binary-expression guidance is overprescriptive
   area: expressions
@@ -392,6 +419,7 @@ issues:
   primary_workstream: normative
   details: "The normative guidance strongly recommends `STEP` interpolation for binary expressions, but the extension does not define binary-expression semantics or a binary flag. Rewrite it as non-normative authoring guidance: authors MAY use `STEP` interpolation when an expression is intended to behave as a discrete or binary control; this can encode behavior similar to VRM's `isBinary` expressions."
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/29
 - id: EXP-18
   title: Facial scope is inconsistent
   area: expressions
@@ -401,6 +429,7 @@ issues:
   primary_workstream: design
   details: The overview describes facial expressions, while the category text also covers broader gestures and actions and movements across down-chain meshes. The extension name and data model support a broader character-expression scope; revise the overview and scope language to describe general expression-driven character controls rather than facial expressions only.
   0b5vr_confidence: 4
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/30
 - id: EXP-20
   title: The schema closes expression entries to future properties
   area: expressions
@@ -410,6 +439,7 @@ issues:
   primary_workstream: schema-and-naming
   details: 'The inline schema for `KHR_character_expression.expressions[]` uses `additionalProperties: false`, contrary to the repository convention that glTF property schemas allow additional properties. Factor this expression-entry schema into a named schema inheriting `glTFProperty`.'
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/31
 - id: JNT-01
   title: "“Joint” terminology suggests an unintended skin-joint scope"
   area: expressions
@@ -419,6 +449,7 @@ issues:
   primary_workstream: design
   details: The extension name and description suggest that targets are `skin.joints`, but the current rules allow expression animations to control arbitrary node transforms in the scene, including nodes not listed in any `skin.joints`. State this scope explicitly and reconsider whether `KHR_character_expression_joint` remains an appropriate extension name.
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/32
 - id: JNT-03
   title: "`KHR_animation_pointer` support should be stated explicitly"
   area: expressions
@@ -428,6 +459,7 @@ issues:
   primary_workstream: normative
   details: Explicitly state that selected channels MAY use `KHR_animation_pointer` targets resolving to `/nodes/{}/rotation`, `/nodes/{}/translation`, or `/nodes/{}/scale`, in addition to ordinary animation targets.
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/33
 - id: JNT-05
   title: Quaternion blending guidance should recommend nlerp without prescribing an exact algorithm
   area: expressions
@@ -437,6 +469,7 @@ issues:
   primary_workstream: normative
   details: Replace the current log/exp formula with prose stating that implementations SHOULD use normalized linear interpolation (nlerp) for quaternion blending where feasible, while allowing another method when nlerp is impractical due to implementation-specific constraints. Defer pseudocode and exact algorithmic details to a later revision.
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/34
 - id: JNT-06
   title: Multi-expression joint composition should be order-independent
   area: expressions
@@ -446,6 +479,7 @@ issues:
   primary_workstream: normative
   details: When multiple expressions affect the same transform, especially quaternion rotations, combine their contributions in a single nlerp operation rather than applying them sequentially so that the result does not depend on expression order. Determine whether this requirement needs to be stated explicitly in the specification, and defer pseudocode and exact algorithmic details to a later revision.
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/35
 - id: JNT-07
   title: Base-pose-relative composition semantics are unspecified
   area: expressions
@@ -455,6 +489,7 @@ issues:
   primary_workstream: normative
   details: Define the composition model under the assumption that expression-driven TRS animations are internally represented as contributions relative to a shared base pose. This assumption defines the required composition semantics but does not prescribe a particular internal data representation. Specify the transform-specific composition semantics for translation, rotation, and scale in a later revision.
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/36
 - id: MOR-01
   title: The extension name is not tokenized snake case
   area: expressions
@@ -464,6 +499,7 @@ issues:
   primary_workstream: schema-and-naming
   details: Use `KHR_character_expression_morph_target` unless “morphtarget” is deliberately accepted as one term before the name freezes.
   0b5vr_confidence: 1
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/37
 - id: MOR-03
   title: Weight-vector composition for multiple expressions is unspecified
   area: expressions
@@ -473,6 +509,7 @@ issues:
   primary_workstream: design
   details: Define that expression-driven weight outputs are combined additively relative to the shared base weight vector defined by MOR-08, preserving contributions from all active expressions rather than allowing one full-vector channel to overwrite another. Define the treatment of unchanged weight elements and its interaction with individual-weight pointer targets.
   0b5vr_confidence: 4
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/38
 - id: MOR-07
   title: Example labels are incorrect
   area: expressions
@@ -482,6 +519,7 @@ issues:
   primary_workstream: examples-tests
   details: Correct the Step 1 heading and explanatory labels so they consistently describe associating expressions with morph-target animation channels. The example currently uses `smile` and `frown` but later refers to `blinkLeft` and a specific morph target index.
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/39
 - id: MOR-08
   title: Authored base weights are not preserved by the composition model
   area: expressions
@@ -491,6 +529,7 @@ issues:
   primary_workstream: normative
   details: Define how the shared base weight vector is derived from authored `node.weights`, fallback `mesh.weights`, or zero defaults, and ensure that expression-driven changes preserve authored defaults and weight elements not changed by an expression.
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/40
 - id: TEX-01
   title: The name overstates the supported domain
   area: expressions
@@ -500,6 +539,7 @@ issues:
   primary_workstream: schema-and-naming
   details: The extension supports only `KHR_texture_transform` offset, scale, and rotation—not texture selection, image blending, material color, or other texture expression techniques. Consider `KHR_character_expression_texture_transform` or broaden the schema and semantics.
   0b5vr_confidence: 2
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/41
 - id: TEX-02
   title: Third-party texture slots are not automatically animatable
   area: expressions
@@ -509,6 +549,7 @@ issues:
   primary_workstream: design
   details: A pointer such as a `KHR_texture_transform` nested under `VRMC_materials_mtoon` is valid only if the containing property is part of the glTF Asset Object Model. The open PR question about MToon remains unresolved in the specification.
   0b5vr_confidence: 1
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/42
 - id: TEX-05
   title: Rotation mixing is omitted
   area: expressions
@@ -518,6 +559,7 @@ issues:
   primary_workstream: normative
   details: The blending section covers offset and scale only. Define angular interpolation, wrapping, and combination for rotation.
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/43
 - id: TEX-06
   title: Atlas transitions need sampling guidance
   area: expressions
@@ -527,6 +569,7 @@ issues:
   primary_workstream: normative
   details: Linear offset interpolation can expose unintended atlas cells and filtering bleed. Define when `STEP` is required and any padding/wrap-mode assumptions.
   0b5vr_confidence: 1
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/44
 - id: TEX-08
   title: Texture targets do not reference shared expression-mixing rules
   area: expressions
@@ -536,6 +579,7 @@ issues:
   primary_workstream: design
   details: Define shared expression mixing in `KHR_character_expression`, including base values, order-independent composition, normalization, and conflict resolution. This extension should apply those rules to `KHR_texture_transform.offset`, `scale`, and `rotation`.
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/45
 - id: MAP-02
   title: Mapping direction is not explicit
   area: expressions
@@ -545,6 +589,7 @@ issues:
   primary_workstream: design
   details: State that each mapping key names an endpoint input expression whose value drives one or more source expressions in `KHR_character_expression.expressions[]` according to their mapping weights. Reverse mapping from source expressions to endpoint expressions is out of scope.
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/46
 - id: MAP-03
   title: No evaluation equation is provided
   area: expressions
@@ -554,6 +599,7 @@ issues:
   primary_workstream: design
   details: "Define the source-value equation: multiply each endpoint input by its mapping weight and accumulate contributions for each referenced source expression. Specify missing-input, duplicate-entry, normalization, and out-of-range behavior."
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/47
 - id: MAP-04
   title: "`weight` is unconstrained"
   area: expressions
@@ -563,6 +609,7 @@ issues:
   primary_workstream: schema-and-naming
   details: Restrict `weight` to the inclusive range [0, 1]. Negative and greater-than-one weights are not supported.
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/48
 - id: MAP-06
   title: Mapping cardinality is not explicit
   area: expressions
@@ -572,6 +619,7 @@ issues:
   primary_workstream: design
   details: State that mapping keys may reference multiple source expressions and that source expressions may be referenced by multiple keys. One-to-one, one-to-many, many-to-one, and many-to-many mappings are supported.
   0b5vr_confidence: 3
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/49
 - id: MAP-08
   title: Duplicate source entries are valid
   area: expressions
@@ -581,6 +629,7 @@ issues:
   primary_workstream: validator
   details: The same `source` may appear repeatedly in one target list. Prohibit duplicates on export and define whether a consumer should sum, average, or reject duplicates.
   0b5vr_confidence: 4
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/50
 - id: MAP-09
   title: Empty mappings are valid
   area: expressions
@@ -590,6 +639,7 @@ issues:
   primary_workstream: schema-and-naming
   details: 'Add `minProperties: 1` to the set dictionary and each mapping dictionary unless an empty set has defined behavior.'
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/51
 - id: MAP-10
   title: Empty and misleading dictionary keys are valid
   area: expressions
@@ -599,6 +649,7 @@ issues:
   primary_workstream: schema-and-naming
   details: Add `propertyNames` constraints and define case sensitivity and Unicode normalization.
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/52
 - id: MAP-13
   title: Optional `name` repeats `source` identity
   area: expressions
@@ -608,6 +659,7 @@ issues:
   primary_workstream: schema-and-naming
   details: Remove it or define a recovery/debugging role that does not make otherwise valid index-based data invalid after a harmless rename.
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/53
 - id: MAP-14
   title: Example reuses one animation for several expressions
   area: expressions
@@ -617,6 +669,7 @@ issues:
   primary_workstream: examples-tests
   details: The example references animation 0 from `smileLeft`, `smileRight`, and `jawOpen`, conflicting with EXP-14. Update the example to use a distinct animation for each expression.
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/54
 - id: MASK-01
   title: The general composition equation is missing
   area: expressions
@@ -626,6 +679,7 @@ issues:
   primary_workstream: normative
   details: "Define the normative mask-composition rule for all masks affecting each target expression: derive each mask's influence factor, combine the factors, and apply the result to the target input to obtain the final output."
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/55
 - id: MASK-02
   title: Input range is only a recommendation
   area: expressions
@@ -635,6 +689,7 @@ issues:
   primary_workstream: normative
   details: Values outside `[0, 1]` can produce negative or amplified outputs. Make the domain and clamping/rejection rule normative.
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/56
 - id: MASK-03
   title: Unknown custom mask types have no runtime fallback
   area: expressions
@@ -644,6 +699,7 @@ issues:
   primary_workstream: design
   details: Preservation alone is insufficient. State explicitly that an unsupported type is ignored.
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/57
 - id: MASK-04
   title: Custom type names can collide
   area: expressions
@@ -653,6 +709,7 @@ issues:
   primary_workstream: schema-and-naming
   details: Require a vendor/URI namespace and reserve standard names. Otherwise a future standard type can change the meaning of existing assets.
   0b5vr_confidence: 3
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/58
 - id: MASK-05
   title: The schema's `anyOf` is misleading
   area: expressions
@@ -662,6 +719,7 @@ issues:
   primary_workstream: schema-and-naming
   details: Because one branch accepts every nonempty string, the `blend` and `block` `const` branches impose no additional validation. Use documented reserved values plus a clear custom-name schema.
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/59
 - id: MASK-06
   title: "“Block” does not necessarily block"
   area: expressions
@@ -671,6 +729,7 @@ issues:
   primary_workstream: schema-and-naming
   details: "Define `block` as threshold-triggered attenuation: when the source value exceeds `threshold`, multiply the target by `(1 - amount)`; `amount: 1` fully blocks the target."
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/60
 - id: MASK-08
   title: Irrelevant properties remain valid
   area: expressions
@@ -680,6 +739,7 @@ issues:
   primary_workstream: schema-and-naming
   details: "`threshold` is accepted on `blend`, and both parameters are accepted on custom types. Use conditional schema rules where possible and define how readers preserve/ignore unused properties."
   0b5vr_confidence: 2
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/61
 - id: MASK-09
   title: Self-masking is valid but unspecified
   area: expressions
@@ -689,6 +749,7 @@ issues:
   primary_workstream: design
   details: An expression may target itself. Explicitly prohibit it.
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/62
 - id: MASK-10
   title: Cyclic masks need an explicit rule
   area: expressions
@@ -698,6 +759,7 @@ issues:
   primary_workstream: normative
   details: State normatively that all masks read the pre-mask input value of their source expression and that mask outputs are never used as mask inputs. Mutual and longer cycles are therefore order-independent and do not require a DAG.
   0b5vr_confidence: 4
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/63
 - id: MASK-12
   title: README wording excludes same-source masks
   area: expressions
@@ -707,6 +769,7 @@ issues:
   primary_workstream: non-normative
   details: Update the README to state that multiple masks may target the same expression, including multiple masks from one source expression; their combined influence is multiplicative. No schema restriction is needed.
   0b5vr_confidence: 3
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/64
 - id: MASK-13
   title: "`name` is redundant and rename-fragile"
   area: expressions
@@ -716,6 +779,7 @@ issues:
   primary_workstream: schema-and-naming
   details: Resolution always uses `target`; requiring a duplicated display name to match adds no behavior.
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/65
 - id: MASK-14
   title: The blending recommendation is unrelated
   area: expressions
@@ -725,6 +789,7 @@ issues:
   primary_workstream: non-normative
   details: The README's generic `lerp` recommendation describes property-value blending, not mask attenuation or expression-driver mixing. Remove it from this extension; define expression and animation mixing in `KHR_character_expression` and keep mask composition in this extension.
   0b5vr_confidence: 5
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/66
 - id: MASK-15
   title: "“Mask” may be misleading terminology"
   area: expressions
@@ -734,6 +799,7 @@ issues:
   primary_workstream: schema-and-naming
   details: In graphics and animation, a mask often selects spatial components or channels; this extension applies directed expression-level attenuation. Consider `inhibition`, `override`, or clearly define the term.
   0b5vr_confidence: 2
+  github_url: https://github.com/Kjakubzak/glTF-private/issues/67
 - id: POSE-01
   title: The schema only tags an arbitrary animation
   area: rigging
