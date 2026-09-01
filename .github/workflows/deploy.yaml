@@ -7,7 +7,20 @@ defaults:
     shell: bash
 
 jobs:
+  verify-assets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+      - name: Verify asset manifest
+        run: node scripts/check-asset-manifest.mjs
+
   build-viewer:
+    needs: verify-assets
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -31,6 +44,7 @@ jobs:
           path: ./viewer/dist
 
   build-converter:
+    needs: verify-assets
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
