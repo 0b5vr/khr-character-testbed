@@ -41,6 +41,11 @@ export class KHRCharacterExpression extends THREE.Object3D {
    */
   public action?: THREE.AnimationAction;
 
+  /** Stateless response curves loaded independently for this entry. */
+  public responses: import('./expressionResponse.ts').ExpressionResponse[] = [];
+
+  public duration = 0;
+
   /**
    * Indicates that this is a KHRCharacterExpression.
    */
