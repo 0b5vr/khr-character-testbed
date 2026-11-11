@@ -167,7 +167,7 @@ function appendExpression(
   }
 
   const expression: KHRCharacterExpressionExpression = {
-    expression: name,
+    name,
     animation: animationIndex,
     extensions,
   };
@@ -206,6 +206,12 @@ export function appendKHRCharacterExpression(
     logVerbose(
       `KHR_character_expression: VRM lookAt type is "${vrm.lookAt?.type}"`,
     );
+  }
+
+  // Validate that native expression names are nonempty and unique across presets and custom expressions.
+  const names = [...Object.keys(vrm.expressions.preset ?? {}), ...Object.keys(vrm.expressions.custom ?? {})];
+  if (names.some((name) => name.length === 0) || new Set(names).size !== names.length) {
+    throw new Error('Native expression names must be nonempty and unique');
   }
 
   const expressions: KHRCharacterExpressionExpression[] = [];
@@ -313,14 +319,14 @@ export function appendKHRCharacterExpression(
   }
 
   const expressionNameIndexMap = new Map(
-    expressions.map((expression, index) => [expression.expression, index]),
+    expressions.map((expression, index) => [expression.name, index]),
   );
   const vrmExpressionsByName = new Map([
     ...Object.entries(vrm.expressions.preset ?? {}),
     ...Object.entries(vrm.expressions.custom ?? {}),
   ]);
   for (const expression of expressions) {
-    const vrmExpression = vrmExpressionsByName.get(expression.expression);
+    const vrmExpression = vrmExpressionsByName.get(expression.name);
     if (vrmExpression == null) {
       continue;
     }

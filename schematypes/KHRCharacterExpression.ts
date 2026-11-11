@@ -2,9 +2,9 @@ import type { GLTFProperty } from './GLTFProperty.ts';
 
 export interface KHRCharacterExpressionExpression extends GLTFProperty {
   /**
-   * Expression name this animation contributes to.
+   * Nonempty descriptive name, unique among entries in the containing expressions array.
    */
-  expression: string;
+  name: string;
 
   /**
    * Index into the glTF animations array representing an expression animation.
