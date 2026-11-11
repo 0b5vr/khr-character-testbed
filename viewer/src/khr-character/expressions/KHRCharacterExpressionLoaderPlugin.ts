@@ -45,6 +45,8 @@ export class KHRCharacterExpressionLoaderPlugin implements GLTFLoaderPlugin {
     const expressionManager = new KHRCharacterExpressionManager(gltf);
 
     const names = new Set<string>();
+
+    // Make sure expressions names are nonempty and unique
     for (const entry of extension.expressions) {
       if (typeof entry.name !== 'string' || entry.name.length === 0 || names.has(entry.name)) {
         throw new Error('Expression names must be nonempty and unique');
