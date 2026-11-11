@@ -41,7 +41,6 @@ function createLoader(): GLTFLoader {
  */
 export async function loadGLTF(url: string): Promise<{
   gltf: GLTF;
-  isCharacter: boolean;
   skeletonMapping: KHRCharacterSkeletonMapping | undefined;
   expressionManager: KHRCharacterExpressionManager | undefined;
   lookat: VRMCCharacterExpressionLookat | undefined;
@@ -65,7 +64,6 @@ export async function loadGLTF(url: string): Promise<{
 
   return {
     gltf,
-    isCharacter: gltf.parser.json.extensions?.KHR_character != null,
     skeletonMapping,
     expressionManager,
     lookat,
