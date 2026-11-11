@@ -3,8 +3,8 @@ import type { GLTF, GLTFLoaderPlugin, GLTFParser } from 'three/examples/jsm/load
 import { type GLTF as GLTFSchema } from '@gltf-transform/core';
 import { KHRCharacterExpressionManager } from './KHRCharacterExpressionManager';
 import { type KHRCharacterExpressionExpression, type KHRCharacterExpression as KHRCharacterExpressionSchema } from '../../../../schematypes/KHRCharacterExpression.ts';
-import { type KHRCharacterExpressionMask as KHRCharacterExpressionMaskSchema, type KHRCharacterExpressionMaskMask } from '../../../../schematypes/KHRCharacterExpressionMask.ts';
-import { KHRCharacterExpression, type KHRCharacterExpressionMask } from './KHRCharacterExpression';
+import { type KHRCharacterExpressionSuppression as KHRCharacterExpressionSuppressionSchema, type KHRCharacterExpressionSuppressionSuppression } from '../../../../schematypes/KHRCharacterExpressionSuppression.ts';
+import { KHRCharacterExpression, type KHRCharacterExpressionSuppression } from './KHRCharacterExpression';
 import { validateKHRCharacterExpressionChannelTargets } from './validateKHRCharacterExpressionChannelTargets.ts';
 
 /**
@@ -61,7 +61,7 @@ export class KHRCharacterExpressionLoaderPlugin implements GLTFLoaderPlugin {
       THREE.AnimationUtils.makeClipAdditive(clip);
 
       const expression = new KHRCharacterExpression(expressionDef.name);
-      expression.masks = this._importMasks(expressionDef, extension.expressions);
+      expression.suppressions = this._importSuppressions(expressionDef, extension.expressions);
       validateKHRCharacterExpressionChannelTargets(expressionDef, json);
       expressionManager.registerExpression(expression);
 
@@ -71,11 +71,11 @@ export class KHRCharacterExpressionLoaderPlugin implements GLTFLoaderPlugin {
       expression.action.play();
     }
 
-    // Validate expression masks
+    // Validate expression suppressions
     for (const expression of expressionManager.expressions) {
-      for (const mask of expression.masks) {
-        if (expressionManager.getValue(mask.target) == null) {
-          console.warn(`Expression mask on "${expression.expressionName}" targets unknown expression "${mask.target}". Skipping this mask.`);
+      for (const suppression of expression.suppressions) {
+        if (expressionManager.getValue(suppression.target) == null) {
+          console.warn(`Expression suppression on "${expression.expressionName}" targets unknown expression "${suppression.target}". Skipping this suppression.`);
         }
       }
     }
@@ -84,34 +84,31 @@ export class KHRCharacterExpressionLoaderPlugin implements GLTFLoaderPlugin {
   }
 
   /**
-   * Import expression masks from the extension.
+   * Import expression suppressions from the extension.
    *
    * @param expressionDef - The expression definition from the GLTF schema.
-   * @returns The imported masks.
+   * @returns The imported suppressions.
    */
-  private _importMasks(
+  private _importSuppressions(
     expressionDef: KHRCharacterExpressionExpression,
     expressions: KHRCharacterExpressionExpression[],
-  ): KHRCharacterExpressionMask[] {
-    const extension = expressionDef.extensions?.['KHR_character_expression_mask'] as KHRCharacterExpressionMaskSchema | undefined;
+  ): KHRCharacterExpressionSuppression[] {
+    const extension = expressionDef.extensions?.['KHR_character_expression_suppression'] as KHRCharacterExpressionSuppressionSchema | undefined;
 
-    const masks: KHRCharacterExpressionMaskMask[] = extension?.masks ?? [];
-    return masks.flatMap((mask) => {
-      const targetExpression = expressions[mask.target];
+    const suppressions: KHRCharacterExpressionSuppressionSuppression[] = extension?.suppressions ?? [];
+    return suppressions.flatMap((suppression) => {
+      const targetExpression = expressions[suppression.target];
       if (targetExpression == null) {
-        console.warn(`Expression mask on "${expressionDef.name}" targets invalid expression index ${mask.target}. Skipping this mask.`);
+        console.warn(`Expression suppression on "${expressionDef.name}" targets invalid expression index ${suppression.target}. Skipping this suppression.`);
         return [];
       }
-      if (mask.name != null && mask.name !== targetExpression.name) {
-        console.warn(`Expression mask on "${expressionDef.name}" names "${mask.name}", but target index ${mask.target} is "${targetExpression.name}". Skipping this mask.`);
-        return [];
-      }
+
 
       return [{
         target: targetExpression.name,
-        type: mask.type,
-        amount: mask.amount,
-        threshold: mask.threshold,
+        type: suppression.type,
+        amount: suppression.amount,
+        threshold: suppression.threshold,
       }];
     });
   }
