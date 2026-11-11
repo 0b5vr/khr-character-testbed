@@ -8,7 +8,9 @@ import type { KHRCharacter } from '../../schematypes/KHRCharacter.ts';
  */
 export function appendKHRCharacter(gltf: GLTF.IGLTF): void {
   // append KHR_character extension
-  gltf.extensionsUsed = [...new Set([...(gltf.extensionsUsed ?? []), 'KHR_character'])];
+  gltf.extensionsUsed ||= [];
+  gltf.extensionsUsed.push('KHR_character');
+
   gltf.extensions ||= {};
   gltf.extensions['KHR_character'] = {} satisfies KHRCharacter;
 }
