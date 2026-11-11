@@ -18,6 +18,8 @@ export function appendKHRXmpJsonLd(gltf: GLTF.IGLTF): void {
   const packet: Record<string, unknown> = {
     '@context': {
       'dc': 'http://purl.org/dc/elements/1.1/',
+      'dcterms': 'http://purl.org/dc/terms/',
+      'rdf': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
     },
     '@id': '',
     'dc:format': 'model/gltf-binary',
@@ -25,7 +27,10 @@ export function appendKHRXmpJsonLd(gltf: GLTF.IGLTF): void {
 
   if (vrm.meta.name != null) {
     logVerbose(`KHR_xmp_json_ld: VRM meta name found, adding dc:title`);
-    packet['dc:title'] = vrm.meta.name;
+    packet['dc:title'] = {
+      '@type': 'rdf:Alt',
+      'rdf:_1': { '@language': 'x-default', '@value': vrm.meta.name },
+    };
   }
 
   if (vrm.meta.authors != null) {
@@ -36,8 +41,8 @@ export function appendKHRXmpJsonLd(gltf: GLTF.IGLTF): void {
   }
 
   if (vrm.meta.licenseUrl != null) {
-    logVerbose(`KHR_xmp_json_ld: VRM meta licenseUrl found, adding dc:license`);
-    packet['dc:license'] = vrm.meta.licenseUrl;
+    logVerbose(`KHR_xmp_json_ld: VRM meta licenseUrl found, adding dcterms:license`);
+    packet['dcterms:license'] = { '@list': [vrm.meta.licenseUrl] };
   }
 
   gltf.extensions ||= {};
