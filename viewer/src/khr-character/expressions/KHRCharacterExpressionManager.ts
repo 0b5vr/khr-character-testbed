@@ -166,7 +166,10 @@ export class KHRCharacterExpressionManager {
       }
     }
 
-    const outputWeights = new Map([...inputWeights].map(([name, weight]) => [name, weight * (1 - saturate(attenuation.get(name) ?? 0))]));
+    const outputWeights = new Map([...inputWeights].map(([name, weight]) => [
+      name,
+      weight * (1 - saturate(attenuation.get(name) ?? 0)),
+    ]));
 
     // Apply output weights to animation actions
     for (const expression of this._expressions) {
