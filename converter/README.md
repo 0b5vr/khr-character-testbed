@@ -44,4 +44,28 @@ deno run --allow-read --allow-write main.ts -i <input_vrm1_glb> -o <output_khr_c
 - `--output`, `-o` to specify output glb file (required).
 - `--spit-json` to output JSON separately for inspection.
 - `--verbose` to output detailed logs.
-- `--auto-visibility` to set mesh nodes named `Face` or `Hair` to `KHR_node_visibility_hint` with `role: "third_person"`.
+- `--auto-visibility` to set mesh nodes named `Face` or `Hair` to `KHR_node_visibility_hint` with `roles: ["third_person"]`.
+
+## Development checks
+
+With Node.js 24 or newer, run from this directory:
+
+```bash
+npm ci --ignore-scripts
+node test/november-draft.test.ts
+npm run build
+```
+
+To rebuild the bundled viewer sample from its retained VRM payload, run from the
+repository root after installing the converter dependencies:
+
+```bash
+node scripts/regenerate-sample.ts
+python3 scripts/validate-sample.py
+```
+
+The schema check requires Python's `jsonschema` and `referencing` packages and the
+initialized specification submodule (`git submodule update --init`). The rebuild
+script is specific to the bundled sample and refuses unexpected source animations
+or layouts where generated accessor/buffer-view data cannot safely be removed.
+It overwrites the sample in place; repeated runs produce the same GLB.
