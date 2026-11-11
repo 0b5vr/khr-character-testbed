@@ -1,162 +1,69 @@
-import { type GLTF as GLTFSchema } from '@gltf-transform/core';
-import { type KHRCharacterExpressionExpression } from '../../../../schematypes/KHRCharacterExpression.ts';
+import type { GLTF } from '@gltf-transform/core';
+import type { KHRCharacterExpressionExpression } from '../../../../schematypes/KHRCharacterExpression.ts';
 
-interface KHRCharacterExpressionChannelExtension {
-  channels: number[];
+const domains = ['KHR_character_expression_joint', 'KHR_character_expression_morphtarget', 'KHR_character_expression_texture_transform'] as const;
+
+/** Resolve core and pointer forms to one concrete authored property identity. */
+export function getExpressionTarget(target: GLTF.IAnimationChannelTarget): string {
+  if ((target.path as string) === 'pointer') {
+    const pointer = (target.extensions?.KHR_animation_pointer as { pointer?: string } | undefined)?.pointer;
+    if (typeof pointer !== 'string' || target.node != null) throw new Error('Invalid animation pointer target');
+    return pointer;
+  }
+  if (!Number.isInteger(target.node) || target.node! < 0) throw new Error('Expression channel requires a concrete target');
+  return `/nodes/${target.node}/${target.path}`;
 }
 
-/**
- * Get the `KHR_animation_pointer` pointer from an animation channel target.
- *
- * @param target - The animation channel target to inspect.
- * @returns The animation pointer, or `null` when the target does not use `KHR_animation_pointer`.
- */
-function getAnimationPointer(target: GLTFSchema.IAnimationChannelTarget): string | null {
-  const extension = target.extensions?.['KHR_animation_pointer'] as { pointer?: string } | null;
-  if (extension == null) {
-    return null;
-  }
-
-  const path = target.path as string;
-  if (path !== 'pointer') {
-    console.warn('KHR_animation_pointer extension is present on an animation channel target but the target path is not "pointer".');
-    return null;
-  }
-
-  const pointer = extension.pointer;
-  if (pointer == null) {
-    console.warn('KHR_animation_pointer extension is present on an animation channel target but does not contain a pointer.');
-    return null;
-  }
-
-  return pointer;
+function resolve(json: unknown, path: string): any {
+  return path.slice(1).split('/').reduce((o: any, p) => o?.[p.replace(/~1/g, '/').replace(/~0/g, '~')], json);
 }
 
-/**
- * Check whether an animation channel target affects a node transform used as a joint target.
- *
- * @param target - The animation channel target to inspect.
- * @returns `true` when the target uses either the classic `translation`/`rotation`/`scale` path or a transform animation pointer.
- */
-function isJointChannelTarget(target: GLTFSchema.IAnimationChannelTarget): boolean {
-  const path = target.path as string;
-  const pointer = getAnimationPointer(target);
-
-  // check for the classic node transform
-  if (target.node != null && (path === 'translation' || path === 'rotation' || path === 'scale')) {
-    return true;
-  }
-
-  // check for the animation pointer
-  const regexPointer = /^\/nodes\/\d+\/(translation|rotation|scale)$/;
-  if (pointer != null && regexPointer.test(pointer)) {
-    return true;
-  }
-
-  return false;
-}
-
-/**
- * Check whether an animation channel target affects morph target weights.
- *
- * @param target - The animation channel target to inspect.
- * @returns `true` when the target uses either the classic `weights` path or a weights animation pointer.
- */
-function isMorphtargetChannelTarget(target: GLTFSchema.IAnimationChannelTarget): boolean {
-  const path = target.path as string;
-  const pointer = getAnimationPointer(target);
-
-  // check for the classic node weights
-  if (target.node != null && path === 'weights') {
-    return true;
-  }
-
-  // check for the animation pointer (array)
-  const regexPointerWeights = /^\/nodes\/\d+\/weights$/;
-  if (path === 'pointer' && pointer != null && regexPointerWeights.test(pointer)) {
-    return true;
-  }
-
-  // check for the animation pointer (individual)
-  const regexPointerWeight = /^\/nodes\/\d+\/weights\/\d+$/;
-  if (path === 'pointer' && pointer != null && regexPointerWeight.test(pointer)) {
-    return true;
-  }
-
-  return false;
-}
-
-/**
- * Check whether an animation channel target affects texture transform values.
- *
- * @param target - The animation channel target to inspect.
- * @returns `true` when the target points to a `KHR_texture_transform` offset, scale, or rotation.
- */
-function isTextureChannelTarget(target: GLTFSchema.IAnimationChannelTarget): boolean {
-  const path = target.path as string;
-  const pointer = getAnimationPointer(target);
-
-  // check for the animation pointer
-  const regexPointerOffset = /^\/materials\/\d+\/.+\/extensions\/KHR_texture_transform\/(offset|scale|rotation)$/;
-  if (path === 'pointer' && pointer != null && regexPointerOffset.test(pointer)) {
-    return true;
-  }
-
-  return false;
-}
-
-/**
- * Validate that declared KHR_character_expression channel indices point to matching animation targets.
- *
- * This intentionally only emits warnings. Runtime expression application is still driven by the animation clip created by GLTFLoader.
- *
- * @param expressionDef - The expression definition to validate.
- * @param json - The source GLTF JSON containing animation channel targets.
- */
+/** Validate JSON-only invariants and return the declared supported channel indices. */
 export function validateKHRCharacterExpressionChannelTargets(
-  expressionDef: KHRCharacterExpressionExpression,
-  json: GLTFSchema.IGLTF,
-): void {
-  const animation = json.animations?.[expressionDef.animation];
-  if (animation == null) {
-    console.error(`Unreachable. Expression "${expressionDef.expression}" references missing animation #${expressionDef.animation}. This should have been caught during expression loading.`);
-    return;
-  }
-
-  const extensionsToValidate = [
-    ['joint', 'KHR_character_expression_joint', isJointChannelTarget],
-    ['morphtarget', 'KHR_character_expression_morphtarget', isMorphtargetChannelTarget],
-    ['texture', 'KHR_character_expression_texture', isTextureChannelTarget],
-  ] as const;
-
-  for (const [targetKind, extensionName, isValidTarget] of extensionsToValidate) {
-    const extension = expressionDef.extensions?.[extensionName] as KHRCharacterExpressionChannelExtension | undefined;
-    if (extension == null) {
-      continue;
+  entry: KHRCharacterExpressionExpression, json: GLTF.IGLTF,
+): Set<number> {
+  const animation = json.animations?.[entry.animation];
+  if (!animation) throw new Error(`Missing expression animation ${entry.animation}`);
+  const targets: string[] = [];
+  for (const channel of animation.channels) {
+    const path = getExpressionTarget(channel.target);
+    if (targets.some((p) => p === path || p.startsWith(path + '/') || path.startsWith(p + '/'))) {
+      throw new Error(`Duplicate or overlapping animation target ${path}`);
     }
-
-    const channels = extension.channels;
-
-    for (const channelIndex of channels) {
-      const channel = animation.channels[channelIndex];
-      if (channel == null) {
-        console.warn(`${extensionName} on expression "${expressionDef.expression}" references missing animation channel #${channelIndex}.`);
-        continue;
+    targets.push(path);
+    const nodeMatch = /^\/nodes\/(\d+)\/(translation|rotation|scale|weights)(?:\/(\d+))?$/.exec(path);
+    if (nodeMatch) {
+      const node = json.nodes?.[Number(nodeMatch[1])];
+      if (!node) throw new Error(`Missing node for ${path}`);
+      if (nodeMatch[2] !== 'weights' && node.matrix) throw new Error(`TRS animation targets a matrix node: ${path}`);
+      if (nodeMatch[2] === 'weights') {
+        const mesh = json.meshes?.[node.mesh!];
+        const count = mesh?.primitives[0]?.targets?.length ?? 0;
+        if (!count || (nodeMatch[3] != null && Number(nodeMatch[3]) >= count)) throw new Error(`Invalid morph target ${path}`);
       }
-
-      if (!isValidTarget(channel.target)) {
-        const pointer = getAnimationPointer(channel.target);
-
-        if (pointer == null) {
-          console.warn(
-            `${extensionName} on expression "${expressionDef.expression}" references animation channel #${channelIndex}, but its target path "${channel.target.path}" is not a ${targetKind} target.`,
-          );
-        } else {
-          console.warn(
-            `${extensionName} on expression "${expressionDef.expression}" references animation channel #${channelIndex}, but its target path "${channel.target.path}" with pointer "${pointer}" is not a ${targetKind} target.`,
-          );
-        }
-      }
+    } else if (resolve(json, path) === undefined && !/\/extensions\/KHR_texture_transform\/(offset|scale|rotation)$/.test(path)) {
+      // Unsupported extensions may define virtual/default mutable properties. Do not reject them here.
+      if (!channel.target.extensions) throw new Error(`Unresolved animation target ${path}`);
     }
   }
+  const listed = new Set<number>();
+  for (const domain of domains) {
+    const def = entry.extensions?.[domain];
+    if (def == null) continue;
+    if (!json.extensionsUsed?.includes(domain)) throw new Error(`Undeclared expression extension ${domain}`);
+    if (!Array.isArray(def.channels) || def.channels.length === 0) throw new Error(`Empty channel list: ${domain}`);
+    for (const i of def.channels) {
+      if (!Number.isInteger(i) || i < 0 || i >= animation.channels.length || listed.has(i)) throw new Error(`Invalid or multiply owned expression channel ${i}`);
+      listed.add(i);
+      const path = targets[i];
+      const valid = domain.endsWith('_joint') ? /^\/nodes\/\d+\/(translation|rotation|scale)$/.test(path)
+        : domain.endsWith('_morphtarget') ? /^\/nodes\/\d+\/weights(?:\/\d+)?$/.test(path)
+        : /^\/materials\/\d+\/.+\/extensions\/KHR_texture_transform\/(offset|scale|rotation)$/.test(path);
+      if (!valid) throw new Error(`Invalid ${domain} target ${path}`);
+      if (domain.endsWith('_texture_transform') && typeof resolve(json, path.slice(0, path.lastIndexOf('/'))) !== 'object') {
+        throw new Error(`Missing authored texture transform ${path}`);
+      }
+    }
+  }
+  return listed;
 }

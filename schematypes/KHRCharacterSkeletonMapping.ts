@@ -5,12 +5,12 @@ import type { GLTFProperty } from './GLTFProperty.ts';
  */
 export interface KHRCharacterSkeletonMappingJointAssociation extends GLTFProperty {
   /**
-   * Index of the source joint's glTF node in the nodes array.
+   * Associated node index; membership in skin.joints is not required.
    */
   node: number;
 
   /**
-   * The name of the source joint node.
+   * Optional association name, independent of the referenced node's name.
    */
   name?: string;
 }
@@ -27,7 +27,7 @@ export interface KHRCharacterSkeletonMappingSkeletalRigMappings {
 }
 
 /**
- * glTF extension that provides a mechanism to map a skeleton rig to a reference rig for retargeting and compatibility.
+ * Generic associations between external skeletal vocabulary roles and glTF nodes.
  */
 export interface KHRCharacterSkeletonMapping extends GLTFProperty {
   /**

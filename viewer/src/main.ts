@@ -155,7 +155,7 @@ function playVRMAnimation() {
   // play new animation, if both character and animation are available
   if (currentVRMAnimation != null) {
     if (currentVRMHumanoidRestPose == null || currentAnimationMixer == null) {
-      console.warn('Unable to play VRM animation. Skeletal rig mapping "vrmHumanoid" is not available in this model.');
+      console.warn('Unable to play VRM animation. Skeletal rig mapping "vrm1_humanoid" is not available in this model.');
       return;
     }
 
@@ -230,25 +230,9 @@ const cameraHintHelper = new KHRNodeCameraHintHelper();
 cameraHintHelper.matrixAutoUpdate = false;
 scene.add(cameraHintHelper);
 
-const _v3CameraHintPosition = new THREE.Vector3();
-const _v3CameraHintTargetPosition = new THREE.Vector3();
-const _v3CameraHintUp = new THREE.Vector3();
-
 function updateCameraHintHelperTransform(hint: KHRNodeCameraHint): void {
   hint.node.updateWorldMatrix(true, false);
-
-  if (hint.targetNode == null) {
-    cameraHintHelper.matrix.copy(hint.node.matrixWorld);
-  } else {
-    hint.node.getWorldPosition(_v3CameraHintPosition);
-    hint.node.getWorldQuaternion(cameraHintHelper.quaternion);
-    _v3CameraHintUp.set(0, 1, 0).applyQuaternion(cameraHintHelper.quaternion);
-    hint.targetNode.updateWorldMatrix(true, false);
-    hint.targetNode.getWorldPosition(_v3CameraHintTargetPosition);
-    cameraHintHelper.matrix.lookAt(_v3CameraHintPosition, _v3CameraHintTargetPosition, _v3CameraHintUp);
-    cameraHintHelper.matrix.setPosition(_v3CameraHintPosition);
-  }
-
+  cameraHintHelper.matrix.copy(hint.node.matrixWorld);
   cameraHintHelper.matrixWorldNeedsUpdate = true;
 }
 
@@ -291,8 +275,14 @@ renderer.setAnimationLoop(() => {
   updateCameraHintHelper();
   currentAnimationMixer?.update(delta);
   currentExpressionManager?.update(delta);
-  css2dRenderer.render(scene, camera);
-  renderer.render(scene, camera);
+  const render = () => {
+    css2dRenderer.render(scene, camera);
+    renderer.render(scene, camera);
+  };
+  const renderPrimitives = () => currentMeshPrimitiveVisibilityHint
+    ? currentMeshPrimitiveVisibilityHint.withView(paramsVisibility.view, render) : render();
+  if (currentNodeVisibilityHint) currentNodeVisibilityHint.withView(paramsVisibility.view, renderPrimitives);
+  else renderPrimitives();
 });
 
 // == handle dnd ===================================================================================

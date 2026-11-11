@@ -2,7 +2,7 @@ import { logVerbose } from './logVerbose.ts';
 import { Quaternion } from 'three';
 import type { GLTF } from '@gltf-transform/core';
 import type { VRMCVRM } from '@pixiv/types-vrmc-vrm-1.0';
-import { Bone } from './Bone.ts';
+import type { Bone } from './Bone.ts';
 
 const QUAT_YP_180DEG = new Quaternion(0, 1, 0, 0);
 

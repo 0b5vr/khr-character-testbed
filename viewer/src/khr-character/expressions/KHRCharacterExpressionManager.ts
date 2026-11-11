@@ -1,35 +1,15 @@
 import * as THREE from 'three';
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { applyExpressionResponses } from './expressionResponse.ts';
 import { saturate } from '../../utils/saturate.ts';
-import { type KHRCharacterExpression, type KHRCharacterExpressionMask } from './KHRCharacterExpression.ts';
+import { type KHRCharacterExpression, type KHRCharacterExpressionSuppression } from './KHRCharacterExpression.ts';
 
-/**
- * Calculate how much a mask attenuates its target expression.
- *
- * A `blend` mask linearly reduces the target as the source expression grows.
- * A `block` mask reduces the target by a fixed amount once the source expression exceeds the threshold.
- *
- * @param mask - The mask definition authored on the source expression.
- * @param sourceWeight - The current input weight of the source expression.
- * @returns A multiplier applied to the target expression weight.
- */
-function getMaskMultiplier(mask: KHRCharacterExpressionMask, sourceWeight: number): number {
-  const amount = saturate(mask.amount ?? 1.0);
-
-  if (mask.type === 'block') {
-    const threshold = saturate(mask.threshold ?? 0.0);
-    return sourceWeight > threshold ? 1.0 - amount : 1.0;
-  }
-
-  // `blend` is the schema default.
-  // When we see unknown custom types here, we warn and treat them as `blend` for safety.
-  if (mask.type && mask.type !== 'blend') {
-    console.warn(
-      `Unknown mask type "${mask.type}" on expression "${mask.target}". Using "blend" behavior instead`,
-    );
-  }
-
-  return 1.0 - saturate(sourceWeight * amount);
+/** Attenuation is summed from one immutable driver snapshot. */
+export function getSuppressionAttenuation(rule: KHRCharacterExpressionSuppression, source: number): number {
+  const amount = saturate(rule.amount ?? 1);
+  if (rule.type === 'block') return source > (rule.threshold ?? 0) ? amount : 0;
+  if (rule.type != null && rule.type !== 'blend') return 0;
+  return amount * source;
 }
 
 /**
@@ -139,6 +119,7 @@ export class KHRCharacterExpressionManager {
       return;
     }
 
+    if (!Number.isFinite(weight)) throw new Error('Expression drivers must be finite');
     expression.weight = saturate(weight);
   }
 
@@ -148,40 +129,26 @@ export class KHRCharacterExpressionManager {
    * @param delta - The delta time. Usually taken from `THREE.Timer`.
    */
   public update(delta: number): void {
-    // Gather input weights
     const inputWeights = new Map<string, number>();
     for (const expression of this._expressions) {
+      if (!Number.isFinite(expression.weight)) throw new Error('Expression drivers must be finite');
       inputWeights.set(expression.expressionName, saturate(expression.weight));
     }
-
-    // Calculate output weights by applying masks
-    const outputWeights = new Map(inputWeights);
-    for (const sourceExpression of this._expressions) {
-      const sourceWeight = inputWeights.get(sourceExpression.expressionName) ?? 0.0;
-
-      for (const mask of sourceExpression.masks) {
-        const targetWeight = outputWeights.get(mask.target);
-        if (targetWeight == null) {
-          continue;
-        }
-
-        outputWeights.set(mask.target, targetWeight * getMaskMultiplier(mask, sourceWeight));
-      }
-    }
-
-    // Apply output weights to animation actions
+    const attenuation = new Map<string, number>();
     for (const expression of this._expressions) {
-      if (!expression.action) {
-        console.warn(
-          `Expression "${expression.expressionName}" does not have an animation action. Skipping update for this expression.`,
-        );
-        continue;
+      for (const rule of expression.suppressions) {
+        attenuation.set(rule.target, (attenuation.get(rule.target) ?? 0)
+          + getSuppressionAttenuation(rule, inputWeights.get(expression.expressionName) ?? 0));
       }
-
-      expression.action.time = outputWeights.get(expression.expressionName) ?? 0.0;
     }
-
-    // Finally, update the animation mixer to apply the changes
+    applyExpressionResponses([...this._expressions].map((expression) => ({
+      responses: expression.responses,
+      time: (inputWeights.get(expression.expressionName) ?? 0)
+        * (1 - saturate(attenuation.get(expression.expressionName) ?? 0)) * expression.duration,
+      active: (inputWeights.get(expression.expressionName) ?? 0)
+        * (1 - saturate(attenuation.get(expression.expressionName) ?? 0)) > 0,
+    })));
+    // Retained for callers using the public mixer; response evaluation itself is stateless.
     this.animationMixer.update(delta);
   }
 }

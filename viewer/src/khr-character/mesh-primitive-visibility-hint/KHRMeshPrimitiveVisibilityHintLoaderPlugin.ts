@@ -1,3 +1,4 @@
+import { validateVisibilityRoles } from '../visibility-hint/isVisibilityHintRoleVisible.ts';
 import type * as THREE from 'three';
 import {
   type GLTF,
@@ -43,6 +44,8 @@ export class KHRMeshPrimitiveVisibilityHintLoaderPlugin
       return null;
     }
 
+    if (json.extensionsRequired?.includes(EXTENSION_NAME)) throw new Error(`${EXTENSION_NAME} must not be required`);
+
     const items: KHRMeshPrimitiveVisibilityHintItem[] = [];
 
     for (const scene of gltf.scenes) {
@@ -58,9 +61,10 @@ export class KHRMeshPrimitiveVisibilityHintLoaderPlugin
           return;
         }
 
+        validateVisibilityRoles(extension.roles);
         items.push({
           object,
-          role: extension.role,
+          roles: extension.roles,
           label: extension.label,
         });
       });

@@ -118,7 +118,7 @@ function collectLookExpressions(
 
   for (const lookatExpressionName of lookatExpressionNames) {
     const expression = expressionExtension.expressions.find((expression) =>
-      expression.expression === lookatExpressionName
+      expression.name === lookatExpressionName
     );
     if (expression != null) {
       logVerbose(

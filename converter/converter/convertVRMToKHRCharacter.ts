@@ -6,7 +6,6 @@ import { appendKHRXmpJsonLd } from './appendKHRXmpJsonLd.ts';
 import { appendVRMCCharacterExpressionLookat } from './appendVRMCCharacterExpressionLookat.ts';
 import { collectNodeBoneMap } from './collectNodeBoneMap.ts';
 import { constructGLB } from './constructGLB.ts';
-import { ensureSingleRoot } from './ensureSingleRoot.ts';
 import { appendKHRCharacterExpression } from './expressions/appendKHRCharacterExpression.ts';
 import { extractGLB } from './extractGLB.ts';
 import { logVerbose } from './logVerbose.ts';
@@ -28,8 +27,6 @@ export function convertVRMToKHRCharacter(
 
   const [gltf, binChunk] = extractGLB(toUint8Array(input));
   const binChunkBox: [Uint8Array] = [binChunk];
-
-  ensureSingleRoot(gltf);
 
   const nodeBoneMap = collectNodeBoneMap(gltf);
 

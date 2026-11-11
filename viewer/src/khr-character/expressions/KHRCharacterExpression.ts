@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 import { type KHRCharacterExpressionManager } from './KHRCharacterExpressionManager.ts';
 
-/** A resolved expression mask, keyed by target expression name at runtime. */
-export interface KHRCharacterExpressionMask {
+/** A resolved expression suppression, keyed by target expression name at runtime. */
+export interface KHRCharacterExpressionSuppression {
   target: string;
   type?: string;
   amount?: number;
@@ -33,13 +33,18 @@ export class KHRCharacterExpression extends THREE.Object3D {
   /**
    * Masks authored on this expression that reduce target expression influence.
    */
-  public masks: KHRCharacterExpressionMask[];
+  public suppressions: KHRCharacterExpressionSuppression[];
 
   /**
    * The animation action for this expression.
    * It is controlled by {@link KHRCharacterExpressionManager}.
    */
   public action?: THREE.AnimationAction;
+
+  /** Stateless response curves loaded independently for this entry. */
+  public responses: import('./expressionResponse.ts').ExpressionResponse[] = [];
+
+  public duration = 0;
 
   /**
    * Indicates that this is a KHRCharacterExpression.
@@ -53,7 +58,7 @@ export class KHRCharacterExpression extends THREE.Object3D {
     this.expressionName = expressionName;
 
     this.weight = 0.0;
-    this.masks = [];
+    this.suppressions = [];
 
     // This is not intended to be visible, we set visible to false for the sake of performance.
     // It omits the calculation of the matrix every frame.

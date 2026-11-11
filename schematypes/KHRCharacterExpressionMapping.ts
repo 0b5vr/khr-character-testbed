@@ -11,12 +11,12 @@ export interface KHRCharacterExpressionMappingExpressionSetMapping {
     source: number;
 
     /**
-     * The name of the source expression.
+     * Optional label for this mapping entry, independent of the referenced expression name.
      */
     name?: string;
 
     /**
-     * Relative influence of this source expression on the target. Weights represent the proportional contribution needed to achieve the desired target result.
+     * Contribution coefficient in [0, 1] from this external input to the referenced native expression driver.
      */
     weight: number;
   }>;
@@ -30,7 +30,7 @@ export interface KHRCharacterExpressionMappingExpressionSetMappings {
 }
 
 /**
- * glTF extension that enables encoding multiple expression set mappings, mapping source expressions present in the model to target expressions that a runtime/endpoint understands.
+ * glTF extension that enables encoding multiple expression set mappings, mapping external inputs to native expression drivers.
  */
 export interface KHRCharacterExpressionMapping extends GLTFProperty {
   /**

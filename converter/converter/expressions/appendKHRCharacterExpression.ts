@@ -1,3 +1,4 @@
+import { options } from '../options.ts';
 import { logVerbose } from '../logVerbose.ts';
 import { appendMorphtargetAnimation } from './appendMorphtargetAnimation.ts';
 import { appendTextureAnimation } from './appendTextureAnimation.ts';
@@ -21,7 +22,7 @@ import type {
   KHRCharacterExpressionMappingExpressionSetMapping,
 } from '../../../schematypes/KHRCharacterExpressionMapping.ts';
 import type { Bone } from '../Bone.ts';
-import { appendExpressionMasksFromOverride } from './appendExpressionMasksFromOverride.ts';
+import { appendExpressionSuppressionsFromOverride } from './appendExpressionSuppressionsFromOverride.ts';
 
 /**
  * Appends one glTF animation for a single VRM expression.
@@ -55,7 +56,17 @@ function appendAnimation(
 
   const isBinary = vrmExpression.isBinary ?? false;
 
+  // One channel per concrete target. A core weights channel covers the whole node.
+  const morphBinds = new Map<string, NonNullable<VRMExpression['morphTargetBinds']>[number]>();
   for (const bind of vrmExpression.morphTargetBinds ?? []) {
+    const key = `${bind.node}/${bind.index}`;
+    const previous = morphBinds.get(key);
+    morphBinds.set(key, { ...bind, weight: (previous?.weight ?? 0) + bind.weight });
+  }
+  const emittedNodes = new Set<number>();
+  for (const bind of morphBinds.values()) {
+    if (!options.useAnimationPointerForMorphTarget && emittedNodes.has(bind.node)) continue;
+    emittedNodes.add(bind.node);
     logVerbose(
       'KHR_character_expression_morphtarget: Appending an animation channel for morph target bind',
     );
@@ -66,15 +77,28 @@ function appendAnimation(
       binChunkBox,
       animation,
       extensionsUsedSet,
+      [...morphBinds.values()].filter((entry) => entry.node === bind.node),
     );
     if (i != null) {
       morphtargetChannelIndices.push(i);
     }
   }
 
+  const textureBinds = new Map<number, NonNullable<VRMExpression['textureTransformBinds']>[number]>();
   for (const bind of vrmExpression.textureTransformBinds ?? []) {
+    const previous = textureBinds.get(bind.material);
+    const merged = { ...previous, material: bind.material };
+    for (const property of ['offset', 'scale'] as const) {
+      if (!bind[property]) continue;
+      const neutral = property === 'scale' ? 1 : 0;
+      const old = previous?.[property] ?? [neutral, neutral];
+      merged[property] = [old[0] + bind[property][0] - neutral, old[1] + bind[property][1] - neutral];
+    }
+    textureBinds.set(bind.material, merged);
+  }
+  for (const bind of textureBinds.values()) {
     logVerbose(
-      'KHR_character_expression_texture: Appending animation channels for texture transform bind',
+      'KHR_character_expression_texture_transform: Appending animation channels for texture transform bind',
     );
     const [_, i] = appendTextureAnimation(
       bind,
@@ -160,14 +184,14 @@ function appendExpression(
         textureChannelIndices.join(', ')
       }]`,
     );
-    extensions['KHR_character_expression_texture'] = {
+    extensions['KHR_character_expression_texture_transform'] = {
       channels: textureChannelIndices,
     };
-    extensionsUsedSet.add('KHR_character_expression_texture');
+    extensionsUsedSet.add('KHR_character_expression_texture_transform');
   }
 
   const expression: KHRCharacterExpressionExpression = {
-    expression: name,
+    name,
     animation: animationIndex,
     extensions,
   };
@@ -208,8 +232,12 @@ export function appendKHRCharacterExpression(
     );
   }
 
+  const names = [...Object.keys(vrm.expressions.preset ?? {}), ...Object.keys(vrm.expressions.custom ?? {})];
+  if (names.some((name) => name.length === 0) || new Set(names).size !== names.length) {
+    throw new Error('Native expression names must be nonempty and unique');
+  }
   const expressions: KHRCharacterExpressionExpression[] = [];
-  const mappingName = 'vrmExpressionPresets';
+  const mappingName = 'vrm1_expressions';
   const mapping: KHRCharacterExpressionMappingExpressionSetMapping = {};
   const extensionsUsed = new Set(gltf.extensionsUsed ?? []);
 
@@ -313,20 +341,20 @@ export function appendKHRCharacterExpression(
   }
 
   const expressionNameIndexMap = new Map(
-    expressions.map((expression, index) => [expression.expression, index]),
+    expressions.map((expression, index) => [expression.name, index]),
   );
   const vrmExpressionsByName = new Map([
     ...Object.entries(vrm.expressions.preset ?? {}),
     ...Object.entries(vrm.expressions.custom ?? {}),
   ]);
   for (const expression of expressions) {
-    const vrmExpression = vrmExpressionsByName.get(expression.expression);
+    const vrmExpression = vrmExpressionsByName.get(expression.name);
     if (vrmExpression == null) {
       continue;
     }
 
     expression.extensions ||= {};
-    appendExpressionMasksFromOverride(
+    appendExpressionSuppressionsFromOverride(
       vrmExpression,
       expression.extensions,
       extensionsUsed,

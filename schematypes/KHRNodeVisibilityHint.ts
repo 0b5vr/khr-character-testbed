@@ -5,9 +5,9 @@ import type { GLTFProperty } from './GLTFProperty.ts';
  */
 export interface KHRNodeVisibilityHint extends GLTFProperty {
   /**
-   * The view context in which this node is visible. Standard vocabulary values ('always', 'first_person', 'third_person') provide interoperability guarantees; custom, vendor-prefixed values are permitted for domain-specific view contexts.
+   * One or more distinct nonempty visibility roles. Standard vocabulary values ('always', 'first_person', 'third_person') provide interoperability guarantees; custom, vendor-prefixed values are permitted for domain-specific view contexts.
    */
-  role: string;
+  roles: string[];
 
   /**
    * Human-readable label for this visibility annotation. Used for UI display in authoring tools and inspectors.
