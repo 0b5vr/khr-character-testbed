@@ -291,8 +291,17 @@ renderer.setAnimationLoop(() => {
   updateCameraHintHelper();
   currentAnimationMixer?.update(delta);
   currentExpressionManager?.update(delta);
-  css2dRenderer.render(scene, camera);
-  renderer.render(scene, camera);
+  const render = () => {
+    css2dRenderer.render(scene, camera);
+    renderer.render(scene, camera);
+  };
+  const renderPrimitives = () => currentMeshPrimitiveVisibilityHint
+    ? currentMeshPrimitiveVisibilityHint.withView(paramsVisibility.view, render) : render();
+  if (currentNodeVisibilityHint) {
+    currentNodeVisibilityHint.withView(paramsVisibility.view, renderPrimitives);
+  } else {
+    renderPrimitives();
+  }
 });
 
 // == handle dnd ===================================================================================
