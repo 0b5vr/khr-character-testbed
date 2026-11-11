@@ -208,8 +208,11 @@ export function appendKHRCharacterExpression(
     );
   }
 
-  // Validate that native expression names are nonempty and unique across presets and custom expressions.
-  const names = [...Object.keys(vrm.expressions.preset ?? {}), ...Object.keys(vrm.expressions.custom ?? {})];
+  // Make sure expressions names are nonempty and unique
+  const names = [
+    ...Object.keys(vrm.expressions.preset ?? {}),
+    ...Object.keys(vrm.expressions.custom ?? {}),
+  ];
   if (names.some((name) => name.length === 0) || new Set(names).size !== names.length) {
     throw new Error('Native expression names must be nonempty and unique');
   }
