@@ -2,6 +2,6 @@ import type * as THREE from 'three';
 
 export interface KHRNodeVisibilityHintItem {
   node: THREE.Object3D;
-  role: string;
+  roles: string[];
   label?: string;
 }
