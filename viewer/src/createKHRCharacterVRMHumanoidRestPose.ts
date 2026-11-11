@@ -9,10 +9,10 @@ const tempScale = new THREE.Vector3();
 const vrmHumanBoneNameSet = new Set<string>(Object.values(VRMHumanBoneName));
 
 /**
- * In KHR_character, eye rotations and jaw movements are took place in the expression system,
+ * This viewer drives eye rotations and jaw movements through its expression system,
  * so setting eye bones and the jaw bone in the skeletal rig mapping may conflict with
  * the expression system and cause issues.
- * To avoid this, we skip reading eye bones and the jaw bone in the `vrmHumanoid` mapping
+ * To avoid this, we skip reading eye bones and the jaw bone in the `vrm1_humanoid` mapping
  * and ignore them.
  */
 const vrmBonesToSkip: Set<VRMHumanBoneName> = new Set([
@@ -35,7 +35,7 @@ function isVRMHumanBoneName(boneName: string): boneName is VRMHumanBoneName {
 /**
  * Converts a raw skeletal rig mapping into a validated VRM humanoid bone node map.
  *
- * @param vrmHumanoidMapping - A `vrmHumanoid` skeletal rig mapping.
+ * @param vrmHumanoidMapping - A `vrm1_humanoid` skeletal rig mapping.
  * @returns A validated bone node map, or null when the mapping is invalid.
  */
 function createValidatedVRMHumanoidBoneNodeMap(
@@ -58,7 +58,6 @@ function createValidatedVRMHumanoidBoneNodeMap(
 
     // eye bones and jaw bone
     if (vrmBonesToSkip.has(vrmBoneName as VRMHumanBoneName)) {
-      console.warn(`Bone "${vrmBoneName}" must not be included in the "vrmHumanoid" mapping to avoid conflicts with the expression system. Skipping this bone.`);
       continue;
     }
 
@@ -108,12 +107,12 @@ function createValidatedVRMHumanoidBoneNodeMap(
  * Captures the rest-pose data used to retarget VRM humanoid animation tracks to raw KHR character bones.
  *
  * @param skeletonMapping - The loaded KHR character skeleton mapping.
- * @returns A rest-pose map keyed by VRM humanoid bone name, or null when the `vrmHumanoid` mapping is missing.
+ * @returns A rest-pose map keyed by VRM humanoid bone name, or null when the `vrm1_humanoid` mapping is missing.
  */
 export function createKHRCharacterVRMHumanoidRestPose(
   skeletonMapping: KHRCharacterSkeletonMapping,
 ): KHRCharacterVRMHumanoidRestPose | null {
-  const vrmHumanoidMapping = skeletonMapping.skeletalRigMappings.get('vrmHumanoid');
+  const vrmHumanoidMapping = skeletonMapping.skeletalRigMappings.get('vrm1_humanoid');
   if (vrmHumanoidMapping == null) {
     return null;
   }

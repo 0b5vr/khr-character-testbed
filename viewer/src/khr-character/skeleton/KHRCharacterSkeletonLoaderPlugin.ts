@@ -39,11 +39,21 @@ export class KHRCharacterSkeletonLoaderPlugin implements GLTFLoaderPlugin {
       return null;
     }
 
+    if (!json.extensionsUsed?.includes('KHR_character') || !json.extensions?.['KHR_character']) {
+      throw new Error('KHR_character_skeleton_mapping requires KHR_character');
+    }
+    if (!extension.skeletalRigMappings || !Object.keys(extension.skeletalRigMappings).length) {
+      throw new Error('Skeletal rig mappings must not be empty');
+    }
+
     const skeletonMapping = new KHRCharacterSkeletonMapping();
 
     // build a map, target rig name -> (target joint name -> node)
     const skeletalRigMappings: Map<string, Map<string, THREE.Object3D>> = new Map();
     for (const [targetRigName, mapping] of Object.entries(extension.skeletalRigMappings)) {
+      if (!targetRigName.length || !Object.keys(mapping).length || Object.keys(mapping).some(role => !role.length)) {
+        throw new Error('Invalid skeletal mapping identifier or empty mapping');
+      }
       // build a map, target joint name -> node
       const targetJointNameToNodeMap: Map<string, THREE.Object3D> = new Map();
 
@@ -52,10 +62,6 @@ export class KHRCharacterSkeletonLoaderPlugin implements GLTFLoaderPlugin {
         if (!Number.isInteger(sourceNodeIndex) || sourceNodeIndex < 0 || sourceNodeIndex >= (json.nodes?.length ?? 0)) {
           console.warn(`Invalid source node index "${sourceNodeIndex}" for joint "${targetJointName}" in mapping "${targetRigName}".`);
           continue;
-        }
-        if (association.name != null && association.name !== json.nodes?.[sourceNodeIndex]?.name) {
-          console.warn(`Source node #${sourceNodeIndex} for joint "${targetJointName}" in mapping "${targetRigName}" is named "${json.nodes?.[sourceNodeIndex]?.name}", not "${association.name}".`);
-          // no need to skip, we can still use the node even if the name doesn't match
         }
 
         const node = await gltf.parser.getDependency('node', sourceNodeIndex);
