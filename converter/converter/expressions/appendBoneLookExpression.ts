@@ -226,7 +226,7 @@ export function appendBoneLookExpression(
   }
 
   const expression: KHRCharacterExpressionExpression = {
-    expression: name,
+    name,
     animation: animationIndex,
     extensions: {
       'KHR_character_expression_joint': {

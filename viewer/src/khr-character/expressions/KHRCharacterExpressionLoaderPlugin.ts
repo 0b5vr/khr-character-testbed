@@ -44,16 +44,25 @@ export class KHRCharacterExpressionLoaderPlugin implements GLTFLoaderPlugin {
 
     const expressionManager = new KHRCharacterExpressionManager(gltf);
 
+    const names = new Set<string>();
+
+    // Make sure expressions names are nonempty and unique
+    for (const entry of extension.expressions) {
+      if (typeof entry.name !== 'string' || entry.name.length === 0 || names.has(entry.name)) {
+        throw new Error('Expression names must be nonempty and unique');
+      }
+      names.add(entry.name);
+    }
     for (const expressionDef of extension.expressions) {
       const clip = gltf.animations[expressionDef.animation];
       if (!clip) {
-        console.warn(`Animation with index ${expressionDef.animation} not found for expression "${expressionDef.expression}". Skipping this expression.`);
+        console.warn(`Animation with index ${expressionDef.animation} not found for expression "${expressionDef.name}". Skipping this expression.`);
         continue;
       }
 
       THREE.AnimationUtils.makeClipAdditive(clip);
 
-      const expression = new KHRCharacterExpression(expressionDef.expression);
+      const expression = new KHRCharacterExpression(expressionDef.name);
       expression.masks = this._importMasks(expressionDef, extension.expressions);
       validateKHRCharacterExpressionChannelTargets(expressionDef, json);
       expressionManager.registerExpression(expression);
@@ -92,16 +101,16 @@ export class KHRCharacterExpressionLoaderPlugin implements GLTFLoaderPlugin {
     return masks.flatMap((mask) => {
       const targetExpression = expressions[mask.target];
       if (targetExpression == null) {
-        console.warn(`Expression mask on "${expressionDef.expression}" targets invalid expression index ${mask.target}. Skipping this mask.`);
+        console.warn(`Expression mask on "${expressionDef.name}" targets invalid expression index ${mask.target}. Skipping this mask.`);
         return [];
       }
-      if (mask.name != null && mask.name !== targetExpression.expression) {
-        console.warn(`Expression mask on "${expressionDef.expression}" names "${mask.name}", but target index ${mask.target} is "${targetExpression.expression}". Skipping this mask.`);
+      if (mask.name != null && mask.name !== targetExpression.name) {
+        console.warn(`Expression mask on "${expressionDef.name}" names "${mask.name}", but target index ${mask.target} is "${targetExpression.name}". Skipping this mask.`);
         return [];
       }
 
       return [{
-        target: targetExpression.expression,
+        target: targetExpression.name,
         type: mask.type,
         amount: mask.amount,
         threshold: mask.threshold,
