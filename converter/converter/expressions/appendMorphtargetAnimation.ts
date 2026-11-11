@@ -96,7 +96,7 @@ export function appendMorphtargetAnimation(
       },
     });
     logVerbose(
-      `KHR_character_expression_texture: New animation channel, pointer for "${pointer}"`,
+      `KHR_character_expression_texture_transform: New animation channel, pointer for "${pointer}"`,
     );
 
     return [samplerIndex, channelIndex];
