@@ -1,4 +1,6 @@
 import type { GLTFProperty } from './GLTFProperty.ts';
 
-/** Asset-level character designation. Defines no character ownership or hierarchy. */
+/**
+ * Designates a glTF asset as containing a character.
+ */
 export interface KHRCharacter extends GLTFProperty {}
