@@ -35,6 +35,7 @@ export class KHRNodeCameraHintLoaderPlugin implements GLTFLoaderPlugin {
       return null;
     }
 
+    if (json.extensionsRequired?.includes(EXTENSION_NAME)) throw new Error(`${EXTENSION_NAME} must not be required`);
     const cameraHints: KHRNodeCameraHint[] = [];
 
     for (const [index, nodeDef] of (json.nodes ?? []).entries()) {
@@ -43,7 +44,7 @@ export class KHRNodeCameraHintLoaderPlugin implements GLTFLoaderPlugin {
         continue;
       }
 
-      if (typeof extension.role !== 'string') {
+      if (typeof extension.role !== 'string' || !extension.role.length) {
         console.warn(`${EXTENSION_NAME} extension on node ${index} does not have a valid role. Skipping.`);
         continue;
       }
