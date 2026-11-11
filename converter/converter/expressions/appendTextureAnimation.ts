@@ -107,36 +107,36 @@ export function appendTextureAnimation(
     extensionsUsedSet.add('KHR_texture_transform');
   }
 
-  for (const propName of ['offset', 'scale'] as const) {
-    const prop = vrmBind[propName];
-    if (prop == null) {
-      continue;
-    }
+  for (const extPath of extPaths) {
+    const transform = dig<{ offset?: number[]; scale?: number[] }>(gltf, extPath.slice(1))!;
+    for (const propName of ['offset', 'scale'] as const) {
+      const prop = vrmBind[propName];
+      if (prop == null) {
+        continue;
+      }
 
-    // TODO: We assume default offset and scale, and it's not always true
-    const [x0, y0] = propName === 'offset' ? [0, 0] : [1, 1];
-    const [x1, y1] = prop;
+      const neutral = propName === 'offset' ? 0 : 1;
+      const [x0, y0] = transform[propName] ?? [neutral, neutral];
+      const x1 = x0 + prop[0] - neutral;
+      const y1 = y0 + prop[1] - neutral;
+      const [inputIndex, outputIndex] = appendAnimationAccessors(
+        new Float32Array(isBinary ? [0, 0.5, 1] : [0, 1]),
+        transformToBinary(new Float32Array([x0, y0, x1, y1]), isBinary),
+        'VEC2',
+        gltf,
+        binChunkBox,
+      );
+      logVerbose(
+        `KHR_character_expression_texture_transform: New accessors (#${inputIndex}, #${outputIndex})`,
+      );
 
-    const [inputIndex, outputIndex] = appendAnimationAccessors(
-      new Float32Array(isBinary ? [0, 0.5, 1] : [0, 1]),
-      transformToBinary(new Float32Array([x0, y0, x1, y1]), isBinary),
-      'VEC2',
-      gltf,
-      binChunkBox,
-    );
-    logVerbose(
-      `KHR_character_expression_texture_transform: New accessors (#${inputIndex}, #${outputIndex})`,
-    );
-
-    const samplerIndex = outAnimation.samplers.length;
-    outAnimation.samplers.push({
-      input: inputIndex,
-      interpolation: isBinary ? 'STEP' : 'LINEAR',
-      output: outputIndex,
-    });
-    samplerIndices.push(samplerIndex);
-
-    for (const extPath of extPaths) {
+      const samplerIndex = outAnimation.samplers.length;
+      outAnimation.samplers.push({
+        input: inputIndex,
+        interpolation: isBinary ? 'STEP' : 'LINEAR',
+        output: outputIndex,
+      });
+      samplerIndices.push(samplerIndex);
       const channelIndex = outAnimation.channels.length;
 
       extensionsUsedSet.add('KHR_animation_pointer');
