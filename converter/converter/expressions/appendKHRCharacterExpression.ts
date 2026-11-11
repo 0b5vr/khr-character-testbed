@@ -21,7 +21,7 @@ import type {
   KHRCharacterExpressionMappingExpressionSetMapping,
 } from '../../../schematypes/KHRCharacterExpressionMapping.ts';
 import type { Bone } from '../Bone.ts';
-import { appendExpressionMasksFromOverride } from './appendExpressionMasksFromOverride.ts';
+import { appendExpressionSuppressionsFromOverride } from './appendExpressionSuppressionsFromOverride.ts';
 
 /**
  * Appends one glTF animation for a single VRM expression.
@@ -332,7 +332,7 @@ export function appendKHRCharacterExpression(
     }
 
     expression.extensions ||= {};
-    appendExpressionMasksFromOverride(
+    appendExpressionSuppressionsFromOverride(
       vrmExpression,
       expression.extensions,
       extensionsUsed,
