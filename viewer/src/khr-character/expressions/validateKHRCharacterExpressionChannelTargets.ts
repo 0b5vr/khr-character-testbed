@@ -126,7 +126,7 @@ export function validateKHRCharacterExpressionChannelTargets(
   const extensionsToValidate = [
     ['joint', 'KHR_character_expression_joint', isJointChannelTarget],
     ['morphtarget', 'KHR_character_expression_morphtarget', isMorphtargetChannelTarget],
-    ['texture', 'KHR_character_expression_texture', isTextureChannelTarget],
+    ['texture', 'KHR_character_expression_texture_transform', isTextureChannelTarget],
   ] as const;
 
   for (const [targetKind, extensionName, isValidTarget] of extensionsToValidate) {
