@@ -11,6 +11,7 @@ This repository aims to support the development of the KHR_character extension b
 - [specification](./specification): A submodule containing the proposal branch of the KHR_character extension in the glTF repository.
 - [viewer](./viewer): A Three.js-based web viewer for testing KHR_character models.
     - It contains a sample KHR_character model converted from a VRM 1.0 model: [viewer/src/assets/khr-character-example.glb](./viewer/src/assets/khr-character-example.glb).
+    - Asset provenance and file-specific license terms are recorded in [viewer/src/assets/ATTRIBUTION.md](./viewer/src/assets/ATTRIBUTION.md).
 
 ## What it currently supports
 
@@ -38,4 +39,6 @@ Following extensions are supported in this testbed:
 
 ## License
 
-[Apache License 2.0](./LICENSE)
+Repository-authored source code and documentation are licensed under the [Apache License 2.0](./LICENSE), except where a file-specific notice states otherwise.
+
+Bundled model content is not relicensed by the repository's Apache license. See [viewer/src/assets/ATTRIBUTION.md](./viewer/src/assets/ATTRIBUTION.md) and the checksum-pinned [asset manifest](./viewer/src/assets/ASSET_MANIFEST.tsv) for its applicable terms.
