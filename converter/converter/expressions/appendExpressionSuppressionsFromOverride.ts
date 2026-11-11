@@ -1,22 +1,22 @@
 import type { Expression as VRMExpression } from '@pixiv/types-vrmc-vrm-1.0';
-import type { KHRCharacterExpressionMaskMask } from '../../../schematypes/KHRCharacterExpressionMask.ts';
+import type { KHRCharacterExpressionSuppressionSuppression } from '../../../schematypes/KHRCharacterExpressionSuppression.ts';
 import { logVerbose } from '../logVerbose.ts';
 
 /**
- * Appends expression masks to the extension of a KHR_character_expression expression, based on the override settings in the source VRM expression.
+ * Appends expression suppressions to the extension of a KHR_character_expression expression, based on the override settings in the source VRM expression.
  *
  * @param vrmExpression The source VRM expression object
- * @param extensions The extensions object of a KHR_character_expression expression to append the masks to
+ * @param extensions The extensions object of a KHR_character_expression expression to append the suppressions to
  * @param extensionsUsedSet Extension names used by the generated expression
  * @param expressionNameIndexMap Expression indices keyed by expression name
  */
-export function appendExpressionMasksFromOverride(
+export function appendExpressionSuppressionsFromOverride(
   vrmExpression: VRMExpression,
   extensions: Record<string, unknown>,
   extensionsUsedSet: Set<string>,
   expressionNameIndexMap: ReadonlyMap<string, number>,
 ): void {
-  const masks: KHRCharacterExpressionMaskMask[] = [];
+  const suppressions: KHRCharacterExpressionSuppressionSuppression[] = [];
 
   const isBinary = vrmExpression.isBinary ?? false;
 
@@ -42,7 +42,7 @@ export function appendExpressionMasksFromOverride(
     const value = vrmExpression[propertyName];
     if (value != null && value !== 'none') {
       logVerbose(
-        `KHR_character_expression_mask: The expression has ${propertyName} == "${value}", masking all ${name} morph targets`,
+        `KHR_character_expression_suppression: The expression has ${propertyName} == "${value}", suppressing all ${name} morph targets`,
       );
 
       for (const target of targets) {
@@ -52,14 +52,14 @@ export function appendExpressionMasksFromOverride(
         }
 
         if (isBinary) {
-          masks.push({
+          suppressions.push({
             target: targetIndex,
             name: target,
             type: 'block',
             threshold: 0.5,
           });
         } else {
-          masks.push({
+          suppressions.push({
             target: targetIndex,
             name: target,
             type: value,
@@ -69,13 +69,13 @@ export function appendExpressionMasksFromOverride(
     }
   }
 
-  if (masks.length > 0) {
+  if (suppressions.length > 0) {
     logVerbose(
-      'KHR_character_expression_mask: Appending expression masks for expression with override settings',
+      'KHR_character_expression_suppression: Appending expression suppressions for expression with override settings',
     );
-    extensions['KHR_character_expression_mask'] = {
-      masks,
+    extensions['KHR_character_expression_suppression'] = {
+      suppressions,
     };
-    extensionsUsedSet.add('KHR_character_expression_mask');
+    extensionsUsedSet.add('KHR_character_expression_suppression');
   }
 }
