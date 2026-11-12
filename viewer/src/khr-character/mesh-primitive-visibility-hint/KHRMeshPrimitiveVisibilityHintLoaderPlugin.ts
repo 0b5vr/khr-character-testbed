@@ -44,7 +44,7 @@ export class KHRMeshPrimitiveVisibilityHintLoaderPlugin
       return null;
     }
 
-    if (json.extensionsRequired?.includes(EXTENSION_NAME)) throw new Error(`${EXTENSION_NAME} must not be required`);
+    if (json.extensionsRequired?.includes(EXTENSION_NAME)) console.warn(`${EXTENSION_NAME} must not be required`);
 
     const items: KHRMeshPrimitiveVisibilityHintItem[] = [];
 
@@ -61,7 +61,7 @@ export class KHRMeshPrimitiveVisibilityHintLoaderPlugin
           return;
         }
 
-        validateVisibilityRoles(extension.roles);
+        if (!validateVisibilityRoles(extension.roles)) return;
         items.push({
           object,
           roles: extension.roles,

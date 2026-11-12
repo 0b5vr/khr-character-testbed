@@ -6,30 +6,55 @@ export class KHRCharacterExpressionMapping {
   public readonly nativeNames: readonly string[];
 
   constructor(definition: MappingSchema, nativeNames: readonly string[]) {
-    this.mappingSets = structuredClone(definition.expressionSetMappings);
+    this.mappingSets = Object.create(null);
     this.nativeNames = [...nativeNames];
-    const entries = Object.entries(this.mappingSets);
-    if (!entries.length) throw new Error('Expression mapping sets must not be empty');
-    for (const [id, set] of entries) {
-      if (!id.length || !Object.keys(set).length) throw new Error('Invalid expression mapping set');
-      for (const [key, contributions] of Object.entries(set)) {
-        if (!key.length || !Array.isArray(contributions) || !contributions.length) throw new Error('Invalid expression mapping input');
-        for (const entry of contributions) {
-          if (!Number.isInteger(entry.source) || entry.source < 0 || entry.source >= nativeNames.length || !Number.isFinite(entry.weight) || entry.weight < 0 || entry.weight > 1) {
-            throw new Error('Invalid expression mapping source or weight');
-          }
-        }
+    const sets = definition?.expressionSetMappings;
+    if (!sets || typeof sets !== 'object' || Array.isArray(sets) || !Object.keys(sets).length) {
+      console.warn('Expression mapping sets must not be empty');
+      return;
+    }
+    for (const [id, set] of Object.entries(sets)) {
+      if (!id.length || !set || typeof set !== 'object' || Array.isArray(set) || !Object.keys(set).length) {
+        console.warn('Invalid expression mapping set. Skipping.');
+        continue;
       }
+      const validSet: MappingSchema['expressionSetMappings'][string] = Object.create(null);
+      for (const [key, contributions] of Object.entries(set)) {
+        if (!key.length || !Array.isArray(contributions) || !contributions.length) {
+          console.warn('Invalid expression mapping input. Skipping.');
+          continue;
+        }
+        const validEntries = contributions.filter(entry => {
+          if (!entry || typeof entry !== 'object' || !Number.isInteger(entry.source) || entry.source < 0 || entry.source >= nativeNames.length || !nativeNames[entry.source] || !Number.isFinite(entry.weight) || entry.weight < 0 || entry.weight > 1) {
+            console.warn('Invalid expression mapping source or weight. Skipping.');
+            return false;
+          }
+          return true;
+        });
+        if (validEntries.length) validSet[key] = structuredClone(validEntries);
+      }
+      if (Object.keys(validSet).length) this.mappingSets[id] = validSet;
     }
   }
 
   public evaluate(setId: string, inputs: Readonly<Record<string, number>>): number[] {
-    const set = this.mappingSets[setId];
-    if (!Object.hasOwn(this.mappingSets, setId)) throw new Error(`Unknown expression mapping set: ${setId}`);
-    for (const value of Object.values(inputs)) if (!Number.isFinite(value)) throw new Error('Expression inputs must be finite');
     const output = this.nativeNames.map(() => 0);
+    if (!Object.hasOwn(this.mappingSets, setId)) {
+      console.warn(`Unknown expression mapping set: ${setId}. Ignoring inputs.`);
+      return output;
+    }
+    if (!inputs || typeof inputs !== 'object' || Array.isArray(inputs)) {
+      console.warn('Invalid expression inputs. Ignoring inputs.');
+      return output;
+    }
+    const set = this.mappingSets[setId];
     for (const [key, contributions] of Object.entries(set)) {
-      const value = Object.hasOwn(inputs, key) ? Math.min(1, Math.max(0, inputs[key])) : 0;
+      const input = Object.hasOwn(inputs, key) ? inputs[key] : 0;
+      if (!Number.isFinite(input)) {
+        console.warn(`Expression input "${key}" must be finite. Ignoring input.`);
+        continue;
+      }
+      const value = Math.min(1, Math.max(0, input));
       for (const entry of contributions) output[entry.source] += value * entry.weight;
     }
     return output.map(value => Math.min(1, value));
