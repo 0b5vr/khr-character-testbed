@@ -1,4 +1,4 @@
-import type * as THREE from 'three';
+import { validateVisibilityRoles } from '../visibility-hint/isVisibilityHintRoleVisible.ts';
 import {
   type GLTF,
   type GLTFLoaderPlugin,
@@ -17,7 +17,7 @@ interface GLTFNodeReference extends GLTFReference {
 }
 
 interface ParsedVisibilityHint {
-  role: string;
+  roles: string[];
   label?: string;
 }
 
@@ -51,33 +51,25 @@ export class KHRNodeVisibilityHintLoaderPlugin
       }
 
       return {
-        role: extension.role,
+        roles: extension.roles,
         label: extension.label,
       };
     });
 
+    if (json.extensionsRequired?.includes(EXTENSION_NAME)) console.warn(`${EXTENSION_NAME} must not be required`);
+
     const items: KHRNodeVisibilityHintItem[] = [];
 
-    const visit = (object: THREE.Object3D, inheritedHint: ParsedVisibilityHint): void => {
-      const reference = this.parser.associations.get(object) as GLTFNodeReference | undefined;
-      const ownHint = reference?.nodes != null ? hints[reference.nodes] : undefined;
-      const effectiveHint = ownHint ?? inheritedHint;
-
-      if (reference?.nodes != null) {
-        items.push({
-          node: object,
-          role: effectiveHint.role,
-          ...(ownHint?.label != null ? { label: ownHint.label } : {}),
-        });
-      }
-
-      for (const child of object.children) {
-        visit(child, effectiveHint);
-      }
-    };
-
+    // Keep each node's own restriction. Three.js traversal provides cumulative ancestor AND.
     for (const scene of gltf.scenes) {
-      visit(scene, { role: 'always' });
+      scene.traverse(object => {
+        const reference = this.parser.associations.get(object) as GLTFNodeReference | undefined;
+        const hint = reference?.nodes != null ? hints[reference.nodes] : undefined;
+        if (hint) {
+          if (!validateVisibilityRoles(hint.roles)) return;
+          items.push({ node: object, roles: hint.roles, label: hint.label });
+        }
+      });
     }
 
     return new KHRNodeVisibilityHint(items);
