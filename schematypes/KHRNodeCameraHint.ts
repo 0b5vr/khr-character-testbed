@@ -15,7 +15,7 @@ export interface KHRNodeCameraHint extends GLTFProperty {
   camera?: number;
 
   /**
-   * Index of a glTF node that this camera should orient toward. When specified, the camera's look-at direction is computed from the vector between this node and the target node.
+   * Index of a different glTF node whose global translation is the hint's subject point: the point of interest, framing subject, or orbit center. It does not change the initial camera pose or define any orientation. When undefined or not usable (an invalid index or a reference to the hint node itself), the hint defines no subject point and a host may choose one.
    */
   targetNode?: number;
 
