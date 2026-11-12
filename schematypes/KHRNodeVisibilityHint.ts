@@ -1,7 +1,7 @@
 import type { GLTFProperty } from './GLTFProperty.ts';
 
 /**
- * Annotates a node (and, by inheritance, its subtree) with a visibility role for view contexts such as first-person or third-person. Advisory: the runtime resolves visibility from the active view context according to the role's semantics and applies the result through KHR_node_visibility semantics.
+ * Associates a node with one or more visibility roles that say when its content, and that of its descendants, is meant to be visible; the application's logic decides when each role applies. A hint allows a view when any of its recognized roles applies there; the node's own hint and all ancestor hints apply together, and a descendant hint cannot restore content an ancestor hides. The specification recommends rendering from these results; applying hints does not alter glTF-authored or animated node state.
  */
 export interface KHRNodeVisibilityHint extends GLTFProperty {
   /**
@@ -10,7 +10,7 @@ export interface KHRNodeVisibilityHint extends GLTFProperty {
   roles: string[];
 
   /**
-   * Human-readable label for this visibility annotation. Used for UI display in authoring tools and inspectors.
+   * Nonempty human-readable label, preferred over node.name and the roles when a host or tool presents the hint to a user. It has no effect on visibility.
    */
   label?: string;
 }

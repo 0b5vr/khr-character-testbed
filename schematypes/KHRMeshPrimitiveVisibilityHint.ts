@@ -1,7 +1,7 @@
 import type { GLTFProperty } from './GLTFProperty.ts';
 
 /**
- * Annotates a mesh primitive with a visibility role for view contexts such as first-person or third-person. Applies to this primitive only (no inheritance). Advisory: the runtime resolves visibility from the active view context according to the role's semantics. Use when a view-context-specific region is baked into a mesh that cannot be separated by node.
+ * Associates one mesh primitive, in every instance of the mesh, with one or more visibility roles that say when it is meant to be visible; the application's logic decides when each role applies. The hint is not inherited and adds a restriction to the containing node's ancestor-inclusive visibility hints. The specification recommends rendering from these results; applying hints does not alter glTF-authored or animated data.
  */
 export interface KHRMeshPrimitiveVisibilityHint extends GLTFProperty {
   /**
@@ -10,7 +10,7 @@ export interface KHRMeshPrimitiveVisibilityHint extends GLTFProperty {
   roles: string[];
 
   /**
-   * Human-readable label for this visibility annotation. Used for UI display in authoring tools and inspectors.
+   * Nonempty human-readable label, preferred over the roles when a host or tool presents the hint to a user. It has no effect on visibility.
    */
   label?: string;
 }

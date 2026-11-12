@@ -1,5 +1,8 @@
 import type { GLTFProperty } from './GLTFProperty.ts';
 
+/**
+ * One labeled expression driver and its response animation.
+ */
 export interface KHRCharacterExpressionExpression extends GLTFProperty {
   /**
    * Nonempty descriptive name, unique among entries in the containing expressions array.
@@ -7,17 +10,17 @@ export interface KHRCharacterExpressionExpression extends GLTFProperty {
   name: string;
 
   /**
-   * Index into the glTF animations array representing an expression animation.
+   * Index of the animation used as this entry's expression response curve.
    */
   animation: number;
 }
 
 /**
- * glTF extension that provides a common interface for facial expression animations.
+ * Associates character-expression entries with animations used as normalized, stateless response curves.
  */
 export interface KHRCharacterExpression extends GLTFProperty {
   /**
-   * Array of mappings between animation/channels and expression labels.
+   * Nonempty array of expression entries with unique nonempty names. Array indices are the authoritative entry identities.
    */
   expressions: KHRCharacterExpressionExpression[];
 }
