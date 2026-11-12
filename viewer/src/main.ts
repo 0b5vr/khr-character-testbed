@@ -155,7 +155,7 @@ function playVRMAnimation() {
   // play new animation, if both character and animation are available
   if (currentVRMAnimation != null) {
     if (currentVRMHumanoidRestPose == null || currentAnimationMixer == null) {
-      console.warn('Unable to play VRM animation. Skeletal rig mapping "vrmHumanoid" is not available in this model.');
+      console.warn('Unable to play VRM animation. Skeletal rig mapping "vrm1_humanoid" is not available in this model.');
       return;
     }
 

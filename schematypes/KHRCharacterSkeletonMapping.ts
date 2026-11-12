@@ -5,12 +5,12 @@ import type { GLTFProperty } from './GLTFProperty.ts';
  */
 export interface KHRCharacterSkeletonMappingJointAssociation extends GLTFProperty {
   /**
-   * Index of the source joint's glTF node in the nodes array.
+   * Index of the associated glTF node in the top-level nodes array.
    */
   node: number;
 
   /**
-   * The name of the source joint node.
+   * Optional name of this association.
    */
   name?: string;
 }
