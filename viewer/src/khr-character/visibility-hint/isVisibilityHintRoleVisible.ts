@@ -6,8 +6,10 @@ export function isVisibilityHintRoleVisible(roles: readonly string[], view: stri
   return recognized.length === 0 || recognized.some(role => role === 'always' || applicable.has(role));
 }
 
-export function validateVisibilityRoles(roles: unknown): asserts roles is string[] {
+export function validateVisibilityRoles(roles: unknown): roles is string[] {
   if (!Array.isArray(roles) || !roles.length || roles.some(r => typeof r !== 'string' || !r.length) || new Set(roles).size !== roles.length) {
-    throw new Error('Visibility roles must be a nonempty array of distinct nonempty strings');
+    console.warn('Visibility roles must be a nonempty array of distinct nonempty strings. Skipping hint.');
+    return false;
   }
+  return true;
 }
