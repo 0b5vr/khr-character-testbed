@@ -18,52 +18,101 @@ function resolve(json: unknown, path: string): any {
   return path.slice(1).split('/').reduce((o: any, p) => o?.[p.replace(/~1/g, '/').replace(/~0/g, '~')], json);
 }
 
-/** Validate JSON-only invariants and return the declared supported channel indices. */
+export interface ExpressionChannelValidation {
+  channels: Set<number>;
+  /** Legacy clip playback cannot safely filter individual rejected channels. */
+  hasInvalidChannels: boolean;
+}
+
+/** Validate JSON-only invariants, warning and omitting invalid channels or expressions. */
 export function validateKHRCharacterExpressionChannelTargets(
   entry: KHRCharacterExpressionExpression, json: GLTF.IGLTF,
-): Set<number> {
-  const animation = json.animations?.[entry.animation];
-  if (!animation) throw new Error(`Missing expression animation ${entry.animation}`);
-  const targets: string[] = [];
-  for (const channel of animation.channels) {
-    const path = getExpressionTarget(channel.target);
-    if (targets.some((p) => p === path || p.startsWith(path + '/') || path.startsWith(p + '/'))) {
-      throw new Error(`Duplicate or overlapping animation target ${path}`);
+): ExpressionChannelValidation | null {
+  const animation = entry && Number.isInteger(entry.animation) && entry.animation >= 0 ? json.animations?.[entry.animation] : undefined;
+  if (!animation || !Array.isArray(animation.channels)) {
+    console.warn(`Missing or invalid expression animation ${entry?.animation}. Skipping this expression.`);
+    return null;
+  }
+  let hasInvalidChannels = false;
+  const warn = (message: string) => {
+    console.warn(`${message}. Skipping the affected channel or declaration.`);
+    hasInvalidChannels = true;
+  };
+  const targets: (string | undefined)[] = [];
+  const invalid = new Set<number>();
+  for (const [i, channel] of animation.channels.entries()) {
+    let path: string;
+    try {
+      if (!channel?.target) throw new Error('Missing animation channel target');
+      path = getExpressionTarget(channel.target);
+    } catch (error) {
+      warn(String(error));
+      invalid.add(i);
+      continue;
     }
-    targets.push(path);
+    if (targets.some((p) => p != null && (p === path || p.startsWith(path + '/') || path.startsWith(p + '/')))) {
+      console.warn(`Duplicate or overlapping animation target ${path}. Skipping this expression.`);
+      return null;
+    }
+    targets[i] = path;
     const nodeMatch = /^\/nodes\/(\d+)\/(translation|rotation|scale|weights)(?:\/(\d+))?$/.exec(path);
+    let problem: string | undefined;
     if (nodeMatch) {
       const node = json.nodes?.[Number(nodeMatch[1])];
-      if (!node) throw new Error(`Missing node for ${path}`);
-      if (nodeMatch[2] !== 'weights' && node.matrix) throw new Error(`TRS animation targets a matrix node: ${path}`);
-      if (nodeMatch[2] === 'weights') {
+      if (!node) problem = `Missing node for ${path}`;
+      else if (nodeMatch[2] !== 'weights' && node.matrix) problem = `TRS animation targets a matrix node: ${path}`;
+      else if (nodeMatch[2] === 'weights') {
         const mesh = json.meshes?.[node.mesh!];
-        const count = mesh?.primitives[0]?.targets?.length ?? 0;
-        if (!count || (nodeMatch[3] != null && Number(nodeMatch[3]) >= count)) throw new Error(`Invalid morph target ${path}`);
+        const count = mesh?.primitives?.[0]?.targets?.length ?? 0;
+        if (!count || (nodeMatch[3] != null && Number(nodeMatch[3]) >= count)) problem = `Invalid morph target ${path}`;
       }
     } else if (resolve(json, path) === undefined && !/\/extensions\/KHR_texture_transform\/(offset|scale|rotation)$/.test(path)) {
       // Unsupported extensions may define virtual/default mutable properties. Do not reject them here.
-      if (!channel.target.extensions) throw new Error(`Unresolved animation target ${path}`);
+      if (!channel.target.extensions) problem = `Unresolved animation target ${path}`;
+    }
+    if (problem) {
+      warn(problem);
+      invalid.add(i);
     }
   }
   const listed = new Set<number>();
+  const owned = new Set<number>();
   for (const domain of domains) {
     const def = entry.extensions?.[domain];
     if (def == null) continue;
-    if (!json.extensionsUsed?.includes(domain)) throw new Error(`Undeclared expression extension ${domain}`);
-    if (!Array.isArray(def.channels) || def.channels.length === 0) throw new Error(`Empty channel list: ${domain}`);
+    if (!json.extensionsUsed?.includes(domain) || !Array.isArray(def.channels) || def.channels.length === 0) {
+      warn(`Undeclared or invalid expression extension ${domain}`);
+      continue;
+    }
     for (const i of def.channels) {
-      if (!Number.isInteger(i) || i < 0 || i >= animation.channels.length || listed.has(i)) throw new Error(`Invalid or multiply owned expression channel ${i}`);
-      listed.add(i);
-      const path = targets[i];
+      if (!Number.isInteger(i) || i < 0 || i >= animation.channels.length) {
+        warn(`Invalid expression channel ${i}`);
+        continue;
+      }
+      if (owned.has(i)) {
+        warn(`Multiply owned expression channel ${i}`);
+        listed.delete(i);
+        invalid.add(i);
+      }
+      owned.add(i);
+      if (invalid.has(i)) continue;
+      const path = targets[i]!;
       const valid = domain.endsWith('_joint') ? /^\/nodes\/\d+\/(translation|rotation|scale)$/.test(path)
         : domain.endsWith('_morphtarget') ? /^\/nodes\/\d+\/weights(?:\/\d+)?$/.test(path)
         : /^\/materials\/\d+\/.+\/extensions\/KHR_texture_transform\/(offset|scale|rotation)$/.test(path);
-      if (!valid) throw new Error(`Invalid ${domain} target ${path}`);
-      if (domain.endsWith('_texture_transform') && typeof resolve(json, path.slice(0, path.lastIndexOf('/'))) !== 'object') {
-        throw new Error(`Missing authored texture transform ${path}`);
+      if (!valid) {
+        warn(`Invalid ${domain} target ${path}`);
+        continue;
       }
+      if (domain.endsWith('_texture_transform')) {
+        const transform = resolve(json, path.slice(0, path.lastIndexOf('/')));
+        if (!transform || typeof transform !== 'object') {
+          warn(`Missing authored texture transform ${path}`);
+          continue;
+        }
+      }
+      listed.add(i);
     }
   }
-  return listed;
+  return { channels: listed, hasInvalidChannels };
 }
