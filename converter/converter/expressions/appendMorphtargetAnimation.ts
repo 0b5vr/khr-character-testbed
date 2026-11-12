@@ -6,25 +6,6 @@ import { options } from '../options.ts';
 import { transformToBinary } from './transformToBinary.ts';
 
 /**
- * Builds a 2-keyframe weight buffer for a mesh with morph targets.
- * The first keyframe is all zeros, and the second keyframe applies `weight` only to `targetIndex`.
- *
- * @param targetsLength The total count of morph targets for the mesh
- * @param targetIndex The index of the morph target to apply the weight to
- * @param weight The weight to apply to the target at the second keyframe
- * @returns A Float32Array containing the keyframe values
- */
-function createOutputWeights(
-  targetsLength: number,
-  targetIndex: number,
-  weight: number,
-): Float32Array {
-  const weights = new Float32Array(targetsLength * 2);
-  weights[targetsLength + targetIndex] = weight;
-  return weights;
-}
-
-/**
  * Appends one VRM morph target bind as animation sampler/channel entries.
  *
  * @param vrmBind The source VRM morph target bind to append
@@ -42,8 +23,9 @@ export function appendMorphtargetAnimation(
   binChunkBox: [Uint8Array],
   outAnimation: GLTF.IAnimation,
   extensionsUsedSet: Set<string>,
+  nodeBinds: ExpressionMorphTargetBind[] = [vrmBind],
 ): [samplerIndex: number | null, channelIndex: number | null] {
-  if (vrmBind.weight === 0) {
+  if (nodeBinds.every((bind) => bind.weight === 0)) {
     return [null, null];
   }
 
@@ -60,11 +42,19 @@ export function appendMorphtargetAnimation(
 
   const targetIndex = vrmBind.index;
   const weight = vrmBind.weight;
+  const targetsLength = mesh.primitives?.[0]?.targets?.length ?? 0;
+  for (const bind of nodeBinds) {
+    if (!Number.isInteger(bind.index) || bind.index < 0 || bind.index >= targetsLength || !Number.isFinite(bind.weight)) {
+      throw new Error(`Invalid morph bind for node #${nodeIndex}`);
+    }
+  }
+  const base = gltf.nodes?.[nodeIndex]?.weights ?? mesh.weights ?? new Array(targetsLength).fill(0);
+  const initial = base[targetIndex];
 
   if (options.useAnimationPointerForMorphTarget) {
     const [inputIndex, outputIndex] = appendAnimationAccessors(
       new Float32Array(isBinary ? [0, 0.5, 1] : [0, 1]),
-      new Float32Array(isBinary ? [0, weight, weight] : [0, weight]),
+      new Float32Array(isBinary ? [initial, initial + weight, initial + weight] : [initial, initial + weight]),
       'SCALAR',
       gltf,
       binChunkBox,
@@ -101,11 +91,14 @@ export function appendMorphtargetAnimation(
 
     return [samplerIndex, channelIndex];
   } else {
-    const targetsLength = mesh.primitives?.[0]?.targets?.length ?? 0;
+    const outputWeights = new Float32Array(targetsLength * 2);
+    outputWeights.set(base);
+    outputWeights.set(base, targetsLength);
+    for (const bind of nodeBinds) outputWeights[targetsLength + bind.index] += bind.weight;
     const [inputIndex, outputIndex] = appendAnimationAccessors(
       new Float32Array(isBinary ? [0, 0.5, 1] : [0, 1]),
       transformToBinary(
-        createOutputWeights(targetsLength, targetIndex, weight),
+        outputWeights,
         isBinary,
       ),
       'SCALAR',

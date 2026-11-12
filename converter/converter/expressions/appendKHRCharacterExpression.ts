@@ -1,3 +1,4 @@
+import { options } from '../options.ts';
 import { logVerbose } from '../logVerbose.ts';
 import { appendMorphtargetAnimation } from './appendMorphtargetAnimation.ts';
 import { appendTextureAnimation } from './appendTextureAnimation.ts';
@@ -55,7 +56,17 @@ function appendAnimation(
 
   const isBinary = vrmExpression.isBinary ?? false;
 
+  // One channel per concrete target. A core weights channel covers the whole node.
+  const morphBinds = new Map<string, NonNullable<VRMExpression['morphTargetBinds']>[number]>();
   for (const bind of vrmExpression.morphTargetBinds ?? []) {
+    const key = `${bind.node}/${bind.index}`;
+    const previous = morphBinds.get(key);
+    morphBinds.set(key, { ...bind, weight: (previous?.weight ?? 0) + bind.weight });
+  }
+  const emittedNodes = new Set<number>();
+  for (const bind of morphBinds.values()) {
+    if (!options.useAnimationPointerForMorphTarget && emittedNodes.has(bind.node)) continue;
+    emittedNodes.add(bind.node);
     logVerbose(
       'KHR_character_expression_morphtarget: Appending an animation channel for morph target bind',
     );
@@ -66,13 +77,26 @@ function appendAnimation(
       binChunkBox,
       animation,
       extensionsUsedSet,
+      [...morphBinds.values()].filter((entry) => entry.node === bind.node),
     );
     if (i != null) {
       morphtargetChannelIndices.push(i);
     }
   }
 
+  const textureBinds = new Map<number, NonNullable<VRMExpression['textureTransformBinds']>[number]>();
   for (const bind of vrmExpression.textureTransformBinds ?? []) {
+    const previous = textureBinds.get(bind.material);
+    const merged = { ...previous, material: bind.material };
+    for (const property of ['offset', 'scale'] as const) {
+      if (!bind[property]) continue;
+      const neutral = property === 'scale' ? 1 : 0;
+      const old = previous?.[property] ?? [neutral, neutral];
+      merged[property] = [old[0] + bind[property][0] - neutral, old[1] + bind[property][1] - neutral];
+    }
+    textureBinds.set(bind.material, merged);
+  }
+  for (const bind of textureBinds.values()) {
     logVerbose(
       'KHR_character_expression_texture_transform: Appending animation channels for texture transform bind',
     );

@@ -37,21 +37,27 @@ export class KHRCharacterExpressionLoaderPlugin implements GLTFLoaderPlugin {
     }
 
     const extension = json.extensions?.['KHR_character_expression'] as KHRCharacterExpressionSchema | undefined;
-    if (!extension) {
+    if (!extension || !Array.isArray(extension.expressions)) {
       console.warn('KHR_character_expression extension is listed in extensionsUsed but not found in extensions.');
       return null;
     }
 
     const expressionManager = new KHRCharacterExpressionManager(gltf);
 
-    const names = new Set<string>();
+    const names = new Map<string, number>();
     for (const entry of extension.expressions) {
-      if (typeof entry.name !== 'string' || entry.name.length === 0 || names.has(entry.name)) {
-        throw new Error('Expression names must be nonempty and unique');
-      }
-      names.add(entry.name);
+      if (typeof entry?.name === 'string') names.set(entry.name, (names.get(entry.name) ?? 0) + 1);
     }
     for (const expressionDef of extension.expressions) {
+      if (typeof expressionDef?.name !== 'string' || expressionDef.name.length === 0 || names.get(expressionDef.name) !== 1) {
+        console.warn('Expression names must be nonempty and unique. Skipping this expression.');
+        continue;
+      }
+      const validation = validateKHRCharacterExpressionChannelTargets(expressionDef, json);
+      if (!validation || validation.hasInvalidChannels) {
+        // This legacy clip path cannot safely exclude individual invalid channels.
+        continue;
+      }
       const clip = gltf.animations[expressionDef.animation];
       if (!clip) {
         console.warn(`Animation with index ${expressionDef.animation} not found for expression "${expressionDef.name}". Skipping this expression.`);
@@ -62,7 +68,6 @@ export class KHRCharacterExpressionLoaderPlugin implements GLTFLoaderPlugin {
 
       const expression = new KHRCharacterExpression(expressionDef.name);
       expression.suppressions = this._importSuppressions(expressionDef, extension.expressions);
-      validateKHRCharacterExpressionChannelTargets(expressionDef, json);
       expressionManager.registerExpression(expression);
 
       expression.action = expressionManager.animationMixer.clipAction(clip);
@@ -73,11 +78,11 @@ export class KHRCharacterExpressionLoaderPlugin implements GLTFLoaderPlugin {
 
     // Validate expression suppressions
     for (const expression of expressionManager.expressions) {
-      for (const suppression of expression.suppressions) {
-        if (expressionManager.getValue(suppression.target) == null) {
-          console.warn(`Expression suppression on "${expression.expressionName}" targets unknown expression "${suppression.target}". Skipping this suppression.`);
-        }
-      }
+      expression.suppressions = expression.suppressions.filter((suppression) => {
+        if (expressionManager.getValue(suppression.target) != null) return true;
+        console.warn(`Expression suppression on "${expression.expressionName}" targets unknown expression "${suppression.target}". Skipping this suppression.`);
+        return false;
+      });
     }
 
     return expressionManager;
@@ -95,8 +100,20 @@ export class KHRCharacterExpressionLoaderPlugin implements GLTFLoaderPlugin {
   ): KHRCharacterExpressionSuppression[] {
     const extension = expressionDef.extensions?.['KHR_character_expression_suppression'] as KHRCharacterExpressionSuppressionSchema | undefined;
 
+    if (extension && (!this.parser.json.extensionsUsed?.includes('KHR_character_expression_suppression') || !Array.isArray(extension.suppressions))) {
+      console.warn(`Invalid suppression declaration on "${expressionDef.name}". Ignoring suppressions.`);
+      return [];
+    }
     const suppressions: KHRCharacterExpressionSuppressionSuppression[] = extension?.suppressions ?? [];
     return suppressions.flatMap((suppression) => {
+      if (!suppression || !Number.isInteger(suppression.target) || suppression.target < 0 || [suppression.amount, suppression.threshold].some((v) => v != null && (!Number.isFinite(v) || v < 0 || v > 1))) {
+        console.warn(`Invalid suppression on "${expressionDef.name}". Skipping this rule.`);
+        return [];
+      }
+      if (suppression.type != null && suppression.type !== 'blend' && suppression.type !== 'block' && !/^[A-Z0-9]+_[a-z0-9]+(?:_[a-z0-9]+)*$/.test(suppression.type)) {
+        console.warn(`Invalid suppression type on "${expressionDef.name}". Skipping this rule.`);
+        return [];
+      }
       const targetExpression = expressions[suppression.target];
       if (targetExpression == null) {
         console.warn(`Expression suppression on "${expressionDef.name}" targets invalid expression index ${suppression.target}. Skipping this suppression.`);
