@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { applyExpressionResponses } from './expressionResponse.ts';
 import { saturate } from '../../utils/saturate.ts';
 import { type KHRCharacterExpression, type KHRCharacterExpressionSuppression } from './KHRCharacterExpression.ts';
 
@@ -13,7 +14,7 @@ import { type KHRCharacterExpression, type KHRCharacterExpressionSuppression } f
  * @param sourceWeight - The current input weight of the source expression.
  * @returns The attenuation amount applied to the target expression weight.
  */
-function getSuppressionAttenuation(suppression: KHRCharacterExpressionSuppression, sourceWeight: number): number {
+export function getSuppressionAttenuation(suppression: KHRCharacterExpressionSuppression, sourceWeight: number): number {
   const amount = saturate(suppression.amount ?? 1.0);
 
   if (suppression.type === 'block') {
@@ -136,6 +137,10 @@ export class KHRCharacterExpressionManager {
       return;
     }
 
+    if (!Number.isFinite(weight)) {
+      console.warn('Expression drivers must be finite. Ignoring this update.');
+      return;
+    }
     expression.weight = saturate(weight);
   }
 
@@ -148,42 +153,32 @@ export class KHRCharacterExpressionManager {
     // Gather input weights
     const inputWeights = new Map<string, number>();
     for (const expression of this._expressions) {
+      if (!Number.isFinite(expression.weight)) {
+        console.warn(`Expression \"${expression.expressionName}\" has a nonfinite driver. Resetting it to zero.`);
+        expression.weight = 0;
+      }
       inputWeights.set(expression.expressionName, saturate(expression.weight));
     }
 
-    // Calculate output weights by applying suppressions
+    // Calculate attenuation from the immutable input weights
     const attenuation = new Map<string, number>();
-    for (const sourceExpression of this._expressions) {
-      const sourceWeight = inputWeights.get(sourceExpression.expressionName) ?? 0.0;
-
-      for (const suppression of sourceExpression.suppressions) {
-        const targetWeight = inputWeights.get(suppression.target);
-        if (targetWeight == null) {
-          continue;
-        }
-
-        attenuation.set(suppression.target, (attenuation.get(suppression.target) ?? 0) + getSuppressionAttenuation(suppression, sourceWeight));
-      }
-    }
-
-    const outputWeights = new Map([...inputWeights].map(([name, weight]) => [
-      name,
-      weight * (1 - saturate(attenuation.get(name) ?? 0)),
-    ]));
-
-    // Apply output weights to animation actions
     for (const expression of this._expressions) {
-      if (!expression.action) {
-        console.warn(
-          `Expression "${expression.expressionName}" does not have an animation action. Skipping update for this expression.`,
-        );
-        continue;
+      for (const rule of expression.suppressions) {
+        attenuation.set(rule.target, (attenuation.get(rule.target) ?? 0)
+          + getSuppressionAttenuation(rule, inputWeights.get(expression.expressionName) ?? 0));
       }
-
-      expression.action.time = outputWeights.get(expression.expressionName) ?? 0.0;
     }
 
-    // Finally, update the animation mixer to apply the changes
+    // Evaluate and apply the current expression responses
+    applyExpressionResponses([...this._expressions].map((expression) => ({
+      responses: expression.responses,
+      time: (inputWeights.get(expression.expressionName) ?? 0)
+        * (1 - saturate(attenuation.get(expression.expressionName) ?? 0)) * expression.duration,
+      active: (inputWeights.get(expression.expressionName) ?? 0)
+        * (1 - saturate(attenuation.get(expression.expressionName) ?? 0)) > 0,
+    })));
+
+    // Retained for callers using the public mixer; response evaluation itself is stateless.
     this.animationMixer.update(delta);
   }
 }
