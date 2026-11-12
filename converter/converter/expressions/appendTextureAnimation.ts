@@ -60,7 +60,7 @@ function compileTextureTransformExtPaths(
     const extensions = textureInfo.extensions ??= {};
     if (typeof extensions !== 'object') {
       console.warn(
-        `KHR_character_expression_texture: Texture info at material #${materialIndex} path "${path}" has an invalid \`extensions\` property (not an object). Skipping the path.`,
+        `KHR_character_expression_texture_transform: Texture info at material #${materialIndex} path "${path}" has an invalid \`extensions\` property (not an object). Skipping the path.`,
       );
       continue;
     }
@@ -125,7 +125,7 @@ export function appendTextureAnimation(
       binChunkBox,
     );
     logVerbose(
-      `KHR_character_expression_texture: New accessors (#${inputIndex}, #${outputIndex})`,
+      `KHR_character_expression_texture_transform: New accessors (#${inputIndex}, #${outputIndex})`,
     );
 
     const samplerIndex = outAnimation.samplers.length;
@@ -155,7 +155,7 @@ export function appendTextureAnimation(
       });
       channelIndices.push(channelIndex);
       logVerbose(
-        `KHR_character_expression_texture: New animation channel, pointer for "${pointer}"`,
+        `KHR_character_expression_texture_transform: New animation channel, pointer for "${pointer}"`,
       );
     }
   }

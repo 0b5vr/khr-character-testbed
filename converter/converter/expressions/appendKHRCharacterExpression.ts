@@ -21,7 +21,7 @@ import type {
   KHRCharacterExpressionMappingExpressionSetMapping,
 } from '../../../schematypes/KHRCharacterExpressionMapping.ts';
 import type { Bone } from '../Bone.ts';
-import { appendExpressionMasksFromOverride } from './appendExpressionMasksFromOverride.ts';
+import { appendExpressionSuppressionsFromOverride } from './appendExpressionSuppressionsFromOverride.ts';
 
 /**
  * Appends one glTF animation for a single VRM expression.
@@ -74,7 +74,7 @@ function appendAnimation(
 
   for (const bind of vrmExpression.textureTransformBinds ?? []) {
     logVerbose(
-      'KHR_character_expression_texture: Appending animation channels for texture transform bind',
+      'KHR_character_expression_texture_transform: Appending animation channels for texture transform bind',
     );
     const [_, i] = appendTextureAnimation(
       bind,
@@ -160,10 +160,10 @@ function appendExpression(
         textureChannelIndices.join(', ')
       }]`,
     );
-    extensions['KHR_character_expression_texture'] = {
+    extensions['KHR_character_expression_texture_transform'] = {
       channels: textureChannelIndices,
     };
-    extensionsUsedSet.add('KHR_character_expression_texture');
+    extensionsUsedSet.add('KHR_character_expression_texture_transform');
   }
 
   const expression: KHRCharacterExpressionExpression = {
@@ -218,7 +218,7 @@ export function appendKHRCharacterExpression(
   }
 
   const expressions: KHRCharacterExpressionExpression[] = [];
-  const mappingName = 'vrmExpressionPresets';
+  const mappingName = 'vrm1_expressions';
   const mapping: KHRCharacterExpressionMappingExpressionSetMapping = {};
   const extensionsUsed = new Set(gltf.extensionsUsed ?? []);
 
@@ -335,7 +335,7 @@ export function appendKHRCharacterExpression(
     }
 
     expression.extensions ||= {};
-    appendExpressionMasksFromOverride(
+    appendExpressionSuppressionsFromOverride(
       vrmExpression,
       expression.extensions,
       extensionsUsed,

@@ -1,35 +1,32 @@
 import * as THREE from 'three';
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { saturate } from '../../utils/saturate.ts';
-import { type KHRCharacterExpression, type KHRCharacterExpressionMask } from './KHRCharacterExpression.ts';
+import { type KHRCharacterExpression, type KHRCharacterExpressionSuppression } from './KHRCharacterExpression.ts';
 
 /**
- * Calculate how much a mask attenuates its target expression.
+ * Calculate how much a suppression attenuates its target expression.
  *
- * A `blend` mask linearly reduces the target as the source expression grows.
- * A `block` mask reduces the target by a fixed amount once the source expression exceeds the threshold.
+ * A `blend` suppression linearly reduces the target as the source expression grows.
+ * A `block` suppression reduces the target by a fixed amount once the source expression exceeds the threshold.
  *
- * @param mask - The mask definition authored on the source expression.
+ * @param suppression - The suppression definition authored on the source expression.
  * @param sourceWeight - The current input weight of the source expression.
- * @returns A multiplier applied to the target expression weight.
+ * @returns The attenuation amount applied to the target expression weight.
  */
-function getMaskMultiplier(mask: KHRCharacterExpressionMask, sourceWeight: number): number {
-  const amount = saturate(mask.amount ?? 1.0);
+function getSuppressionAttenuation(suppression: KHRCharacterExpressionSuppression, sourceWeight: number): number {
+  const amount = saturate(suppression.amount ?? 1.0);
 
-  if (mask.type === 'block') {
-    const threshold = saturate(mask.threshold ?? 0.0);
-    return sourceWeight > threshold ? 1.0 - amount : 1.0;
+  if (suppression.type === 'block') {
+    const threshold = suppression.threshold ?? 0.0;
+    return sourceWeight > threshold ? amount : 0;
   }
 
-  // `blend` is the schema default.
-  // When we see unknown custom types here, we warn and treat them as `blend` for safety.
-  if (mask.type && mask.type !== 'blend') {
-    console.warn(
-      `Unknown mask type "${mask.type}" on expression "${mask.target}". Using "blend" behavior instead`,
-    );
+  // `blend` is the schema default. Unsupported custom types contribute no attenuation.
+  if (suppression.type != null && suppression.type !== 'blend') {
+    return 0;
   }
 
-  return 1.0 - saturate(sourceWeight * amount);
+  return amount * sourceWeight;
 }
 
 /**
@@ -154,20 +151,25 @@ export class KHRCharacterExpressionManager {
       inputWeights.set(expression.expressionName, saturate(expression.weight));
     }
 
-    // Calculate output weights by applying masks
-    const outputWeights = new Map(inputWeights);
+    // Calculate output weights by applying suppressions
+    const attenuation = new Map<string, number>();
     for (const sourceExpression of this._expressions) {
       const sourceWeight = inputWeights.get(sourceExpression.expressionName) ?? 0.0;
 
-      for (const mask of sourceExpression.masks) {
-        const targetWeight = outputWeights.get(mask.target);
+      for (const suppression of sourceExpression.suppressions) {
+        const targetWeight = inputWeights.get(suppression.target);
         if (targetWeight == null) {
           continue;
         }
 
-        outputWeights.set(mask.target, targetWeight * getMaskMultiplier(mask, sourceWeight));
+        attenuation.set(suppression.target, (attenuation.get(suppression.target) ?? 0) + getSuppressionAttenuation(suppression, sourceWeight));
       }
     }
+
+    const outputWeights = new Map([...inputWeights].map(([name, weight]) => [
+      name,
+      weight * (1 - saturate(attenuation.get(name) ?? 0)),
+    ]));
 
     // Apply output weights to animation actions
     for (const expression of this._expressions) {
