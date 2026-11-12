@@ -60,22 +60,56 @@ test('suppression sums attenuation and ignores unsupported custom types', async 
   assert.equal(f.node.position.x, 7); // only a contributes; custom rule leaves a unchanged.
 });
 
-test('duplicate targets and multiply owned channels are rejected', () => {
+test('duplicate targets and multiply owned channels warn without throwing', (t) => {
+  const warn = t.mock.method(console, 'warn', () => {});
   const f = fixture(); const entry = f.json.extensions.KHR_character_expression.expressions[0];
   f.json.animations[0].channels[1].target.node = 0;
-  assert.throws(() => validateKHRCharacterExpressionChannelTargets(entry, f.json), /overlapping/);
+  assert.equal(validateKHRCharacterExpressionChannelTargets(entry, f.json), null);
   f.json.animations[0].channels[1].target.node = 1;
   entry.extensions.KHR_character_expression_joint.channels = [0,0];
-  assert.throws(() => validateKHRCharacterExpressionChannelTargets(entry, f.json), /multiply owned/);
+  const result = validateKHRCharacterExpressionChannelTargets(entry, f.json)!;
+  assert.equal(result.hasInvalidChannels, true);
+  assert.equal(result.channels.size, 0);
+  assert.ok(warn.mock.calls.some(call => String(call.arguments[0]).includes('overlapping')));
+  assert.ok(warn.mock.calls.some(call => /multiply owned/i.test(String(call.arguments[0]))));
 });
 
-test('decoded input times and native names are validated', async () => {
+test('invalid native names and decoded sampler data skip entries with warnings', async (t) => {
+  const warn = t.mock.method(console, 'warn', () => {});
   const f = fixture();
   f.json.extensions.KHR_character_expression.expressions[1].name = 'a';
-  await assert.rejects(new KHRCharacterExpressionLoaderPlugin(f.parser)._import(f.gltf), /unique/);
+  const namesManager = (await new KHRCharacterExpressionLoaderPlugin(f.parser)._import(f.gltf))!;
+  assert.equal(namesManager.expressions.size, 0);
   f.json.extensions.KHR_character_expression.expressions[1].name = 'b';
   f.parser.getDependency = async () => new THREE.Float32BufferAttribute([1,1],1);
-  await assert.rejects(new KHRCharacterExpressionLoaderPlugin(f.parser)._import(f.gltf), /input times/);
+  const samplerManager = (await new KHRCharacterExpressionLoaderPlugin(f.parser)._import(f.gltf))!;
+  assert.equal(samplerManager.expressions.size, 0);
+  assert.ok(warn.mock.calls.length >= 2);
+});
+
+test('one invalid expression does not prevent valid entries importing and animating', async (t) => {
+  const warn = t.mock.method(console, 'warn', () => {});
+  const f = fixture();
+  f.json.extensions.KHR_character_expression.expressions.push({ name: 'broken', animation: 999 });
+  const manager = (await new KHRCharacterExpressionLoaderPlugin(f.parser)._import(f.gltf))!;
+  assert.deepEqual([...manager.expressionMap.keys()], ['a', 'b']);
+  manager.setValue('a', 0.25);
+  manager.update(0);
+  assert.equal(f.node.position.x, 6);
+  assert.ok(warn.mock.calls.length > 0);
+});
+
+test('invalid driver updates warn without preventing other expressions updating', async (t) => {
+  const warn = t.mock.method(console, 'warn', () => {});
+  const f = fixture();
+  const manager = (await new KHRCharacterExpressionLoaderPlugin(f.parser)._import(f.gltf))!;
+  manager.setValue('a', 0.25);
+  manager.setValue('a', NaN);
+  assert.equal(manager.getValue('a'), 0.25);
+  manager.expressionMap.get('b')!.weight = Infinity;
+  assert.doesNotThrow(() => manager.update(0));
+  assert.equal(f.node.position.x, 6);
+  assert.ok(warn.mock.calls.length >= 2);
 });
 
 test('textureInfo targets remain isolated despite loader texture deduplication', async () => {
@@ -113,4 +147,38 @@ test('morph binding excludes descendant glTF node meshes', async () => {
   binding.write([0.4]);
   assert.deepEqual(parent.morphTargetInfluences,[0.4]);
   assert.deepEqual(child.morphTargetInfluences,[0.8]);
+});
+
+test('skipped expressions preserve suppression indices for later valid entries', async (t) => {
+  const warn = t.mock.method(console, 'warn', () => {});
+  const f = fixture();
+  const entries = f.json.extensions.KHR_character_expression.expressions;
+  entries.splice(1, 0, { name: '', animation: 0 }, { name: 'missing', animation: 999 });
+  entries[0].extensions.KHR_character_expression_suppression.suppressions = [
+    { target: 3 }, { target: 1 }, { target: 3, amount: 2 },
+  ];
+  const manager = (await new KHRCharacterExpressionLoaderPlugin(f.parser)._import(f.gltf))!;
+  assert.deepEqual([...manager.expressionMap.keys()], ['a', 'b']);
+  assert.equal(manager.expressionMap.get('a')!.suppressions.length, 1);
+  manager.setValue('a', 1); manager.setValue('b', 1); manager.update(0);
+  assert.equal(f.node.position.x, 7);
+  assert.ok(warn.mock.calls.length > 0);
+});
+
+test('invalid decoded channel output leaves valid channels usable', async (t) => {
+  const warn = t.mock.method(console, 'warn', () => {});
+  const f = fixture();
+  f.json.nodes.push({});
+  f.json.animations[0].channels.push({ sampler: 2, target: { node: 2, path: 'translation' } });
+  f.json.animations[0].samplers.push({ input: 0, output: 3 });
+  f.json.accessors.push({ type: 'VEC3', componentType: 5126 });
+  f.json.extensions.KHR_character_expression.expressions[0].extensions.KHR_character_expression_joint.channels.push(2);
+  const load = f.parser.getDependency;
+  f.parser.getDependency = async (type: string, index: number) => type === 'accessor' && index === 3
+    ? new THREE.Float32BufferAttribute([0, NaN, 0, 2, 0, 0], 3) : load(type, index);
+  const manager = (await new KHRCharacterExpressionLoaderPlugin(f.parser)._import(f.gltf))!;
+  assert.equal(manager.expressionMap.get('a')!.responses.length, 1);
+  manager.setValue('a', 1); manager.update(0);
+  assert.equal(f.node.position.x, 7);
+  assert.ok(warn.mock.calls.length > 0);
 });
