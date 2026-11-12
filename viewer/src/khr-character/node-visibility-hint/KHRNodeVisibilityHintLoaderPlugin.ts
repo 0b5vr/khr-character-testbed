@@ -56,7 +56,7 @@ export class KHRNodeVisibilityHintLoaderPlugin
       };
     });
 
-    if (json.extensionsRequired?.includes(EXTENSION_NAME)) throw new Error(`${EXTENSION_NAME} must not be required`);
+    if (json.extensionsRequired?.includes(EXTENSION_NAME)) console.warn(`${EXTENSION_NAME} must not be required`);
 
     const items: KHRNodeVisibilityHintItem[] = [];
 
@@ -66,7 +66,7 @@ export class KHRNodeVisibilityHintLoaderPlugin
         const reference = this.parser.associations.get(object) as GLTFNodeReference | undefined;
         const hint = reference?.nodes != null ? hints[reference.nodes] : undefined;
         if (hint) {
-          validateVisibilityRoles(hint.roles);
+          if (!validateVisibilityRoles(hint.roles)) return;
           items.push({ node: object, roles: hint.roles, label: hint.label });
         }
       });
