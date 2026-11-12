@@ -138,7 +138,8 @@ export class KHRCharacterExpressionManager {
     }
 
     if (!Number.isFinite(weight)) {
-      throw new Error('Expression drivers must be finite');
+      console.warn('Expression drivers must be finite. Ignoring this update.');
+      return;
     }
     expression.weight = saturate(weight);
   }
@@ -153,7 +154,8 @@ export class KHRCharacterExpressionManager {
     const inputWeights = new Map<string, number>();
     for (const expression of this._expressions) {
       if (!Number.isFinite(expression.weight)) {
-        throw new Error('Expression drivers must be finite');
+        console.warn(`Expression \"${expression.expressionName}\" has a nonfinite driver. Resetting it to zero.`);
+        expression.weight = 0;
       }
       inputWeights.set(expression.expressionName, saturate(expression.weight));
     }
