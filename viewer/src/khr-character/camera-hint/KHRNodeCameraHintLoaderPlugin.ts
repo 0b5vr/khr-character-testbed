@@ -35,7 +35,10 @@ export class KHRNodeCameraHintLoaderPlugin implements GLTFLoaderPlugin {
       return null;
     }
 
-    if (json.extensionsRequired?.includes(EXTENSION_NAME)) throw new Error(`${EXTENSION_NAME} must not be required`);
+    if (json.extensionsRequired?.includes(EXTENSION_NAME)) {
+      console.warn(`${EXTENSION_NAME} must not be required`);
+    }
+
     const cameraHints: KHRNodeCameraHint[] = [];
 
     for (const [index, nodeDef] of (json.nodes ?? []).entries()) {
