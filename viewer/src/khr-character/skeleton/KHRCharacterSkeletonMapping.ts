@@ -1,4 +1,4 @@
-import { type KHRCharacterSkeletalRigMapping } from './KHRCharacterSkeletalRigMapping';
+import type { KHRCharacterSkeletalRigMapping } from './KHRCharacterSkeletalRigMapping';
 
 export class KHRCharacterSkeletonMapping {
   /**

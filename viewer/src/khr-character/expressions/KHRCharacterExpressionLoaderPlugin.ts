@@ -56,64 +56,106 @@ export class KHRCharacterExpressionLoaderPlugin implements GLTFLoaderPlugin {
     }
 
     const extension = json.extensions?.[this.name] as KHRCharacterExpressionSchema | undefined;
-    if (!extension?.expressions?.length || !json.extensions?.KHR_character || !json.extensionsUsed?.includes('KHR_character')) throw new Error('Missing character/expression dependency');
-    const names = extension.expressions.map((e) => e.name);
-    if (names.some((name) => typeof name !== 'string' || !name.length) || new Set(names).size !== names.length) throw new Error('Expression names must be nonempty and unique');
+    if (!Array.isArray(extension?.expressions) || !extension.expressions.length) {
+      console.warn('Missing or empty character expression array. Skipping character expressions.');
+      return null;
+    }
+    if (!json.extensions?.KHR_character || !json.extensionsUsed?.includes('KHR_character')) {
+      console.warn('Missing KHR_character marker or declaration. Loading usable character expressions.');
+    }
+    // Retain the original array positions: suppression references use these indices.
+    const names = extension.expressions.map((e) => e?.name);
+    const nameCounts = new Map<string, number>();
+    for (const name of names) nameCounts.set(name, (nameCounts.get(name) ?? 0) + 1);
     const expressionManager = new KHRCharacterExpressionManager(gltf);
     for (const expressionDef of extension.expressions) {
-      const listed = validateKHRCharacterExpressionChannelTargets(expressionDef, json);
-      const animation = json.animations![expressionDef.animation];
-      const expression = new KHRCharacterExpression(expressionDef.name);
-      const curves = new Map<number, { times: number[]; sampler: GLTFSchema.IAnimationSampler }>();
-      // Every referenced sampler contributes to duration, including unsupported/unlisted channels.
-      for (const channel of animation.channels) {
-        const sampler = animation.samplers[channel.sampler];
-        if (!sampler) throw new Error('Missing expression sampler');
-        if (!curves.has(channel.sampler)) {
-          const definition = json.accessors?.[sampler.input];
-          const accessor = await this.parser.getDependency('accessor', sampler.input) as THREE.BufferAttribute;
-          const times = Array.from({ length: accessor.count }, (_, i) => accessor.getX(i));
-          if (definition?.type !== 'SCALAR' || definition.componentType !== 5126 || !definition.min || !definition.max || times.length < 2 || times.some((t, i) => !Number.isFinite(t) || t < 0 || (i > 0 && t <= times[i - 1]))) throw new Error('Invalid decoded expression input times');
-          expression.duration = Math.max(expression.duration, times.at(-1)!);
-          curves.set(channel.sampler, { times, sampler });
-        }
+      if (typeof expressionDef?.name !== 'string' || !expressionDef.name.length || nameCounts.get(expressionDef.name) !== 1) {
+        console.warn('Expression names must be nonempty and unique. Skipping this expression.');
+        continue;
       }
-      for (const i of listed) {
-        const channel = animation.channels[i];
-        const pointer = (channel.target.path as string) === 'pointer';
-        if (pointer && !json.extensionsUsed?.includes('KHR_animation_pointer')) throw new Error('Undeclared KHR_animation_pointer');
-        const binding = await this._binding(getExpressionTarget(channel.target), json);
-        if (!binding) continue; // A material extension on the target path is unsupported.
-        const { times, sampler } = curves.get(channel.sampler)!;
-        const output = await this.parser.getDependency('accessor', sampler.output) as THREE.BufferAttribute;
-        const size = binding.component == null ? binding.base.length : 1;
-        const definition = json.accessors?.[sampler.output];
-        const morph = /\/weights(?:\/\d+)?$/.test(getExpressionTarget(channel.target));
-        if (definition?.componentType !== 5126 || definition.type !== (morph || size === 1 ? 'SCALAR' : `VEC${size}`)) throw new Error('Invalid expression output accessor type');
-        const values: number[] = [];
-        for (let j = 0; j < output.count; j++) for (let k = 0; k < output.itemSize; k++) values.push(output.getComponent(j, k));
-        if (binding.quaternion) {
-          const cubic = sampler.interpolation === 'CUBICSPLINE';
-          for (let key = 0; key < times.length; key++) {
-            const start = (key * (cubic ? 3 : 1) + (cubic ? 1 : 0)) * 4;
-            const length = Math.hypot(...values.slice(start, start + 4));
-            if (Math.abs(length - 1) > 1e-4) throw new Error('Invalid non-unit quaternion key');
+      const validation = validateKHRCharacterExpressionChannelTargets(expressionDef, json);
+      if (!validation) continue;
+      const listed = validation.channels;
+      try {
+        const animation = json.animations![expressionDef.animation];
+        const expression = new KHRCharacterExpression(expressionDef.name);
+        const curves = new Map<number, { times: number[]; sampler: GLTFSchema.IAnimationSampler }>();
+        // Every referenced sampler contributes to duration, including unsupported/unlisted channels.
+        for (const channel of animation.channels) {
+          const sampler = animation.samplers[channel.sampler];
+          if (!sampler) throw new Error('Missing expression sampler');
+          if (!curves.has(channel.sampler)) {
+            const definition = json.accessors?.[sampler.input];
+            const accessor = await this.parser.getDependency('accessor', sampler.input) as THREE.BufferAttribute;
+            const times = Array.from({ length: accessor.count }, (_, i) => accessor.getX(i));
+            if (definition?.type !== 'SCALAR' || definition.componentType !== 5126 || !definition.min || !definition.max || times.length < 2 || times.some((t, i) => !Number.isFinite(t) || t < 0 || (i > 0 && t <= times[i - 1]))) throw new Error('Invalid decoded expression input times');
+            expression.duration = Math.max(expression.duration, times.at(-1)!);
+            curves.set(channel.sampler, { times, sampler });
           }
         }
-        const sample = createExpressionSampler(times, values, size, sampler.interpolation ?? 'LINEAR', binding.quaternion);
-        expression.responses.push({ ...binding, sample, neutral: sample(0) });
+        for (const i of listed) {
+          try {
+            const channel = animation.channels[i];
+            const pointer = (channel.target.path as string) === 'pointer';
+            if (pointer && !json.extensionsUsed?.includes('KHR_animation_pointer')) throw new Error('Undeclared KHR_animation_pointer');
+            const binding = await this._binding(getExpressionTarget(channel.target), json);
+            if (!binding) continue; // A material extension on the target path is unsupported.
+            const { times, sampler } = curves.get(channel.sampler)!;
+            const output = await this.parser.getDependency('accessor', sampler.output) as THREE.BufferAttribute;
+            const size = binding.component == null ? binding.base.length : 1;
+            const definition = json.accessors?.[sampler.output];
+            const morph = /\/weights(?:\/\d+)?$/.test(getExpressionTarget(channel.target));
+            if (definition?.componentType !== 5126 || definition.type !== (morph || size === 1 ? 'SCALAR' : `VEC${size}`)) throw new Error('Invalid expression output accessor type');
+            const values: number[] = [];
+            for (let j = 0; j < output.count; j++) for (let k = 0; k < output.itemSize; k++) values.push(output.getComponent(j, k));
+            if (binding.quaternion) {
+              const cubic = sampler.interpolation === 'CUBICSPLINE';
+              for (let key = 0; key < times.length; key++) {
+                const start = (key * (cubic ? 3 : 1) + (cubic ? 1 : 0)) * 4;
+                const length = Math.hypot(...values.slice(start, start + 4));
+                if (Math.abs(length - 1) > 1e-4) throw new Error('Invalid non-unit quaternion key');
+              }
+            }
+            const sample = createExpressionSampler(times, values, size, sampler.interpolation ?? 'LINEAR', binding.quaternion);
+            expression.responses.push({ ...binding, sample, neutral: sample(0) });
+          } catch (error) {
+            console.warn(`Expression "${expressionDef.name}" channel ${i} could not be evaluated. Skipping this channel.`, error);
+          }
+        }
+        const suppression = expressionDef.extensions?.KHR_character_expression_suppression as KHRCharacterExpressionSuppression | undefined;
+        if (suppression) {
+          if (!json.extensionsUsed?.includes('KHR_character_expression_suppression') || !Array.isArray(suppression.suppressions) || !suppression.suppressions.length) {
+            console.warn(`Invalid suppression declaration on "${expressionDef.name}". Ignoring suppressions.`);
+          } else {
+            expression.suppressions = suppression.suppressions.flatMap((rule) => {
+              if (!rule || !Number.isInteger(rule.target) || rule.target < 0 || typeof names[rule.target] !== 'string' || !names[rule.target]?.length || nameCounts.get(names[rule.target]) !== 1) {
+                console.warn(`Invalid suppression target on "${expressionDef.name}". Skipping this rule.`);
+                return [];
+              }
+              if ([rule.amount, rule.threshold].some((v) => v != null && (!Number.isFinite(v) || v < 0 || v > 1))) {
+                console.warn(`Invalid suppression parameter on "${expressionDef.name}". Skipping this rule.`);
+                return [];
+              }
+              if (rule.type != null && rule.type !== 'blend' && rule.type !== 'block' && !/^[A-Z0-9]+_[a-z0-9]+(?:_[a-z0-9]+)*$/.test(rule.type)) {
+                console.warn(`Invalid suppression type on "${expressionDef.name}". Skipping this rule.`);
+                return [];
+              }
+              return [{ target: names[rule.target], type: rule.type, amount: rule.amount, threshold: rule.threshold }];
+            });
+          }
+        }
+        expressionManager.registerExpression(expression);
+      } catch (error) {
+        // Invalid duration inputs cannot be dropped without changing the timeline.
+        console.warn(`Expression "${expressionDef.name}" could not be loaded. Skipping this expression.`, error);
       }
-      const suppression = expressionDef.extensions?.KHR_character_expression_suppression as KHRCharacterExpressionSuppression | undefined;
-      if (suppression) {
-        if (!json.extensionsUsed?.includes('KHR_character_expression_suppression') || !suppression.suppressions?.length) throw new Error('Invalid suppression declaration');
-        expression.suppressions = suppression.suppressions.map((rule) => {
-          if (!Number.isInteger(rule.target) || !names[rule.target]) throw new Error('Invalid suppression target');
-          for (const v of [rule.amount, rule.threshold]) if (v != null && (!Number.isFinite(v) || v < 0 || v > 1)) throw new Error('Invalid suppression parameter');
-          if (rule.type != null && rule.type !== 'blend' && rule.type !== 'block' && !/^[A-Z0-9]+_[a-z][a-z0-9]*(?:_[a-z0-9]+)*$/.test(rule.type)) throw new Error('Invalid custom suppression type');
-          return { target: names[rule.target], type: rule.type, amount: rule.amount, threshold: rule.threshold };
-        });
-      }
-      expressionManager.registerExpression(expression);
+    }
+    for (const expression of expressionManager.expressions) {
+      expression.suppressions = expression.suppressions.filter((rule) => {
+        if (expressionManager.getValue(rule.target) != null) return true;
+        console.warn(`Suppression targets unavailable expression "${rule.target}". Skipping this rule.`);
+        return false;
+      });
     }
     return expressionManager;
   }
