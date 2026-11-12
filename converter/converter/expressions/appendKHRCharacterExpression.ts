@@ -218,7 +218,7 @@ export function appendKHRCharacterExpression(
   }
 
   const expressions: KHRCharacterExpressionExpression[] = [];
-  const mappingName = 'vrmExpressionPresets';
+  const mappingName = 'vrm1_expressions';
   const mapping: KHRCharacterExpressionMappingExpressionSetMapping = {};
   const extensionsUsed = new Set(gltf.extensionsUsed ?? []);
 

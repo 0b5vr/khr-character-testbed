@@ -1,3 +1,5 @@
+import { KHRCharacterExpressionMappingLoaderPlugin } from './khr-character/expression-mapping/KHRCharacterExpressionMappingLoaderPlugin';
+import type { KHRCharacterExpressionMapping } from './khr-character/expression-mapping/KHRCharacterExpressionMapping';
 import { GLTFAnimationPointerExtension } from '@needle-tools/three-animation-pointer';
 import { VRMAnimation, VRMAnimationLoaderPlugin } from '@pixiv/three-vrm-animation';
 import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
@@ -22,6 +24,7 @@ function createLoader(): GLTFLoader {
 
   loader.register((parser) => new GLTFAnimationPointerExtension(parser));
   loader.register((parser) => new KHRCharacterSkeletonLoaderPlugin(parser));
+  loader.register((parser) => new KHRCharacterExpressionMappingLoaderPlugin(parser));
   loader.register((parser) => new KHRCharacterExpressionLoaderPlugin(parser));
   loader.register((parser) => new VRMCCharacterExpressionLookatLoaderPlugin(parser));
   loader.register((parser) => new KHRNodeCameraHintLoaderPlugin(parser));
@@ -42,6 +45,7 @@ function createLoader(): GLTFLoader {
 export async function loadGLTF(url: string): Promise<{
   gltf: GLTF;
   skeletonMapping: KHRCharacterSkeletonMapping | undefined;
+  expressionMapping: KHRCharacterExpressionMapping | undefined;
   expressionManager: KHRCharacterExpressionManager | undefined;
   lookat: VRMCCharacterExpressionLookat | undefined;
   cameraHints: KHRNodeCameraHint[] | undefined;
@@ -65,6 +69,7 @@ export async function loadGLTF(url: string): Promise<{
   return {
     gltf,
     skeletonMapping,
+    expressionMapping: gltf.userData.khrCharacterExpressionMapping as KHRCharacterExpressionMapping | undefined,
     expressionManager,
     lookat,
     cameraHints,
