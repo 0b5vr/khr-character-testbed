@@ -1,11 +1,11 @@
 import type { GLTFProperty } from './GLTFProperty.ts';
 
 /**
- * glTF extension that extends KHR_character_expression to specify morph target-based expression animations.
+ * Classifies listed expression-animation channels as node morph-weight channels.
  */
 export interface KHRCharacterExpressionMorphtarget extends GLTFProperty {
   /**
-   * Array of animation channel indices that drive morph target-based expressions.
+   * Nonempty array of unique indices classifying node morph-weight channels. A consumer that supports this extension produces response records for the listed channels when the expression entry's effective driver is positive, subject to the base extension's target-support rules; a consumer that does not support it produces none for them. Every channel of the selected animation still contributes to the base expression duration.
    */
   channels: number[];
 }

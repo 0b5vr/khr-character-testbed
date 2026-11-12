@@ -1,12 +1,15 @@
 import type { GLTFProperty } from './GLTFProperty.ts';
 
+/**
+ * Nonempty dictionary of input expression keys. Each value lists weighted contributions from that input to native expression drivers.
+ */
 export interface KHRCharacterExpressionMappingExpressionSetMapping {
   /**
-   * Array of source expression mappings that contribute to the target expression.
+   * Nonempty array of contributions from this input to native expression drivers.
    */
   [targetExpression: string]: Array<{
     /**
-     * Index of the source expression in the top-level KHR_character_expression extension object.
+     * Index of the native expression to drive in the top-level KHR_character_expression expressions array.
      */
     source: number;
 
@@ -22,9 +25,12 @@ export interface KHRCharacterExpressionMappingExpressionSetMapping {
   }>;
 }
 
+/**
+ * Nonempty dictionary of mapping sets from external expression inputs to native expression drivers. Each key identifies one external vocabulary.
+ */
 export interface KHRCharacterExpressionMappingExpressionSetMappings {
   /**
-   * Expression mapping dictionary where each key is a target expression name and each value is an array of source expression mappings.
+   * Nonempty dictionary of input expression keys. Each value lists weighted contributions from that input to native expression drivers.
    */
   [expressionSetName: string]: KHRCharacterExpressionMappingExpressionSetMapping;
 }
@@ -34,7 +40,7 @@ export interface KHRCharacterExpressionMappingExpressionSetMappings {
  */
 export interface KHRCharacterExpressionMapping extends GLTFProperty {
   /**
-   * Dictionary of expression set mappings, where each key is a target expression set name.
+   * Nonempty dictionary of mapping sets from external expression inputs to native expression drivers. Each key identifies one external vocabulary.
    */
   expressionSetMappings: KHRCharacterExpressionMappingExpressionSetMappings;
 }
