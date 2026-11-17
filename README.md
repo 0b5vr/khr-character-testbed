@@ -38,4 +38,7 @@ Following extensions are supported in this testbed:
 
 ## License
 
-[Apache License 2.0](./LICENSE)
+Code in this repository is licensed under the [Apache License 2.0](./LICENSE).
+
+- `viewer/src/assets/khr-character-example.glb` is licensed under [Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0)](https://creativecommons.org/licenses/by-nc/4.0/).
+- `viewer/src/assets/smartphone.vrma` is taken from [使いどころに困るモーションセット by へすい/rerofumi](https://booth.pm/ja/items/5527394) and is licensed under [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/).
